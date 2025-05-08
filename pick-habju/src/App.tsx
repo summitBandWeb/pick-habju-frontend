@@ -19,7 +19,7 @@ function App() {
       <h1>Vite + React</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
-          변동 확인 해보겠습니다 {count}
+          Preview 확인 해보겠습니다. {count}
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
