@@ -9,10 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
       deployments: write
-      id-token: write
-      issues: write
       pull-requests: write
 
     env:
@@ -25,25 +22,19 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Install Ruby and Mustache
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ruby-full
-          gem install mustache
-
-      - name: Get Vercel Environment Variables
+      - name: Pull Vercel Environment
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} --cwd=pick-habju
 
-      - name: Build Project Artifacts
+      - name: Build Project
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd=pick-habju
 
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy to Preview
         id: deploy
         run: |
-          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd=pick-habju > vercel-output.txt
-          echo "preview_url=$(cat vercel-output.txt)" >> $GITHUB_OUTPUT
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd=pick-habju)
+          echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
-      - name: Comment PR with Preview URL
+      - name: Comment Preview URL
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
