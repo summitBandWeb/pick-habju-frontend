@@ -713,17 +713,6 @@
   dependencies:
     "@storybook/global" "^5.0.0"
 
-"@storybook/addon-interactions@^8.6.12":
-  version "8.6.12"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-interactions/-/addon-interactions-8.6.12.tgz#04fadf3809a6afdfa0ab38c52ca0584253f107dd"
-  integrity sha512-cTAJlTq6uVZBEbtwdXkXoPQ4jHOAGKQnYSezBT4pfNkdjn/FnEeaQhMBDzf14h2wr5OgBnJa6Lmd8LD9ficz4A==
-  dependencies:
-    "@storybook/global" "^5.0.0"
-    "@storybook/instrumenter" "8.6.12"
-    "@storybook/test" "8.6.12"
-    polished "^4.2.2"
-    ts-dedent "^2.2.0"
-
 "@storybook/addon-measure@8.6.12":
   version "8.6.12"
   resolved "https://registry.npmjs.org/@storybook/addon-measure/-/addon-measure-8.6.12.tgz"

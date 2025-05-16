@@ -12,7 +12,6 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@storybook/addon-interactions": "^8.6.12",
     "classnames": "^2.5.1",
     "lucide-react": "^0.510.0",
     "react": "^19.1.0",
