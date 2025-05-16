@@ -102,6 +102,11 @@
     --line-height-modal-timepicker: 44px;
     --letter-spacing-modal-timepicker: 0em;
 
+    --font-hero-info-weight: 600;
+    --font-hero-info-size: 16px;
+    --line-height-hero-info: normal;
+    --letter-spacing-hero-info: 0em;
+
     --box-shadow-card: 4px 4px 10px rgba(0, 0, 0, 0.25);
     --box-shadow-search: 0px 4px 8px rgba(0, 0, 0, 0.2);
   }
@@ -312,6 +317,15 @@
     font-size: var(--font-modal-timepicker-size);
     line-height: var(--line-height-modal-timepicker);
     letter-spacing: var(--letter-spacing-modal-timepicker);
+  }
+
+  /* Button */
+  .font-button {
+    font-family: var(--font-sans);
+    font-weight: var(--font-hero-info-weight);
+    font-size: var(--font-hero-info-size);
+    line-height: var(--line-height-hero-info);
+    letter-spacing: var(--letter-spacing-hero-info);
   }
 
   /* Box Shadows */
