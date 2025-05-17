@@ -1,8 +1,14 @@
+import Button from '../components/Button/Button';
+import PaginationDots from '../components/PaginationDot/PaginationDot';
+import { ButtonVariant } from '../enums/components';
+
 const HomePage = () => {
   return (
     <div>
-      <h1 className="font-hero-headline text-decoration-hero-edit text-red-400 ">Hello Tailwind with TS Config!</h1>
-      <h1>Hello Tailwind with TS Config!</h1>
+      <Button label="검색하기" variant={ButtonVariant.Main} />
+      <Button label="검색하기" variant={ButtonVariant.Sub} />
+      <Button label="검색하기" variant={ButtonVariant.Text} />
+      <PaginationDots total={5} current={0} />
     </div>
   );
 };
