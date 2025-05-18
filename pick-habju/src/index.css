@@ -318,6 +318,13 @@
     line-height: var(--line-height-modal-timepicker);
     letter-spacing: var(--letter-spacing-modal-timepicker);
   }
+  .font-modal-num {
+    font-family: var(--font-sans);
+    font-weight: 500; /* medium */
+    font-size: 18px;
+    line-height: normal;
+    letter-spacing: 0.04em;
+  }
 
   /* Button */
   .font-button {
