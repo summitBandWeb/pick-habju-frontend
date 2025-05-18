@@ -20,3 +20,9 @@ export enum ChevronVariant {
   Middle = 'middle',
   Last = 'last',
 }
+
+// Time Picker
+export enum TimePeriod {
+  AM = 'AM',
+  PM = 'PM',
+}

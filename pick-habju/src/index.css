@@ -335,4 +335,21 @@
   .shadow-search {
     box-shadow: var(--box-shadow-search);
   }
+
+  /* Time Picker Scroll */
+
+  .scroll-picker {
+    scroll-snap-type: y mandatory;
+  }
+  .scroll-picker li {
+    scroll-snap-align: center;
+  }
+
+  .scroll-picker {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE & Edge */
+  }
+  .scroll-picker::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
 }
