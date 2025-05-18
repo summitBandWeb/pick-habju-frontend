@@ -102,6 +102,11 @@
     --line-height-modal-timepicker: 44px;
     --letter-spacing-modal-timepicker: 0em;
 
+    --font-modal-num-weight: 500;
+    --font-modal-num-size: 18px;
+    --line-height-modal-num: normal;
+    --letter-spacing-modal-num: 0.04em;
+
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
@@ -320,10 +325,10 @@
   }
   .font-modal-num {
     font-family: var(--font-sans);
-    font-weight: 500; /* medium */
-    font-size: 18px;
-    line-height: normal;
-    letter-spacing: 0.04em;
+    font-weight: var(--font-modal-num-weight);
+    font-size: var(--font-modal-num-size);
+    line-height: var(--line-height-modal-num);
+    letter-spacing: var(--letter-spacing-modal-num);
   }
 
   /* Button */
