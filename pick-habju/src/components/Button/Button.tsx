@@ -23,8 +23,8 @@ const baseStyle = 'transition duration-200 flex items-center justify-center font
 
 // 버튼 종류별 스타일
 const variantStyles: Record<ButtonVariant, string> = {
-  [ButtonVariant.Main]: 'bg-[#f5be00] text-primary-black hover:bg-yellow-700',
-  [ButtonVariant.Sub]: 'bg-[#e6e6e6] text-primary-black hover:bg-gray-100',
+  [ButtonVariant.Main]: 'bg-yellow-900 text-primary-black hover:bg-yellow-700',
+  [ButtonVariant.Sub]: 'bg-gray-200 text-primary-black hover:bg-gray-100',
   [ButtonVariant.Text]: 'bg-primary-black text-yellow-900',
 };
 
