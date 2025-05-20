@@ -10,15 +10,24 @@ const Button = ({
   onClick,
   size = BtnSizeVariant.DEFAULT,
 }: ButtonProps) => {
+  const isDisabled = !!disabled;
+
   const classes = classNames(
     baseStyle,
-    ...variantStyles[variant],
     sizeStyles[size],
-    disabled && 'bg-gray-200 text-gray-300 cursor-not-allowed'
+    isDisabled ? 'bg-gray-200 text-gray-300 cursor-not-allowed' : variantStyles[variant]
   );
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isDisabled) {
+      e.preventDefault();
+      return;
+    }
+    // 인자가 있을 경우를 생각
+    onClick?.(e);
+  };
   return (
-    <button type="button" className={classes} disabled={disabled} onClick={disabled ? undefined : onClick}>
+    <button type="button" className={classes} disabled={disabled} onClick={handleClick}>
       {label}
     </button>
   );
