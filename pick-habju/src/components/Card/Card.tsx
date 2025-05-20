@@ -6,19 +6,7 @@ import { useState } from 'react';
 import Location from '../../assets/svg/location.svg';
 import People from '../../assets/svg/people.svg';
 import classNames from 'classnames';
-
-export interface CardProps {
-  images: string[];
-  title: string;
-  subtitle: string;
-  price: number;
-  locationText: string;
-  walkTime: string;
-  capacity: string;
-  booked?: boolean;
-  btnsize?: BtnSizeVariant;
-  initialIndex?: number;
-}
+import type { CardProps } from './Card.types';
 
 const Card = ({
   images,
