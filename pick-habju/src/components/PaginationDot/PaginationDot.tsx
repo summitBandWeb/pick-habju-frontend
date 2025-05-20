@@ -1,7 +1,4 @@
-export interface PaginationDotsProps {
-  total: number;
-  current: number;
-}
+import type { PaginationDotsProps } from './PaginationDot.types';
 
 const PaginationDots = ({ total, current }: PaginationDotsProps) => (
   <div className="flex items-center gap-x-[6px]">
