@@ -3,11 +3,11 @@ import { ButtonVariant } from './ButtonEnums';
 
 // 버튼 사이즈 별로 분리
 export const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {
-  xsm: 'w-[91px] h-[43px] font-button',
-  sm: 'w-[144px] h-[48px] font-button',
-  default: 'w-[182.5px] h-[48px] font-button',
-  md: 'w-[274px] h-[48px] font-button',
-  lg: 'w-[294px] h-[43px] font-button',
+  xsm: 'w-[5.7rem] h-[2.7rem] font-button', // 91px, 43px
+  sm: 'w-[9rem] h-[3rem] font-button', // 144px, 48px
+  default: 'w-[11.4rem] h-[3rem] font-button', // 182.5px, 48px
+  md: 'w-[17.1rem] h-[3rem] font-button', // 274px, 48px
+  lg: 'w-[18.4rem] h-[2.7rem] font-button', // 294px, 43px
 };
 
 export const baseStyle = 'transition duration-200 flex items-center justify-center font-button rounded-[10px]';
