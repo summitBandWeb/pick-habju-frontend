@@ -1,5 +1,6 @@
 @import 'tailwindcss' layer(base);
 @import 'tailwindcss/theme' layer(theme);
+@import 'tailwindcss/utilities' layer(utilities);
 
 @layer theme {
   @theme {
@@ -102,6 +103,11 @@
     --line-height-modal-timepicker: 44px;
     --letter-spacing-modal-timepicker: 0em;
 
+    --font-modal-num-weight: 500;
+    --font-modal-num-size: 18px;
+    --line-height-modal-num: normal;
+    --letter-spacing-modal-num: 0.04em;
+
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
@@ -112,118 +118,17 @@
   }
 }
 
+@tailwind utilities;
+
 @layer utilities {
   /* Font family */
+  
   .font-sans {
     font-family: var(--font-sans);
   }
-
-  /* Color */
-  .text-primary-white {
-    color: var(--color-primary-white);
-  }
-  .text-primary-black {
-    color: var(--color-primary-black);
-  }
-  .text-blue-500 {
-    color: var(--color-blue-500);
-  }
-  .text-gray-100 {
-    color: var(--color-gray-100);
-  }
-  .text-gray-200 {
-    color: var(--color-gray-200);
-  }
-  .text-gray-300 {
-    color: var(--color-gray-300);
-  }
-  .text-gray-400 {
-    color: var(--color-gray-400);
-  }
-  .text-gray-500 {
-    color: var(--color-gray-500);
-  }
-  .text-gray-600 {
-    color: var(--color-gray-600);
-  }
-  .text-yellow-300 {
-    color: var(--color-yellow-300);
-  }
-  .text-yellow-700 {
-    color: var(--color-yellow-700);
-  }
-  .text-yellow-900 {
-    color: var(--color-yellow-900);
-  }
-  .text-red-400 {
-    color: var(--color-red-400);
-  }
-  .text-red-500 {
-    color: var(--color-red-500);
-  }
-  .text-green {
-    color: var(--color-green);
-  }
-  .text-black {
-    color: var(--color-text-black);
-  }
-  .text-gray {
-    color: var(--color-text-gray);
-  }
-  .text-light-gray {
-    color: var(--color-text-light-gray);
-  }
-  .text-white {
-    color: var(--color-text-white);
-  }
-
-  .bg-primary-white {
-    background-color: var(--color-primary-white);
-  }
-  .bg-primary-black {
-    background-color: var(--color-primary-black);
-  }
-  .bg-blue-500 {
-    background-color: var(--color-blue-500);
-  }
-  .bg-gray-100 {
-    background-color: var(--color-gray-100);
-  }
-  .bg-gray-200 {
-    background-color: var(--color-gray-200);
-  }
-  .bg-gray-300 {
-    background-color: var(--color-gray-300);
-  }
-  .bg-gray-400 {
-    background-color: var(--color-gray-400);
-  }
-  .bg-gray-500 {
-    background-color: var(--color-gray-500);
-  }
-  .bg-gray-600 {
-    background-color: var(--color-gray-600);
-  }
-  .bg-yellow-300 {
-    background-color: var(--color-yellow-300);
-  }
-  .bg-yellow-700 {
-    background-color: var(--color-yellow-700);
-  }
-  .bg-yellow-900 {
-    background-color: var(--color-yellow-900);
-  }
-  .bg-red-400 {
-    background-color: var(--color-red-400);
-  }
-  .bg-red-500 {
-    background-color: var(--color-red-500);
-  }
-  .bg-green {
-    background-color: var(--color-green);
-  }
-
+  
   /* Hero Area */
+
   .font-hero-headline {
     font-weight: var(--font-hero-headline-weight);
     font-size: var(--font-hero-headline-size);
@@ -318,6 +223,13 @@
     line-height: var(--line-height-modal-timepicker);
     letter-spacing: var(--letter-spacing-modal-timepicker);
   }
+  .font-modal-num {
+    font-family: var(--font-sans);
+    font-weight: var(--font-modal-num-weight);
+    font-size: var(--font-modal-num-size);
+    line-height: var(--line-height-modal-num);
+    letter-spacing: var(--letter-spacing-modal-num);
+  }
 
   /* Button */
   .font-button {
@@ -334,5 +246,22 @@
   }
   .shadow-search {
     box-shadow: var(--box-shadow-search);
+  }
+
+  /* Time Picker Scroll */
+
+  .scroll-picker {
+    scroll-snap-type: y mandatory;
+  }
+  .scroll-picker li {
+    scroll-snap-align: center;
+  }
+
+  .scroll-picker {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE & Edge */
+  }
+  .scroll-picker::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
   }
 }
