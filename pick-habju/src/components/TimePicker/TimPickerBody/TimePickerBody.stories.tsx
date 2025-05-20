@@ -1,10 +1,8 @@
-// src/components/TimePicker/TimePickerBody.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
-
 import { action } from '@storybook/addon-actions';
 import { TimePickerBody } from './TimePickerBody';
-import { TimePeriod } from '../../../enums/components';
 import type { TimePickerBodyProps } from './TimePickerBody.types';
+import { TimePeriod } from '../TimePickerEnums';
 
 const meta: Meta<TimePickerBodyProps> = {
   title: 'Components/TimePicker/TimePickerBody',

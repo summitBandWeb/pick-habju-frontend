@@ -1,4 +1,3 @@
-// src/components/DatePicker/DatePicker.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import DatePicker from './DatePicker';

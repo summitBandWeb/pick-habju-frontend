@@ -1,5 +1,4 @@
 import Button from '../Button/Button';
-import { ButtonVariant, BtnSizeVariant, ChevronVariant } from '../../enums/components';
 import PaginationDots from '../PaginationDot/PaginationDot';
 import Chevron from '../Chevron/Chevron';
 import { useState } from 'react';
@@ -7,6 +6,8 @@ import Location from '../../assets/svg/location.svg';
 import People from '../../assets/svg/people.svg';
 import classNames from 'classnames';
 import type { CardProps } from './Card.types';
+import { ChevronVariant } from '../Chevron/ChevronEnums';
+import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 
 const Card = ({
   images,

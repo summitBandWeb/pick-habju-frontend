@@ -3,8 +3,8 @@ import Card from './Card';
 import image1 from '../../assets/images/1.png';
 import image2 from '../../assets/images/2.png';
 import image3 from '../../assets/images/3.png';
-import { BtnSizeVariant } from '../../enums/components';
 import type { CardProps } from './Card.types';
+import { BtnSizeVariant } from '../Button/ButtonEnums';
 
 const exampleImages = [image1, image2, image3];
 

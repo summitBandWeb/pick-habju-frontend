@@ -4,7 +4,7 @@ import type { PickerFooterProps } from './PickerFooter.types';
 import PickerFooter from './PickerFooter';
 
 const meta: Meta<PickerFooterProps> = {
-  title: 'Components/DatePicker/DatePickerFooter',
+  title: 'Components/PickerFooter',
   component: PickerFooter,
   tags: ['autodocs'],
   parameters: {
