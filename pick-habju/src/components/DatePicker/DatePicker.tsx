@@ -16,10 +16,24 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
   );
 
   // 외부 selectedDates prop 동기화
+  // 이전 코드는 useEffect 무한 호출 문제 *
   useEffect(() => {
     // 단일 선택 모드이므로, 외부에서 여러 날짜가 들어와도 첫 번째 날짜만 반영
-    setSelected(selectedDates.slice(0, 1));
-  }, [selectedDates]);
+    // 깊은 비교를 통해 실제로 값이 변경되었을 때만 상태 업데이트
+    const newSelected = selectedDates.slice(0, 1);
+    if (
+      selected.length !== newSelected.length ||
+      selected.some(
+        (date, index) =>
+          !newSelected[index] ||
+          date.getFullYear() !== newSelected[index].getFullYear() ||
+          date.getMonth() !== newSelected[index].getMonth() ||
+          date.getDate() !== newSelected[index].getDate()
+      )
+    ) {
+      setSelected(newSelected);
+    }
+  }, [selected, selectedDates]);
 
   const toggleDate = (date: Date) => {
     const exists = selected.some(
