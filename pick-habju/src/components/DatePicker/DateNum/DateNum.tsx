@@ -1,9 +1,4 @@
-export interface DateNumProps {
-  date: Date;
-  currentMonth: number;
-  selectedList: Date[];
-  onSelect: (d: Date) => void;
-}
+import type { DateNumProps } from './DateNum.types';
 
 const isSameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
