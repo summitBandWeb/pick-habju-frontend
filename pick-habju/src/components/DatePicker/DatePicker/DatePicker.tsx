@@ -27,7 +27,8 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
 
   // 외부 selectedDates prop 동기화
   useEffect(() => {
-    setSelected(selectedDates);
+    // 단일 선택 모드이므로, 외부에서 여러 날짜가 들어와도 첫 번째 날짜만 반영
+    setSelected(selectedDates.slice(0, 1));
   }, [selectedDates]);
 
   const toggleDate = (date: Date) => {
@@ -36,8 +37,11 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
         d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
     );
 
-    const updated = exists ? selected.filter((d) => d.getTime() !== date.getTime()) : [...selected, date];
-
+    // 중복 선택 방지 로직:
+    // 클릭된 날짜가 이미 선택된 날짜이면 선택 해제 (빈 배열)
+    // 클릭된 날짜가 선택되지 않았으면 해당 날짜 하나만 선택 (해당 날짜를 가진 배열)
+    const updated = exists ? [] : [date];
+    
     setSelected(updated);
     onChange?.(updated);
   };

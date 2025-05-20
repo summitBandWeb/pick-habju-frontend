@@ -55,15 +55,3 @@ export const Default: Story = {
   name: 'Default (Interactive)',
   render: (args) => <InteractiveWrapper {...args} />,
 };
-
-export const SelectedMultiple: Story = {
-  name: 'Selected Multiple',
-  args: {
-    selectedDates: [
-      today,
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
-    ],
-  },
-  render: (args) => <InteractiveWrapper {...args} />,
-};
