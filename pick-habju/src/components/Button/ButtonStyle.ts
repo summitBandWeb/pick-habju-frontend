@@ -1,5 +1,5 @@
-import { ButtonVariant } from '../../enums/components';
 import type { ButtonProps } from './Button.types';
+import { ButtonVariant } from './ButtonEnums';
 
 // 버튼 사이즈 별로 분리
 export const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {

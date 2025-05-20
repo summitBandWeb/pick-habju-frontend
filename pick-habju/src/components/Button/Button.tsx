@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import { ButtonVariant, BtnSizeVariant } from '../../enums/components';
 import type { ButtonProps } from './Button.types';
 import { baseStyle, sizeStyles, variantStyles } from './ButtonStyle';
+import { BtnSizeVariant, ButtonVariant } from './ButtonEnums';
 
 const Button = ({
   label,

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import type { TimePeriod } from '../../enums/components';
 import PickerFooter from '../PickerFooter/PickerFooter';
 import type { TimePickerProps } from './TimePicker.types';
 import { TimePickerBody } from './TimPickerBody/TimePickerBody';
+import type { TimePeriod } from './TimePickerEnums';
 
 const TimePicker = ({
   startHour,

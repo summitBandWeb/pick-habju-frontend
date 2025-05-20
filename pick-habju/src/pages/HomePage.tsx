@@ -3,7 +3,8 @@ import Button from '../components/Button/Button';
 import DatePicker from '../components/DatePicker/DatePicker';
 import PaginationDots from '../components/PaginationDot/PaginationDot';
 import TimePicker from '../components/TimePicker/TimePicker';
-import { ButtonVariant, TimePeriod } from '../enums/components';
+import { TimePeriod } from '../components/TimePicker/TimePickerEnums';
+import { ButtonVariant } from '../components/Button/ButtonEnums';
 
 const HomePage = () => {
   const [startHour] = useState<number>(9);

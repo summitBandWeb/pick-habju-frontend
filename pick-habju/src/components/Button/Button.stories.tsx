@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import Button from './Button';
-import { ButtonVariant } from '../../enums/components';
+import { ButtonVariant } from './ButtonEnums';
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Button',

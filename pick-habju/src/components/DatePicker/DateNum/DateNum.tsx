@@ -23,15 +23,17 @@ const DateNum = ({ date, currentMonth, selectedList, onSelect }: DateNumProps) =
   else if (isAvailable) cls += ' text-primary-black hover:bg-yellow-700 cursor-pointer';
 
   return (
-    <button
-      type="button"
+    <div
       className={cls}
-      onClick={() => onSelect(date)}
-      disabled={isEmpty || isPastDate}
+      onClick={() => {
+        if (isAvailable) onSelect(date);
+      }}
+      role="button"
+      aria-disabled={isEmpty || isPastDate}
       aria-label={`${date.getDate()}일`}
     >
       {!isEmpty ? date.getDate() : ''}
-    </button>
+    </div>
   );
 };
 

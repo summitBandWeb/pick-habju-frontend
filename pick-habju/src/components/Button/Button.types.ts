@@ -1,4 +1,4 @@
-import type { BtnSizeVariant, ButtonVariant } from '../../enums/components';
+import type { BtnSizeVariant, ButtonVariant } from './ButtonEnums';
 
 export interface ButtonProps {
   label: string;

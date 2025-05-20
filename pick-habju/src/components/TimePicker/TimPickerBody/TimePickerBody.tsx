@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ScrollPicker from '../ScrollPicker/ScrollPicker';
-import type { TimePeriod } from '../../../enums/components';
 import type { TimePickerBodyProps } from './TimePickerBody.types';
+import type { TimePeriod } from '../TimePickerEnums';
 
 const hours = Array.from({ length: 12 }, (_, i) => (i + 1) as number);
 const periods: ('AM' | 'PM')[] = ['AM', 'PM'];

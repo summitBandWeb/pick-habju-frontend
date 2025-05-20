@@ -1,4 +1,4 @@
-import type { TimePeriod } from '../../enums/components';
+import type { TimePeriod } from './TimePickerEnums';
 import type { TimePickerBodyProps } from './TimPickerBody/TimePickerBody.types';
 
 export interface TimePickerProps extends Omit<TimePickerBodyProps, 'onChange'> {

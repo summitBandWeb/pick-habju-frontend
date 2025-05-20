@@ -1,7 +1,7 @@
 import clsx from 'classnames';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import type { ChevronProps } from './Chevron.types';
-import { ChevronVariant } from '../../enums/components';
+import { ChevronVariant } from './ChevronEnums';
 
 const TOUCH_AREA = 'w-10.5 h-10.5 flex items-center justify-center';
 

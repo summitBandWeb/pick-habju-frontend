@@ -1,4 +1,4 @@
-import type { TimePeriod } from '../../../enums/components';
+import type { TimePeriod } from '../TimePickerEnums';
 
 export interface TimePickerBodyProps {
   startHour: number;
