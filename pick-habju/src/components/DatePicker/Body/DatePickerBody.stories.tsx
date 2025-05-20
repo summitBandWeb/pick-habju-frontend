@@ -1,8 +1,7 @@
-// src/components/DatePicker/Body/DatePickerBody.stories.tsx
-
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import DatePickerBody, { type DatePickerBodyProps } from './DatePickerBody';
+import DatePickerBody from './DatePickerBody';
+import type { DatePickerBodyProps } from './DatePickerBody.types';
 
 const meta: Meta<DatePickerBodyProps> = {
   title: 'Components/DatePicker/DatePickerBody',
