@@ -1,4 +1,4 @@
-import type { BtnSizeVariant } from '../../enums/components';
+import type { BtnSizeVariant } from '../Button/ButtonEnums';
 
 export interface CardProps {
   images: string[];
