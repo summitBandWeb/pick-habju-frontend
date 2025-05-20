@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Button from '../components/Button/Button';
-import DatePicker from '../components/DatePicker/DatePicker/DatePicker';
+import DatePicker from '../components/DatePicker/DatePicker';
 import PaginationDots from '../components/PaginationDot/PaginationDot';
-import TimePicker from '../components/TimePicker/TimePicker/TimePicker';
+import TimePicker from '../components/TimePicker/TimePicker';
 import { ButtonVariant, TimePeriod } from '../enums/components';
 
 const HomePage = () => {
