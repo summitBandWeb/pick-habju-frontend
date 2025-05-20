@@ -21,11 +21,10 @@ const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {
 
 const baseStyle = 'transition duration-200 flex items-center justify-center font-button rounded-[10px]';
 
-// 버튼 종류별 스타일
-const variantStyles: Record<ButtonVariant, string> = {
-  [ButtonVariant.Main]: 'bg-yellow-900 text-primary-black hover:bg-yellow-700',
-  [ButtonVariant.Sub]: 'bg-gray-200 text-primary-black hover:bg-gray-100',
-  [ButtonVariant.Text]: 'bg-primary-black text-yellow-900',
+const variantStyles: Record<ButtonVariant, string[]> = {
+  [ButtonVariant.Main]: ['bg-yellow-900', 'text-primary-black', 'hover:bg-yellow-700'],
+  [ButtonVariant.Sub]: ['bg-gray-200', 'text-primary-black', 'hover:bg-gray-100'],
+  [ButtonVariant.Text]: ['bg-primary-black', 'text-yellow-900'],
 };
 
 const Button = ({
@@ -37,7 +36,7 @@ const Button = ({
 }: ButtonProps) => {
   const classes = classNames(
     baseStyle,
-    variantStyles[variant],
+    ...variantStyles[variant], 
     sizeStyles[size],
     disabled && 'bg-gray-200 text-gray-300 cursor-not-allowed'
   );
