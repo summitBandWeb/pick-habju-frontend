@@ -13,16 +13,3 @@ export enum BtnSizeVariant {
   MD = 'md',
   LG = 'lg',
 }
-
-// Chevron 관련
-export enum ChevronVariant {
-  First = 'first',
-  Middle = 'middle',
-  Last = 'last',
-}
-
-// Time Picker
-export enum TimePeriod {
-  AM = 'AM',
-  PM = 'PM',
-}

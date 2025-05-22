@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import DateNum, { type DateNumProps } from './DateNum';
+import type { DateNumProps } from './DateNum.types';
+import DateNum from './DateNum';
 
 const meta: Meta<DateNumProps> = {
   title: 'Components/DatePicker/DateNum',

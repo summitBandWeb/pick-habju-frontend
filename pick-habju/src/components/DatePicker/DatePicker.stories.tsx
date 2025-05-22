@@ -1,8 +1,7 @@
-// src/components/DatePicker/DatePicker.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import DatePicker from './DatePicker';
-import type { DatePickerProps } from './DatePicker';
+import type { DatePickerProps } from './DatePicker.types';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);

@@ -1,10 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-
-export type DatePickerHeaderProps = {
-  current: Date;
-  onPrev: () => void;
-  onNext: () => void;
-};
+import type { DatePickerHeaderProps } from './DatePickerHeader.types';
 
 const DatePickerHeader = ({ current, onPrev, onNext }: DatePickerHeaderProps) => (
   <div className="flex items-center justify-between px-4 py-2 bg-white rounded-t-lg">

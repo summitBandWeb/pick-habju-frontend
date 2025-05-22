@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import DatePickerFooter, { type DatePickerFooterProps } from './DatePickerFooter';
+import type { PickerFooterProps } from './PickerFooter.types';
+import PickerFooter from './PickerFooter';
 
-const meta: Meta<DatePickerFooterProps> = {
-  title: 'Components/DatePicker/DatePickerFooter',
-  component: DatePickerFooter,
+const meta: Meta<PickerFooterProps> = {
+  title: 'Components/PickerFooter',
+  component: PickerFooter,
   tags: ['autodocs'],
   parameters: {
     backgrounds: {
@@ -23,11 +24,19 @@ const meta: Meta<DatePickerFooterProps> = {
 
 export default meta;
 
-type Story = StoryObj<DatePickerFooterProps>;
+type Story = StoryObj<PickerFooterProps>;
 
 export const Default: Story = {
   args: {
     onConfirm: action('확인 클릭'),
     onCancel: action('취소 클릭'),
+  },
+};
+
+export const DatePickerFooter: Story = {
+  args: {
+    onConfirm: action('확인 클릭'),
+    onCancel: action('취소 클릭'),
+    cancelText: '뒤로가기',
   },
 };

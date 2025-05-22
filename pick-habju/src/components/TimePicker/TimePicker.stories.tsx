@@ -1,8 +1,7 @@
-// src/components/TimePicker/TimePicker.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
 import TimePicker from './TimePicker';
 import { action } from '@storybook/addon-actions';
-import { TimePeriod } from '../../../enums/components';
+import { TimePeriod } from './TimePickerEnums';
 
 interface TimePickerArgs {
   startHour: number;

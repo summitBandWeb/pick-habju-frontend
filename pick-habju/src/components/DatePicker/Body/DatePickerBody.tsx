@@ -1,18 +1,7 @@
 import Calendar from 'react-calendar';
 import '../../../styles/calendarCustom.css';
 import DateNum from '../DateNum/DateNum';
-
-export interface DatePickerBodyProps {
-  activeStartDate?: Date;
-  selectedDates: Date[];
-  onChange: (date: Date) => void;
-  onActiveStartDateChange?: (details: { activeStartDate: Date | null }) => void;
-}
-
-type CalendarTileProps = {
-  date: Date;
-  view: string;
-};
+import type { CalendarTileProps, DatePickerBodyProps } from './DatePickerBody.types';
 
 const DatePickerBody = ({
   activeStartDate = new Date(),

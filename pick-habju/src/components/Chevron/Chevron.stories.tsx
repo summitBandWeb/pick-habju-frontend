@@ -1,7 +1,6 @@
-// src/components/Chevron/Chevron.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
 import Chevron from './Chevron';
-import { ChevronVariant } from '../../enums/components';
+import { ChevronVariant } from './ChevronEnums';
 
 const meta: Meta<typeof Chevron> = {
   title: 'Components/Chevron',

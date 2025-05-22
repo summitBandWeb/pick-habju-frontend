@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Meta } from '@storybook/react';
-import DatePickerHeader, { type DatePickerHeaderProps } from './DatePickerHeader';
+import DatePickerHeader from './DatePickerHeader';
+import type { DatePickerHeaderProps } from './DatePickerHeader.types';
 
 const meta: Meta<DatePickerHeaderProps> = {
   title: 'Components/DatePicker/DatePickerHeader',

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import Button from './Button';
-import { ButtonVariant } from '../../enums/components';
+import { BtnSizeVariant, ButtonVariant } from './ButtonEnums';
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Button',
@@ -10,6 +10,10 @@ const meta: Meta<typeof Button> = {
     variant: {
       control: { type: 'select' },
       options: Object.values(ButtonVariant),
+    },
+    size: {
+      control: { type: 'select' },
+      options: Object.values(BtnSizeVariant),
     },
     disabled: {
       control: 'boolean',

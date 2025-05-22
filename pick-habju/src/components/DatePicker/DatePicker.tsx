@@ -1,18 +1,8 @@
-import DatePickerHeader from '../Header/DatePickerHeader';
-import DatePickerBody from '../Body/DatePickerBody';
-import DatePickerFooter from '../Footer/DatePickerFooter';
+import DatePickerHeader from './Header/DatePickerHeader';
+import DatePickerBody from './Body/DatePickerBody';
 import { useEffect, useState } from 'react';
-
-export interface DatePickerProps {
-  /* 초기 선택된 날짜들 */
-  selectedDates?: Date[];
-  /* 날짜 선택 시 호출되는 콜백 */
-  onChange?: (dates: Date[]) => void;
-  /* 확인 버튼 클릭 시 호출되는 콜백 */
-  onConfirm?: (dates: Date[]) => void;
-  /* 취소 버튼 클릭 시 호출되는 콜백 */
-  onCancel?: () => void;
-}
+import PickerFooter from '../PickerFooter/PickerFooter';
+import type { DatePickerProps } from './DatePicker.types';
 
 const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DatePickerProps) => {
   const [selected, setSelected] = useState<Date[]>(selectedDates);
@@ -26,10 +16,24 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
   );
 
   // 외부 selectedDates prop 동기화
+  // 이전 코드는 useEffect 무한 호출 문제 *
   useEffect(() => {
     // 단일 선택 모드이므로, 외부에서 여러 날짜가 들어와도 첫 번째 날짜만 반영
-    setSelected(selectedDates.slice(0, 1));
-  }, [selectedDates]);
+    // 깊은 비교를 통해 실제로 값이 변경되었을 때만 상태 업데이트
+    const newSelected = selectedDates.slice(0, 1);
+    if (
+      selected.length !== newSelected.length ||
+      selected.some(
+        (date, index) =>
+          !newSelected[index] ||
+          date.getFullYear() !== newSelected[index].getFullYear() ||
+          date.getMonth() !== newSelected[index].getMonth() ||
+          date.getDate() !== newSelected[index].getDate()
+      )
+    ) {
+      setSelected(newSelected);
+    }
+  }, [selected, selectedDates]);
 
   const toggleDate = (date: Date) => {
     const exists = selected.some(
@@ -41,7 +45,7 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
     // 클릭된 날짜가 이미 선택된 날짜이면 선택 해제 (빈 배열)
     // 클릭된 날짜가 선택되지 않았으면 해당 날짜 하나만 선택 (해당 날짜를 가진 배열)
     const updated = exists ? [] : [date];
-    
+
     setSelected(updated);
     onChange?.(updated);
   };
@@ -62,7 +66,7 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
   };
 
   return (
-    <div className="inline-block w-90 bg-white rounded-xl shadow-lg overflow-hidden pt-4 px-2.5">
+    <div className="inline-block w-90 bg-primary-white rounded-xl shadow-lg overflow-hidden pt-4 px-2.5">
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
       <DatePickerBody
         activeStartDate={activeStartDate}
@@ -70,7 +74,7 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
         onChange={toggleDate}
         onActiveStartDateChange={({ activeStartDate }) => activeStartDate && setActiveStartDate(activeStartDate)}
       />
-      <DatePickerFooter onConfirm={handleConfirm} onCancel={handleCancel} />
+      <PickerFooter onConfirm={handleConfirm} onCancel={handleCancel} />
     </div>
   );
 };

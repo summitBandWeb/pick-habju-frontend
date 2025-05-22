@@ -16,6 +16,7 @@
     --color-gray-400: #7c7c7c;
     --color-gray-500: #4b5563;
     --color-gray-600: #444444;
+    --color-gray-booked: #282828b3;
 
     --color-yellow-300: #fffbf0;
     --color-yellow-700: #fccd28;
@@ -122,11 +123,11 @@
 
 @layer utilities {
   /* Font family */
-  
+
   .font-sans {
     font-family: var(--font-sans);
   }
-  
+
   /* Hero Area */
 
   .font-hero-headline {

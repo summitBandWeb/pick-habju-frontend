@@ -1,31 +1,7 @@
-// src/components/Button/Button.tsx
 import classNames from 'classnames';
-import { ButtonVariant, BtnSizeVariant } from '../../enums/components';
-
-interface ButtonProps {
-  label: string;
-  variant?: ButtonVariant;
-  disabled?: boolean;
-  onClick?: () => void;
-  size?: BtnSizeVariant;
-}
-
-// 버튼 사이즈 별로 분리
-const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {
-  xsm: 'w-[91px] h-[43px] font-button',
-  sm: 'w-[144px] h-[48px] font-button',
-  default: 'w-[182.5px] h-[48px] font-button',
-  md: 'w-[274px] h-[48px] font-button',
-  lg: 'w-[294px] h-[43px] font-button',
-};
-
-const baseStyle = 'transition duration-200 flex items-center justify-center font-button rounded-[10px]';
-
-const variantStyles: Record<ButtonVariant, string[]> = {
-  [ButtonVariant.Main]: ['bg-yellow-900', 'text-primary-black', 'hover:bg-yellow-700'],
-  [ButtonVariant.Sub]: ['bg-gray-200', 'text-primary-black', 'hover:bg-gray-100'],
-  [ButtonVariant.Text]: ['bg-primary-black', 'text-yellow-900'],
-};
+import type { ButtonProps } from './Button.types';
+import { baseStyle, sizeStyles, variantStyles } from './ButtonStyle';
+import { BtnSizeVariant, ButtonVariant } from './ButtonEnums';
 
 const Button = ({
   label,
@@ -34,15 +10,24 @@ const Button = ({
   onClick,
   size = BtnSizeVariant.DEFAULT,
 }: ButtonProps) => {
+  const isDisabled = !!disabled;
+
   const classes = classNames(
     baseStyle,
-    ...variantStyles[variant], 
     sizeStyles[size],
-    disabled && 'bg-gray-200 text-gray-300 cursor-not-allowed'
+    isDisabled ? 'bg-gray-200 text-gray-300 cursor-not-allowed' : variantStyles[variant]
   );
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isDisabled) {
+      e.preventDefault();
+      return;
+    }
+    // 인자가 있을 경우를 생각
+    onClick?.(e);
+  };
   return (
-    <button type="button" className={classes} disabled={disabled} onClick={disabled ? undefined : onClick}>
+    <button type="button" className={classes} disabled={disabled} onClick={handleClick}>
       {label}
     </button>
   );
