@@ -12,15 +12,14 @@ const meta: Meta<DatePickerBodyProps> = {
 export default meta;
 
 const Template = () => {
-  // 다중 선택용 Date[] 상태
+  // 단일 선택용 Date[] 상태 (최대 1개만 유지)
   const [selectedDates, setSelectedDates] = useState<Date[]>([new Date()]);
 
   const toggleDate = (date: Date) => {
     const exists = selectedDates.some((d) => d.toDateString() === date.toDateString());
-    setSelectedDates((prev) =>
-      exists ? prev.filter((d) => d.toDateString() !== date.toDateString()) : [...prev, date]
-    );
-    console.log('현재 선택된 날짜들:', selectedDates);
+    const updated = exists ? [] : [date];
+    setSelectedDates(updated);
+    console.log('현재 선택된 날짜:', updated);
   };
 
   return (
