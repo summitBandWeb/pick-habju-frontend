@@ -8,12 +8,17 @@ import { ButtonVariant } from '../components/Button/ButtonEnums';
 import { showToastByKey } from '../utils/showToastByKey';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
 import PaginationDots from '../components/PaginationDot/PaginationDot';
+import GuestCounterModal from '../components/GuestCounterModal/GuestCounterModal'; // 추가
 
 const HomePage = () => {
   const [startHour] = useState<number>(9);
   const [startPeriod] = useState<TimePeriod>(TimePeriod.AM);
   const [endHour] = useState<number>(5);
   const [endPeriod] = useState<TimePeriod>(TimePeriod.PM);
+
+  // ✅ 모달 관련 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const [guestCount, setGuestCount] = useState<number | null>(null);
 
   return (
     <div className="flex flex-col items-center gap-6 p-10 bg-gray-100 min-h-screen">
@@ -42,7 +47,24 @@ const HomePage = () => {
         }}
       />
 
-      {/* ✅ Toast 테스트 버튼 */}
+      {/* ✅ GuestCounterModal 열기 버튼 */}
+      <Button label="인원 수 선택" variant={ButtonVariant.Main} onClick={() => setModalOpen(true)} />
+
+      {/* ✅ 선택된 인원 표시 */}
+      {guestCount !== null && <p className="text-primary-black font-medium">선택된 인원: {guestCount}명</p>}
+
+      {/* ✅ GuestCounterModal */}
+      <GuestCounterModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initialCount={guestCount ?? 1}
+        onConfirm={(count) => {
+          setGuestCount(count);
+          console.log('선택된 인원 수:', count);
+        }}
+      />
+
+      {/* ✅ 토스트 테스트 */}
       <div className="flex gap-3">
         <Button
           label="과거 시간"
@@ -66,7 +88,6 @@ const HomePage = () => {
         />
       </div>
 
-      {/* ✅ 토스트 메시지 표시용 컴포넌트 (전역 위치에 있어야 함) */}
       <ToastMessage />
     </div>
   );
