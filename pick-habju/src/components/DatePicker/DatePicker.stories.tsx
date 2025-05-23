@@ -20,15 +20,6 @@ const meta: Meta<DatePickerProps> = {
     },
     layout: 'centered',
   },
-  argTypes: {
-    selectedDates: {
-      control: { type: 'object' },
-      description: '초기 선택 날짜 배열',
-    },
-    onChange: { action: 'dateChanged', table: { disable: true } },
-    onCancel: { action: 'canceled', description: '취소 콜백' },
-    onConfirm: { action: 'confirmed', description: '확인 콜백' },
-  },
 };
 export default meta;
 

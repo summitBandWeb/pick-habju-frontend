@@ -7,6 +7,7 @@ export enum ButtonVariant {
 
 // 버튼 Size
 export enum BtnSizeVariant {
+  XXSM = 'xxsm',
   XSM = 'xsm',
   SM = 'sm',
   DEFAULT = 'default',
