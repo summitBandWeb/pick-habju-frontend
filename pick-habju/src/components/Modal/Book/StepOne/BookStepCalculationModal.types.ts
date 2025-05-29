@@ -1,4 +1,4 @@
-export interface BookStepPriceProps {
+export interface BookStepCalculationModalProps {
   basicAmount: number;
   hours: number;
   addPersonCount?: number;

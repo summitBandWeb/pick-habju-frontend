@@ -1,10 +1,10 @@
 import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import BookStepPrice from './BookStepCalculationModal';
+import BookStepCalculationModal from './BookStepCalculationModal';
 
 export default {
   title: 'Modal/BookStepPrice',
-  component: BookStepPrice,
+  component: BookStepCalculationModal,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
@@ -16,9 +16,11 @@ export default {
       ],
     },
   },
-} as Meta<typeof BookStepPrice>;
+} as Meta<typeof BookStepCalculationModal>;
 
-const Template: StoryFn<React.ComponentProps<typeof BookStepPrice>> = (args) => <BookStepPrice {...args} />;
+const Template: StoryFn<React.ComponentProps<typeof BookStepCalculationModal>> = (args) => (
+  <BookStepCalculationModal {...args} />
+);
 
 export const DefaultPrice = Template.bind({});
 DefaultPrice.args = {

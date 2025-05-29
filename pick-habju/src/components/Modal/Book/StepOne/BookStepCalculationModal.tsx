@@ -1,8 +1,8 @@
 import Button from '../../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../../Button/ButtonEnums';
-import type { BookStepPriceProps } from './BookStepCalculationModal.types';
+import type { BookStepCalculationModalProps } from './BookStepCalculationModal.types';
 
-const BookStepPrice = ({
+const BookStepCalculationModal = ({
   basicAmount,
   hours,
   addPersonCount = 0,
@@ -11,13 +11,13 @@ const BookStepPrice = ({
   addTotal,
   finalTotal,
   onNext,
-}: BookStepPriceProps) => {
+}: BookStepCalculationModalProps) => {
   return (
     <div className="w-88 h-83 px-8 py-7 rounded-lg bg-primary-white flex flex-col justify-between">
       <div className="flex flex-col space-y-4">
-        <div className="flex justify-between items-center font-modal-default">
-          <p className="text-primary-black">최종 금액을 확인해주세요</p>
-          <p className="text-gray-400 font-button">1 of 2</p>
+        <div className="flex justify-between items-center">
+          <p className="text-primary-black font-modal-default">최종 금액을 확인해주세요</p>
+          <p className="text-gray-300 font-button">1 of 2</p>
         </div>
 
         <div className="pt-4 space-y-2 text-gray-400">
@@ -57,4 +57,4 @@ const BookStepPrice = ({
   );
 };
 
-export default BookStepPrice;
+export default BookStepCalculationModal;
