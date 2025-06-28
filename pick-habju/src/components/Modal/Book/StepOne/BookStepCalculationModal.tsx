@@ -20,17 +20,19 @@ const BookStepCalculationModal = ({
           <p className="text-gray-300 font-button">1 of 2</p>
         </div>
 
-        <div className="pt-4 space-y-2 text-gray-400">
-          <div className="font-modal-description">기본 금액</div>
-          <div className="font-modal-calcdetail">
+        <div className="pt-4 space-y-2">
+          <div className="font-modal-description text-gray-600">기본 금액</div>
+          <div className="font-modal-calcdetail text-gray-400">
             시간당 {basicAmount.toLocaleString()}원 * {hours}시간 = {baseTotal.toLocaleString()}원
           </div>
         </div>
 
-        <div className="space-y-2 text-gray-400">
-          <div className="font-modal-description">추가 금액</div>
+        <div className="space-y-2 ">
+          <div className={`font-modal-description ${addPersonCount <= 0 ? 'text-gray-300' : 'text-gray-600'}`}>
+            추가 금액
+          </div>
           {addPersonCount > 0 ? (
-            <div className="font-modal-calcdetail">
+            <div className="font-modal-calcdetail text-gray-400">
               시간당 1인 {addAmountPerPerson.toLocaleString()}원 * {addPersonCount}인 = {addTotal.toLocaleString()}원
             </div>
           ) : (
