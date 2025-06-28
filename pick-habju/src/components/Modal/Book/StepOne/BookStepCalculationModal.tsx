@@ -34,7 +34,7 @@ const BookStepCalculationModal = ({
               시간당 1인 {addAmountPerPerson.toLocaleString()}원 * {addPersonCount}인 = {addTotal.toLocaleString()}원
             </div>
           ) : (
-            <div className="font-modal-calcdetail text-gray-400">0원</div>
+            <div className="font-modal-calcdetail text-gray-300">추가금액이 없습니다.</div>
           )}
         </div>
 
