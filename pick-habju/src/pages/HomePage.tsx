@@ -63,7 +63,13 @@ const HomePage = () => {
             </button>
             {isDatePickerOpen && (
               <div className="absolute top-full left-0 z-10 mt-2">
-                <DatePicker onConfirm={setDate} onCancel={closeDatePicker} />
+                <DatePicker
+                  onConfirm={(selected) => {
+                    setDate(selected);
+                    closeDatePicker();
+                  }}
+                  onCancel={closeDatePicker}
+                />
               </div>
             )}
           </div>
@@ -80,7 +86,13 @@ const HomePage = () => {
             </button>
             {isTimePickerOpen && (
               <div className="absolute top-full left-0 z-10 mt-2">
-                <TimePicker onConfirm={setHourSlots} onCancel={closeTimePicker} />
+                <TimePicker
+                  onConfirm={(sh, sp, eh, ep) => {
+                    setHourSlots(sh, sp, eh, ep);
+                    closeTimePicker();
+                  }}
+                  onCancel={closeTimePicker}
+                />
               </div>
             )}
           </div>
