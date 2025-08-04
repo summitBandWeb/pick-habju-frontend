@@ -12,6 +12,14 @@ const DatePickerBody = ({
   <Calendar
     className="minimal-calendar pt-2"
     calendarType="gregory"
+    // 지난 날짜 확실히 클릭 방지
+    tileDisabled={({ date }) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(date);
+      target.setHours(0, 0, 0, 0);
+      return target < today;
+    }}
     showNavigation={false}
     activeStartDate={activeStartDate}
     onActiveStartDateChange={onActiveStartDateChange}
