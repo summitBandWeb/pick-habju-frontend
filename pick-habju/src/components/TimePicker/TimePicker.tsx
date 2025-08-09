@@ -1,28 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PickerFooter from '../PickerFooter/PickerFooter';
 import type { TimePickerProps } from './TimePicker.types';
 import { TimePickerBody } from './TimPickerBody/TimePickerBody';
-import type { TimePeriod } from './TimePickerEnums';
+import { TimePeriod } from './TimePickerEnums';
 
 const TimePicker = ({
-  startHour,
-  startPeriod,
-  endHour,
-  endPeriod,
+  initialStartHour = 9,
+  initialStartPeriod = TimePeriod.AM,
+  initialEndHour = 5,
+  initialEndPeriod = TimePeriod.PM,
   onConfirm,
   onCancel,
   disabled = false,
 }: TimePickerProps) => {
   const [time, setTime] = useState({
-    startHour,
-    startPeriod,
-    endHour,
-    endPeriod,
+    startHour: initialStartHour,
+    startPeriod: initialStartPeriod,
+    endHour: initialEndHour,
+    endPeriod: initialEndPeriod,
   });
-  // prop이 바뀔 때 state 동기화
-  useEffect(() => {
-    setTime({ startHour, startPeriod, endHour, endPeriod });
-  }, [startHour, startPeriod, endHour, endPeriod]);
+
   const handleChange = (
     newStartHour: number,
     newStartPeriod: TimePeriod,
@@ -36,6 +33,7 @@ const TimePicker = ({
       endPeriod: newEndPeriod,
     });
   };
+
   const handleConfirm = () => {
     const { startHour, startPeriod, endHour, endPeriod } = time;
     onConfirm(startHour, startPeriod, endHour, endPeriod);

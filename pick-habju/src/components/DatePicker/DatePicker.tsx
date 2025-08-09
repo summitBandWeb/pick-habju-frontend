@@ -1,45 +1,33 @@
-import DatePickerHeader from './Header/DatePickerHeader';
-import DatePickerBody from './Body/DatePickerBody';
-import { useEffect, useState } from 'react';
-import PickerFooter from '../PickerFooter/PickerFooter';
+'use client';
+
+import { useState } from 'react';
+
 import type { DatePickerProps } from './DatePicker.types';
 
-const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DatePickerProps) => {
-  const [selected, setSelected] = useState<Date[]>(selectedDates);
-  // 표시할 달력의 시작 날짜 (해당 월 1일)
-  const [activeStartDate, setActiveStartDate] = useState<Date>(
-    new Date(
-      selectedDates[0]?.getFullYear() ?? new Date().getFullYear(),
-      selectedDates[0]?.getMonth() ?? new Date().getMonth(),
-      1
-    )
-  );
+import PickerFooter from '../PickerFooter/PickerFooter';
+import DatePickerHeader from './Header/DatePickerHeader';
+import DatePickerBody from './Body/DatePickerBody';
 
-  // 외부 selectedDates prop 동기화
-  // 이전 코드는 useEffect 무한 호출 문제 *
-  useEffect(() => {
-    // 단일 선택 모드이므로, 외부에서 여러 날짜가 들어와도 첫 번째 날짜만 반영
-    // 깊은 비교를 통해 실제로 값이 변경되었을 때만 상태 업데이트
-    const newSelected = selectedDates.slice(0, 1);
-    if (
-      selected.length !== newSelected.length ||
-      selected.some(
-        (date, index) =>
-          !newSelected[index] ||
-          date.getFullYear() !== newSelected[index].getFullYear() ||
-          date.getMonth() !== newSelected[index].getMonth() ||
-          date.getDate() !== newSelected[index].getDate()
-      )
-    ) {
-      setSelected(newSelected);
-    }
-  }, [selected, selectedDates]);
+/**
+ * DatePicker.tsx
+ *
+ * 날짜 선택기 컴포넌트
+ * 사용자가 날짜를 선택할 수 있는 UI를 제공합니다.
+ * 선택된 날짜는 외부에서 관리할 수 있으며, 확인/취소 버튼을 통해 선택을 완료하거나 취소할 수 있습니다.
+ */
+
+const DatePicker = ({ onChange, onConfirm, onCancel }: DatePickerProps) => {
+  const [selected, setSelected] = useState<Date[]>([]);
+  const [activeStartDate, setActiveStartDate] = useState<Date>(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+
+  // 외부에서 props로 selectedDates를 전달했을 때, 업데이트 하기 위한 로직입니다.
+  // selectedDates를 삭제 처리하였습니다. (부모에서 전달할 수 없습니다.)
 
   const toggleDate = (date: Date) => {
-    const exists = selected.some(
-      (d) =>
-        d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
-    );
+    const exists = selected.some((d) => d.getTime() === date.getTime());
 
     // 중복 선택 방지 로직:
     // 클릭된 날짜가 이미 선택된 날짜이면 선택 해제 (빈 배열)
@@ -70,7 +58,7 @@ const DatePicker = ({ selectedDates = [], onChange, onConfirm, onCancel }: DateP
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
       <DatePickerBody
         activeStartDate={activeStartDate}
-        selectedDates={selected}
+        selectedDates={selected ?? []}
         onChange={toggleDate}
         onActiveStartDateChange={({ activeStartDate }) => activeStartDate && setActiveStartDate(activeStartDate)}
       />

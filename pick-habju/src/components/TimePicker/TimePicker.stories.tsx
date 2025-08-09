@@ -4,10 +4,10 @@ import { action } from '@storybook/addon-actions';
 import { TimePeriod } from './TimePickerEnums';
 
 interface TimePickerArgs {
-  startHour: number;
-  startPeriod: TimePeriod;
-  endHour: number;
-  endPeriod: TimePeriod;
+  initialStartHour: number;
+  initialStartPeriod: TimePeriod;
+  initialEndHour: number;
+  initialEndPeriod: TimePeriod;
   disabled: boolean;
 }
 
@@ -26,13 +26,13 @@ const meta: Meta<TimePickerArgs> = {
     layout: 'centered',
   },
   argTypes: {
-    startHour: { control: { type: 'number', min: 1, max: 12, step: 1 } },
-    endHour: { control: { type: 'number', min: 1, max: 12, step: 1 } },
-    startPeriod: {
+    initialStartHour: { control: { type: 'number', min: 1, max: 12, step: 1 } },
+    initialEndHour: { control: { type: 'number', min: 1, max: 12, step: 1 } },
+    initialStartPeriod: {
       control: { type: 'radio' },
       options: Object.values(TimePeriod) as TimePeriod[],
     },
-    endPeriod: {
+    initialEndPeriod: {
       control: { type: 'radio' },
       options: Object.values(TimePeriod) as TimePeriod[],
     },
@@ -45,18 +45,18 @@ type Story = StoryObj<TimePickerArgs>;
 
 export const Default: Story = {
   args: {
-    startHour: 9,
-    startPeriod: TimePeriod.AM,
-    endHour: 5,
-    endPeriod: TimePeriod.PM,
+    initialStartHour: 9,
+    initialStartPeriod: TimePeriod.AM,
+    initialEndHour: 5,
+    initialEndPeriod: TimePeriod.PM,
     disabled: false,
   },
-  render: ({ startHour, startPeriod, endHour, endPeriod, disabled }) => (
+  render: ({ initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod, disabled }) => (
     <TimePicker
-      startHour={startHour}
-      startPeriod={startPeriod}
-      endHour={endHour}
-      endPeriod={endPeriod}
+      initialStartHour={initialStartHour}
+      initialStartPeriod={initialStartPeriod}
+      initialEndHour={initialEndHour}
+      initialEndPeriod={initialEndPeriod}
       disabled={disabled}
       onConfirm={action('onConfirm')}
       onCancel={action('onCancel')}
@@ -66,18 +66,18 @@ export const Default: Story = {
 
 export const Inactive: Story = {
   args: {
-    startHour: 9,
-    startPeriod: TimePeriod.AM,
-    endHour: 5,
-    endPeriod: TimePeriod.PM,
-    disabled: true, // ← 여기만 true 로 변경
+    initialStartHour: 9,
+    initialStartPeriod: TimePeriod.AM,
+    initialEndHour: 5,
+    initialEndPeriod: TimePeriod.PM,
+    disabled: true,
   },
-  render: ({ startHour, startPeriod, endHour, endPeriod, disabled }) => (
+  render: ({ initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod, disabled }) => (
     <TimePicker
-      startHour={startHour}
-      startPeriod={startPeriod}
-      endHour={endHour}
-      endPeriod={endPeriod}
+      initialStartHour={initialStartHour}
+      initialStartPeriod={initialStartPeriod}
+      initialEndHour={initialEndHour}
+      initialEndPeriod={initialEndPeriod}
       disabled={disabled}
       onConfirm={action('onConfirm')}
       onCancel={action('onCancel')}

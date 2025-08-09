@@ -1,7 +1,9 @@
 import clsx from 'classnames';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import type { ChevronProps } from './Chevron.types';
 import { ChevronVariant } from './ChevronEnums';
+
+import ChevronLeftIcon from '../../assets/svg/chevronLeft.svg';
+import ChevronRightIcon from '../../assets/svg/chevronRight.svg';
 
 const TOUCH_AREA = 'w-10.5 h-10.5 flex items-center justify-center';
 
@@ -14,7 +16,7 @@ const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronPro
       {/* 이전 화살표 */}
       {showPrev ? (
         <button onClick={onPrev} className={TOUCH_AREA} aria-label="Previous">
-          <ChevronLeftIcon className="w-10.5 h-10.5 text-primary-white" />
+          <img src={ChevronLeftIcon} alt="previous" />
         </button>
       ) : (
         <div className={TOUCH_AREA} />
@@ -23,7 +25,7 @@ const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronPro
       {/* 다음 화살표 */}
       {showNext ? (
         <button onClick={onNext} className={TOUCH_AREA} aria-label="Next">
-          <ChevronRightIcon className="w-10.5 h-10.5 text-primary-white" />
+          <img src={ChevronRightIcon} alt="previous" />
         </button>
       ) : (
         <div className={TOUCH_AREA} />
