@@ -18,6 +18,8 @@ const Card = ({
   walkTime,
   capacity,
   booked = false,
+  partialAvailable = false,
+  reOpenDaysFromNow = 90,
   btnsize,
   initialIndex = 0,
 }: CardProps) => {
@@ -49,10 +51,26 @@ const Card = ({
 
   const renderOverlay = () =>
     booked && (
-      <div className="absolute inset-0 bg-gray-booked backdrop-blur-sm flex items-center justify-center font-card-title text-primary-white">
-        예약마감
+      <div className="absolute inset-0 bg-gray-booked backdrop-blur-sm text-primary-white">
+        {/* 헤더 스타일 차용 */}
+        <div className="absolute top-6 left-4 flex items-start space-x-[9px]">
+          <div className="w-0.5 h-12.5 bg-white" />
+          <div className="space-y-1">
+            <p className="font-card-title">{title}</p>
+            <p className="font-card-title">{getReopenText()}</p>
+          </div>
+        </div>
+        {/* 중앙 메시지는 제거하고 헤더만 노출 */}
       </div>
     );
+
+  const getReopenText = (): string => {
+    const base = new Date();
+    base.setDate(base.getDate() + reOpenDaysFromNow);
+    const month = base.getMonth() + 1;
+    const day = base.getDate();
+    return `${month}/${day}부터 예약가능합니다`;
+  };
 
   const renderChevron = () =>
     !booked && (
@@ -70,12 +88,20 @@ const Card = ({
 
   const renderInfo = () => (
     <>
-      <div className="flex items-center space-x-2">
-        <span className={classNames('font-card-info', booked ? 'text-gray-300' : 'text-gray-400')}>예상 결제 금액</span>
-        <span className={classNames('font-card-price-num', booked ? 'text-gray-300' : 'text-primary-black')}>
-          {price.toLocaleString()}원
-        </span>
-      </div>
+      {!partialAvailable ? (
+        <div className="flex items-center space-x-2">
+          <span className={classNames('font-card-info', booked ? 'text-gray-300' : 'text-gray-400')}>예상 결제 금액</span>
+          {booked ? (
+            <span className={classNames('font-card-price-num', 'text-gray-300')}>N원</span>
+          ) : (
+            <span className={classNames('font-card-price-num', 'text-primary-black')}>
+              {price.toLocaleString()}원
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="font-card-partial">선택하신 시간 중 일부만 가능합니다</div>
+      )}
 
       <div className="bg-gray-200 w-46 h-0.25 mt-2 mb-2" />
 
@@ -106,7 +132,7 @@ const Card = ({
 
   const renderAction = () => (
     <Button
-      label="예약하기"
+      label={booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기'}
       variant={ButtonVariant.Main}
       onClick={() => alert('예약되었습니다!')}
       disabled={booked}

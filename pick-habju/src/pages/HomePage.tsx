@@ -1,5 +1,4 @@
 import HeroArea from '../components/HeroArea/HeroArea';
-import SearchSection from '../components/Search/SearchSection';
 
 
 const HomePage = () => {
@@ -14,7 +13,7 @@ const HomePage = () => {
           onPersonCountChange={() => {}}
           onSearch={() => {}}
         />
-        <SearchSection />
+
       </div>
     </div>
   );
