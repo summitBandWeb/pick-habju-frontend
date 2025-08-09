@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import HeaderLogo from '../components/Header/HeaderLogo';
 import Button from '../components/Button/Button';
 import DatePicker from '../components/DatePicker/DatePicker';
 import TimePicker from '../components/TimePicker/TimePicker';
@@ -22,6 +23,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col items-center gap-6 p-10 bg-gray-100 min-h-screen">
+      <HeaderLogo className="mt-4" />
       <h1 className="text-xl font-bold">🔥 HomePage 테스트용</h1>
 
       <div className="flex gap-2">
