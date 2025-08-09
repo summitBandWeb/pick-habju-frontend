@@ -22,25 +22,6 @@ const meta: Meta<CardProps> = {
       ],
     },
   },
-  argTypes: {
-    images: { control: 'object' },
-    title: { control: 'text' },
-    subtitle: { control: 'text' },
-    price: { control: 'number' },
-    locationText: { control: 'text' },
-    walkTime: { control: 'text' },
-    capacity: { control: 'text' },
-    booked: { control: 'boolean' },
-    initialIndex: {
-      control: { type: 'number', min: 0, max: exampleImages.length - 1, step: 1 },
-      description: '처음 보여줄 슬라이드 인덱스',
-    },
-    btnsize: {
-      control: { type: 'select' },
-      options: Object.values(BtnSizeVariant),
-      description: '버튼 크기',
-    },
-  },
 };
 export default meta;
 
@@ -57,7 +38,7 @@ export const First: Story = {
     capacity: '12인',
     booked: false,
     initialIndex: 0,
-    btnsize: BtnSizeVariant.XSM,
+    btnsize: BtnSizeVariant.XXSM,
   },
 };
 

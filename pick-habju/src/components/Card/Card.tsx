@@ -70,9 +70,9 @@ const Card = ({
 
   const renderInfo = () => (
     <>
-      <div className="space-x-1.5">
+      <div className="flex items-center space-x-2">
         <span className={classNames('font-card-info', booked ? 'text-gray-300' : 'text-gray-400')}>예상 결제 금액</span>
-        <span className={classNames('font-card-pricenum', booked ? 'text-gray-300' : 'text-primary-black')}>
+        <span className={classNames('font-card-price-num', booked ? 'text-gray-300' : 'text-primary-black')}>
           {price.toLocaleString()}원
         </span>
       </div>
@@ -110,12 +110,12 @@ const Card = ({
       variant={ButtonVariant.Main}
       onClick={() => alert('예약되었습니다!')}
       disabled={booked}
-      size={btnsize ?? BtnSizeVariant.XSM}
+      size={btnsize ?? BtnSizeVariant.XXSM}
     />
   );
 
   return (
-    <div className="w-full min-w-80 min-h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
+    <div className="w-80 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
       <div className="relative min-w-80 h-45 bg-gray-100">
         <img src={images[current]} alt={`slide ${current + 1}`} className="w-full h-full object-cover" />
@@ -126,7 +126,7 @@ const Card = ({
       </div>
 
       {/* 정보 & 버튼 */}
-      <div className="p-3">
+      <div className="px-4 py-3">
         <div className="flex items-center justify-between">
           <div>{renderInfo()}</div>
           {renderAction()}

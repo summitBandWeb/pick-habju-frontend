@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import ScrollPicker from '../ScrollPicker/ScrollPicker';
 import type { TimePickerBodyProps } from './TimePickerBody.types';
 import type { TimePeriod } from '../TimePickerEnums';
@@ -14,23 +13,6 @@ export const TimePickerBody = ({
   onChange,
   disabled = false,
 }: TimePickerBodyProps) => {
-  const [h1, setH1] = useState(startHour);
-  const [p1, setP1] = useState<TimePeriod>(startPeriod);
-  const [h2, setH2] = useState(endHour);
-  const [p2, setP2] = useState<TimePeriod>(endPeriod);
-
-  const update = (newH: number, newP: TimePeriod, side: 'start' | 'end') => {
-    if (side === 'start') {
-      setH1(newH);
-      setP1(newP);
-      onChange(newH, newP, h2, p2);
-    } else {
-      setH2(newH);
-      setP2(newP);
-      onChange(h1, p1, newH, newP);
-    }
-  };
-
   return (
     <div className="relative inline-flex items-center justify-center w-84 h-62 bg-primary-white rounded-xl overflow-hidden">
       <div className="absolute left-0 right-0 top-1/2 h-[50px] -translate-y-1/2 bg-gray-200 rounded-lg" />
@@ -39,33 +21,33 @@ export const TimePickerBody = ({
         <div className="flex space-x-2 gap-2">
           <ScrollPicker
             list={hours}
-            value={h1}
-            onChange={(val) => update(val, p1, 'start')}
+            value={startHour}
+            onChange={(newStartHour) => onChange(newStartHour, startPeriod, endHour, endPeriod)}
             itemHeight={50}
             disabled={disabled}
           />
           <ScrollPicker
             list={periods}
-            value={p1}
-            onChange={(val) => update(h1, val as TimePeriod, 'start')}
+            value={startPeriod}
+            onChange={(newStartPeriod) => onChange(startHour, newStartPeriod as TimePeriod, endHour, endPeriod)}
             itemHeight={50}
             disabled={disabled}
           />
         </div>
         <span className="text-2xl text-black">~</span>
         {/* End */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 gap-2">
           <ScrollPicker
             list={hours}
-            value={h2}
-            onChange={(val) => update(val, p2, 'end')}
+            value={endHour}
+            onChange={(newEndHour) => onChange(startHour, startPeriod, newEndHour, endPeriod)}
             itemHeight={50}
             disabled={disabled}
           />
           <ScrollPicker
             list={periods}
-            value={p2}
-            onChange={(val) => update(h2, val as TimePeriod, 'end')}
+            value={endPeriod}
+            onChange={(newEndPeriod) => onChange(startHour, startPeriod, endHour, newEndPeriod as TimePeriod)}
             itemHeight={50}
             disabled={disabled}
           />

@@ -1,10 +1,12 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
 @import 'tailwindcss' layer(base);
 @import 'tailwindcss/theme' layer(theme);
 @import 'tailwindcss/utilities' layer(utilities);
 
 @layer theme {
   @theme {
-    --font-sans: 'Inter', sans-serif;
+    --font-sans: 'Pretendard', 'Inter', sans-serif;
 
     --color-primary-white: #ffffff;
     --color-primary-black: #000000;
@@ -123,26 +125,27 @@
 
 @layer utilities {
   /* Font family */
-
   .font-sans {
     font-family: var(--font-sans);
   }
 
   /* Hero Area */
-
   .font-hero-headline {
+    font-family: var(--font-sans);
     font-weight: var(--font-hero-headline-weight);
     font-size: var(--font-hero-headline-size);
     line-height: var(--line-height-hero-headline);
     letter-spacing: var(--letter-spacing-hero-headline);
   }
   .font-hero-info {
+    font-family: var(--font-sans);
     font-weight: var(--font-hero-info-weight);
     font-size: var(--font-hero-info-size);
     line-height: var(--line-height-hero-info);
     letter-spacing: var(--letter-spacing-hero-info);
   }
   .font-hero-edit {
+    font-family: var(--font-sans);
     font-weight: var(--font-hero-edit-weight);
     font-size: var(--font-hero-edit-size);
     line-height: var(--line-height-hero-edit);
@@ -154,30 +157,35 @@
 
   /* Card Area */
   .font-card-title {
+    font-family: var(--font-sans);
     font-weight: var(--font-card-title-weight);
     font-size: var(--font-card-title-size);
     line-height: var(--line-height-card-title);
     letter-spacing: var(--letter-spacing-card-title);
   }
   .font-card-price-num {
+    font-family: var(--font-sans);
     font-weight: var(--font-card-price-num-weight);
     font-size: var(--font-card-price-num-size);
     line-height: var(--line-height-card-price-num);
     letter-spacing: var(--letter-spacing-card-price-num);
   }
   .font-card-price-text {
+    font-family: var(--font-sans);
     font-weight: var(--font-card-price-text-weight);
     font-size: var(--font-card-price-text-size);
     line-height: var(--line-height-card-price-text);
     letter-spacing: var(--letter-spacing-card-price-text);
   }
   .font-card-info {
+    font-family: var(--font-sans);
     font-weight: var(--font-card-info-weight);
     font-size: var(--font-card-info-size);
     line-height: var(--line-height-card-info);
     letter-spacing: var(--letter-spacing-card-info);
   }
   .font-card-book {
+    font-family: var(--font-sans);
     font-weight: var(--font-card-book-weight);
     font-size: var(--font-card-book-size);
     line-height: var(--line-height-card-book);
@@ -189,6 +197,7 @@
 
   /* Modal */
   .font-modal-default {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-default-weight);
     font-size: var(--font-modal-default-size);
     line-height: var(--line-height-modal-default);
@@ -209,30 +218,35 @@
     line-height: normal;
   }
   .font-modal-call {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-call-weight);
     font-size: var(--font-modal-call-size);
     line-height: var(--line-height-modal-call);
     letter-spacing: var(--letter-spacing-modal-call);
   }
   .font-modal-description {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-description-weight);
     font-size: var(--font-modal-description-size);
     line-height: var(--line-height-modal-description);
     letter-spacing: var(--letter-spacing-modal-description);
   }
   .font-modal-calctype {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-calctype-weight);
     font-size: var(--font-modal-calctype-size);
     line-height: var(--line-height-modal-calctype);
     letter-spacing: var(--letter-spacing-modal-calctype);
   }
   .font-modal-calcdetail {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-calcdetail-weight);
     font-size: var(--font-modal-calcdetail-size);
     line-height: var(--line-height-modal-calcdetail);
     letter-spacing: var(--letter-spacing-modal-calcdetail);
   }
   .font-modal-timepicker {
+    font-family: var(--font-sans);
     font-weight: var(--font-modal-timepicker-weight);
     font-size: var(--font-modal-timepicker-size);
     line-height: var(--line-height-modal-timepicker);
@@ -264,14 +278,12 @@
   }
 
   /* Time Picker Scroll */
-
   .scroll-picker {
     scroll-snap-type: y mandatory;
   }
   .scroll-picker li {
     scroll-snap-align: center;
   }
-
   .scroll-picker {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE & Edge */
