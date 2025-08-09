@@ -58,9 +58,9 @@ export const Last: Story = {
   },
 };
 
-// 예약 마감 상태
+// 오픈 대기 상태
 export const Booked: Story = {
-  name: '예약 마감',
+  name: '오픈 대기',
   args: {
     ...First.args!,
     booked: true,

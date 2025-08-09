@@ -177,6 +177,14 @@
     line-height: var(--line-height-card-price-text);
     letter-spacing: var(--letter-spacing-card-price-text);
   }
+  .font-card-partial {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.8125rem; /* 13px */
+    line-height: normal;
+    letter-spacing: -0.01625rem;
+    color: var(--color-blue-500);
+  }
   .font-card-info {
     font-family: var(--font-sans);
     font-weight: var(--font-card-info-weight);

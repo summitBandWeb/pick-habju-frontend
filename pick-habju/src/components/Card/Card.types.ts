@@ -9,6 +9,8 @@ export interface CardProps {
   walkTime: string;
   capacity: string;
   booked?: boolean;
+  partialAvailable?: boolean;
+  reOpenDaysFromNow?: number;
   btnsize?: BtnSizeVariant;
   initialIndex?: number;
 }
