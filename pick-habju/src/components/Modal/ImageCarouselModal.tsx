@@ -58,9 +58,9 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
   }, []);
 
   return (
-    <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex justify-center items-start bg-black/60">
+    <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex justify-center items-center bg-black/60">
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
-      <div className="mt-4 w-[25.125rem]">
+      <div className="w-[25.125rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
         <div className="w-full flex justify-end">
           <button
@@ -82,19 +82,19 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
           {/* Rectangle (이미지 영역) */}
           <div
             key={animKey}
-            className="relative w-[23.125rem] h-[16.25rem] flex-shrink-0 rounded-t-[0.75rem] rounded-b-[0rem] overflow-hidden transition-opacity duration-200 ease-out"
+            className="relative w-[23.125rem] h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden transition-opacity duration-200 ease-out"
             style={{ backgroundImage: `url(${currentImage})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 1 }}
             aria-label="확대 이미지"
           >
             {/* Frame (컨트롤 오버레이) */}
             <div className="absolute inset-0 flex w-[23.125rem] h-[16.25rem] flex-col justify-between items-start">
               {/* Chevron Row */}
-              <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-1">
+              <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-2">
                 <Chevron variant={variant} onPrev={prev} onNext={next} />
               </div>
 
               {/* Pagination */}
-              <div className="w-full flex justify-center pb-2">
+              <div className="w-full flex justify-center pb-3">
                 <PaginationDots total={total} current={current} />
               </div>
             </div>
