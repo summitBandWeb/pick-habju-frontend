@@ -6,7 +6,16 @@ const Footer = () => {
     >
       <div className="flex items-center text-gray-400 font-footer-button">
         <span>공지사항 |</span>
-        <span>&nbsp;서비스 피드백하기 |</span>
+        <span>
+          <a
+          href="https://forms.gle/wvtbKpesk2NwpCrX9"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="서비스 피드백하기 (새 탭에서 열림)"
+          className="ml-1 cursor-pointer hover:underline hover:text-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm transition-colors"
+        >
+          서비스 피드백하기
+        </a> |</span>
         <span>&nbsp;이메일 pickhabju@gmail.com</span>
       </div>
 
