@@ -23,7 +23,16 @@ const Footer = () => {
         >
           서비스 피드백하기
         </a> |</span>
-        <span>&nbsp;이메일 pickhabju@gmail.com</span>
+        <span>
+          &nbsp;
+          <a
+            href="mailto:pickhabju@gmail.com"
+            className="cursor-pointer hover:underline hover:text-blue-500 transition-colors"
+            aria-label="이메일 보내기"
+          >
+            이메일 pickhabju@gmail.com
+          </a>
+        </span>
       </div>
 
       <div className="flex justify-center items-center gap-[0.625rem] px-[0.625rem] py-[0.25rem]">
