@@ -1,8 +1,8 @@
-import type { PropsWithChildren } from 'react';
+import type { ReactNode } from 'react';
 import AppHeader from '../components/Header/AppHeader.tsx';
 import Footer from '../components/Footer/Footer';
 
-type AppWrapperProps = PropsWithChildren<Record<string, never>>;
+type AppWrapperProps = { children?: ReactNode };
 
 /**
  * 모바일 기준 고정 폭 래퍼. 상단 헤더는 고정, 나머지 영역은 스크롤.
