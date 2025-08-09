@@ -10,7 +10,7 @@ import type { HeroAreaProps } from './HeroArea.types';
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   return (
     <div
-      className="relative w-94.5 h-97.5 flex flex-col items-center"
+      className="relative w-full h-97.5 flex flex-col items-center"
       style={{
         backgroundImage: `url(${BackGroundImage})`,
         backgroundSize: 'cover',

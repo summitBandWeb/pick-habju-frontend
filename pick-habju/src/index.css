@@ -203,6 +203,20 @@
     line-height: var(--line-height-modal-default);
     letter-spacing: var(--letter-spacing-modal-default);
   }
+
+  /* Footer */
+  .font-footer-button {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.75rem; /* 12px */
+    line-height: normal;
+  }
+  .font-footer-copyright {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 0.75rem; /* 12px */
+    line-height: normal;
+  }
   .font-modal-call {
     font-family: var(--font-sans);
     font-weight: var(--font-modal-call-weight);
