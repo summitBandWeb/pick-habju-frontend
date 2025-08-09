@@ -10,6 +10,7 @@ import { showToastByKey } from '../utils/showToastByKey';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
 import PaginationDots from '../components/PaginationDot/PaginationDot';
 import GuestCounterModal from '../components/GuestCounterModal/GuestCounterModal'; // 추가
+import Footer from '../components/Footer/Footer';
 
 const HomePage = () => {
   const [startHour] = useState<number>(9);
@@ -35,6 +36,7 @@ const HomePage = () => {
       <PaginationDots total={5} current={0} />
 
       <DatePicker />
+      <Footer />
 
       <TimePicker
         startHour={startHour}
