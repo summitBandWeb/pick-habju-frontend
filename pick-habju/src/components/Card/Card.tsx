@@ -5,6 +5,8 @@ import PaginationDots from '../PaginationDot/PaginationDot';
 import Chevron from '../Chevron/Chevron';
 import Location from '../../assets/svg/location.svg';
 import People from '../../assets/svg/people.svg';
+import ImageCarouselModal from '../Modal/ImageCarouselModal';
+import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import type { CardProps } from './Card.types';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
@@ -25,6 +27,7 @@ const Card = ({
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
   const total = images.length;
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const variant: ChevronVariant = booked
     ? ChevronVariant.Middle
@@ -143,8 +146,8 @@ const Card = ({
   return (
     <div className="w-80 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
-      <div className="relative min-w-80 h-45 bg-gray-100">
-        <img src={images[current]} alt={`slide ${current + 1}`} className="w-full h-full object-cover" />
+      <div className="relative min-w-80 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
+        <img src={images[current]} alt={`slide ${current + 1}`} className="w-full h-full object-cover cursor-pointer" />
         {renderHeader()}
         {renderOverlay()}
         {renderChevron()}
@@ -158,6 +161,14 @@ const Card = ({
           {renderAction()}
         </div>
       </div>
+      {isModalOpen && (
+        <ImageCarouselModal
+          images={images}
+          initialIndex={current}
+          onClose={() => setIsModalOpen(false)}
+          closeIconSrc={TurnOffIcon}
+        />
+      )}
     </div>
   );
 };
