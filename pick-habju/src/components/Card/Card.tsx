@@ -127,7 +127,7 @@ const Card = ({
           )}
         >
           <img src={People} alt="인원 아이콘" />
-          <span>권장 인원 {capacity}</span>
+          <span>권장 인원 {booked ? 'N인' : capacity}</span>
         </div>
       </div>
     </>
