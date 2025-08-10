@@ -285,6 +285,28 @@
     box-shadow: var(--box-shadow-search);
   }
 
+  /* Toast keyframes */
+  @keyframes toast-in {
+    0% {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes toast-out {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+  }
+
   /* Time Picker Scroll */
   .scroll-picker {
     scroll-snap-type: y mandatory;

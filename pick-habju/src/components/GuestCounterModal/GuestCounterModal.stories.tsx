@@ -33,7 +33,7 @@ const AlwaysOpenTemplate = (args: { initialCount?: number }) => {
 };
 
 export const Defalut: Story = {
-  render: () => <AlwaysOpenTemplate initialCount={1} />,
+  render: () => <AlwaysOpenTemplate initialCount={12} />,
   parameters: {
     docs: {
       description: {
@@ -55,11 +55,11 @@ export const WithInitialCount5: Story = {
 };
 
 export const WithInitialCountMax: Story = {
-  render: () => <AlwaysOpenTemplate initialCount={15} />,
+  render: () => <AlwaysOpenTemplate initialCount={30} />,
   parameters: {
     docs: {
       description: {
-        story: '최대 인원(15명)으로 초기값이 설정된 모달입니다.',
+        story: '최대 인원(30명)으로 초기값이 설정된 모달입니다.',
       },
     },
   },
