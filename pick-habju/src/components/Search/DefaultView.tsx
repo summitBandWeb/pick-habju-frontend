@@ -4,10 +4,20 @@ import { useSearchStore } from '../../store/search/searchStore';
 
 const DefaultView = () => {
   const cards = useSearchStore((s) => s.cards);
+  const sorted = [...cards]
+    .map((c, idx) => ({ c, idx }))
+    .sort((a, b) => {
+      const rank = (kind: typeof a.c.kind) => (kind === 'default' ? 0 : kind === 'recommend' ? 1 : 2);
+      const ra = rank(a.c.kind);
+      const rb = rank(b.c.kind);
+      if (ra !== rb) return ra - rb;
+      return a.idx - b.idx; // 안정성 보장
+    })
+    .map((x) => x.c);
 
   return (
     <div className="w-full flex flex-col items-center gap-4 py-4">
-      {cards.map((c, i) => {
+      {sorted.map((c, i) => {
         const room = ROOMS[c.roomIndex];
         const images = room.imageUrls;
         const price = room.pricePerHour;
