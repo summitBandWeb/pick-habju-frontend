@@ -16,12 +16,14 @@ import DatePickerBody from './Body/DatePickerBody';
  * 선택된 날짜는 외부에서 관리할 수 있으며, 확인/취소 버튼을 통해 선택을 완료하거나 취소할 수 있습니다.
  */
 
-const DatePicker = ({ onChange, onConfirm, onCancel }: DatePickerProps) => {
+const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: DatePickerProps) => {
   const today = new Date();
   const todayAtMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-  // 항상 기본 선택은 '당일'
-  const [selected, setSelected] = useState<Date[]>([todayAtMidnight]);
+  // 항상 기본 선택은 '당일' (초기값 전달 시 해당 날짜로 설정)
+  const [selected, setSelected] = useState<Date[]>([
+    initialSelectedDate ? new Date(initialSelectedDate.getFullYear(), initialSelectedDate.getMonth(), initialSelectedDate.getDate()) : todayAtMidnight,
+  ]);
   const [activeStartDate, setActiveStartDate] = useState<Date>(() => {
     return new Date(todayAtMidnight.getFullYear(), todayAtMidnight.getMonth(), 1);
   });
