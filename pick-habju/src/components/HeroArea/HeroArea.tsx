@@ -15,14 +15,16 @@ import { ReservationToastKey } from '../ToastMessage/ToastMessageEnums';
 import { useReservationActions, useReservationState } from '../../hook/useReservationStore';
 import { convertTo24Hour } from '../../utils/formatDate';
 import { useToastStore } from '../../store/toast/toastStore';
+import { formatReservationLabel } from '../../utils/formatReservationLabel';
+import { generateHourSlots } from '../../utils/formatTime';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
-  const [dateTimeText, setDateTimeText] = useState<string>(dateTime);
+  const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
-  const { selectedDate } = useReservationState();
+  const { selectedDate, hourSlots } = useReservationState();
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
 
@@ -102,15 +104,14 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       actions.setHourSlots(sh, sp, eh, ep);
       setIsTimePickerOpen(false);
 
-      // 라벨 업데이트: M월 DD일 (요일) HH~HH시
       if (selectedDate) {
-        const month = selectedDate.getMonth() + 1; // 1~12
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][selectedDate.getDay()];
+        const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
+          selectedDate.getDate()
+        ).padStart(2, '0')}`;
         const start24 = convertTo24Hour(sh, sp);
-        const rawEnd24 = convertTo24Hour(eh, ep);
-        const displayEndHour = rawEnd24 === 0 ? 24 : rawEnd24 <= start24 ? rawEnd24 + 24 : rawEnd24;
-        setDateTimeText(`${month}월 ${day}일 (${weekdayKorean}) ${start24}~${displayEndHour}시`);
+        const end24 = convertTo24Hour(eh, ep);
+        const slots = generateHourSlots(start24, end24);
+        setDateTimeText(formatReservationLabel(dateIso, slots));
       }
     },
     [actions, validateTime, selectedDate]
@@ -144,7 +145,27 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
             <PersonCountInput count={peopleCountText} onChangeClick={openGuestCounter} />
           </div>
           <div>
-            <Button label="검색하기" onClick={onSearch} variant={ButtonVariant.Main} size={BtnSizeVariant.MD} />
+            <Button
+              label="검색하기"
+              onClick={() => {
+                // 필수값 체크
+                if (!selectedDate) {
+                  alert('날짜와 시간을 선택해 주세요.');
+                  return;
+                }
+                const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+                const slots = hourSlots && hourSlots.length > 0 ? hourSlots : [];
+                if (slots.length === 0) {
+                  alert('시간을 선택해 주세요.');
+                  return;
+                }
+                // UI 라벨 업데이트 보정
+                setDateTimeText(formatReservationLabel(dateIso, slots));
+                onSearch({ date: dateIso, hour_slots: slots, peopleCount: peopleCountText });
+              }}
+              variant={ButtonVariant.Main}
+              size={BtnSizeVariant.MD}
+            />
           </div>
         </div>
       </div>
