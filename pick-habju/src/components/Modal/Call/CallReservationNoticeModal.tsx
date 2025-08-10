@@ -17,7 +17,7 @@ const CallReservationNoticeModal = ({ open, onClose, studioName, phoneNumber }: 
     <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-end gap-3 py-[3.5rem] px-[1.75rem]">
       {/* 1. 안내 문구 */}
       <div className="w-full text-center font-modal-default text-primary-black">
-        해당 합주실의 당일 예약은{' '}
+        해당 합주실의 당일 예약은{' '}<br></br>
         <span className="text-blue-500 font-modal-default">전화</span>
         로만 가능합니다.
       </div>
