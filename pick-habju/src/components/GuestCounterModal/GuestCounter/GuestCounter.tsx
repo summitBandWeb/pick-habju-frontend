@@ -2,7 +2,7 @@ import { Minus, Plus } from 'lucide-react';
 import clsx from 'clsx';
 import type { GuestCounterProps } from './GuestCounter.types';
 
-const GuestCounter = ({ value, onChange, min = 0, max = 15 }: GuestCounterProps) => {
+const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps) => {
   const handleIncrement = () => {
     if (value < max) onChange(value + 1);
   };
