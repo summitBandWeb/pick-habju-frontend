@@ -7,6 +7,7 @@ import BackGroundImage from '../../assets/images/background.jpg';
 import type { HeroAreaProps } from './HeroArea.types';
 import DatePicker from '../DatePicker/DatePicker';
 import TimePicker from '../TimePicker/TimePicker';
+import GuestCounterModal from '../GuestCounterModal/GuestCounterModal';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
 import ToastMessage from '../ToastMessage/ToastMessage';
 import { showToastByKey } from '../../utils/showToastByKey';
@@ -18,7 +19,9 @@ import { useToastStore } from '../../store/toast/toastStore';
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime);
+  const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
   const { selectedDate } = useReservationState();
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
@@ -27,6 +30,11 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     setIsDatePickerOpen(true);
     onDateTimeChange?.();
   }, [onDateTimeChange]);
+
+  const openGuestCounter = useCallback(() => {
+    setIsGuestModalOpen(true);
+    onPersonCountChange?.();
+  }, [onPersonCountChange]);
 
   const handleDateConfirm = useCallback(
     (dates: Date[]) => {
@@ -133,7 +141,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         <div className="flex flex-col items-center">
           <div className="flex flex-col gap-3 mb-8">
             <DateTimeInput dateTime={dateTimeText} onChangeClick={openDatePicker} />
-            <PersonCountInput count={peopleCount} onChangeClick={onPersonCountChange} />
+            <PersonCountInput count={peopleCountText} onChangeClick={openGuestCounter} />
           </div>
           <div>
             <Button label="검색하기" onClick={onSearch} variant={ButtonVariant.Main} size={BtnSizeVariant.MD} />
@@ -141,7 +149,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         </div>
       </div>
 
-      {(isDatePickerOpen || isTimePickerOpen) && (
+      {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
           {/* wrapper 기준 폭으로 중앙 정렬 */}
           <div className="w-[25.125rem] flex flex-col items-center">
@@ -154,6 +162,17 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
             )}
             {isTimePickerOpen && (
               <TimePicker onConfirm={handleTimeConfirm} onCancel={handleTimeCancel} disabled={isToastVisible} />
+            )}
+            {isGuestModalOpen && (
+              <GuestCounterModal
+                open
+                onClose={() => setIsGuestModalOpen(false)}
+                onConfirm={(val) => {
+                  setPeopleCountText(val);
+                  setIsGuestModalOpen(false);
+                }}
+                initialCount={peopleCountText}
+              />
             )}
             {/* 토스트는 모달 하단에 배치되도록 아래에 둔다 */}
             <div className="mt-3">

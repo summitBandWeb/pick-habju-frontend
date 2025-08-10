@@ -6,13 +6,22 @@ import img3 from '../assets/images/3.png';
 
 
 const HomePage = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = String(now.getDate()).padStart(2, '0');
+  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][now.getDay()];
+  const startHour = now.getHours();
+  const rawEndHour = (startHour + 2) % 24;
+  const displayEndHour = rawEndHour === 0 ? 24 : rawEndHour <= startHour ? rawEndHour + 24 : rawEndHour;
+  const defaultDateTime = `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${displayEndHour}시`;
+  const defaultPeopleCount = 12;
 
   return (
     <div className="w-full flex flex-col items-center">
       <div className="flex w-[25.125rem] flex-col justify-center items-center">
         <HeroArea
-          dateTime={"3월 26일 (수) 18-20시"}
-          peopleCount={10}
+          dateTime={defaultDateTime}
+          peopleCount={defaultPeopleCount}
           onDateTimeChange={() => {}}
           onPersonCountChange={() => {}}
           onSearch={() => {}}
