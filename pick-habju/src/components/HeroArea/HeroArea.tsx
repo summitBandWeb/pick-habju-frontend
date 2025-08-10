@@ -23,6 +23,13 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
   const [lastWarningKey, setLastWarningKey] = useState<string | null>(null);
+  // TimePicker 임시 선택값 유지
+  const [draftTime, setDraftTime] = useState<{
+    startHour: number;
+    startPeriod: TimePeriod;
+    endHour: number;
+    endPeriod: TimePeriod;
+  } | null>(null);
   const { selectedDate } = useReservationState();
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
@@ -43,6 +50,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       setIsDatePickerOpen(false);
       setIsTimePickerOpen(true);
       setLastWarningKey(null);
+      // 날짜 확정 시 기존 시간 임시값 유지 (변경 없음)
     },
     [actions]
   );
@@ -203,7 +211,16 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               />
             )}
             {isTimePickerOpen && (
-              <TimePicker onConfirm={handleTimeConfirm} onCancel={handleTimeCancel} disabled={isToastVisible} />
+              <TimePicker
+                onConfirm={handleTimeConfirm}
+                onCancel={handleTimeCancel}
+                disabled={isToastVisible}
+                onDraftChange={(sh, sp, eh, ep) => setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep })}
+                initialStartHour={draftTime?.startHour}
+                initialStartPeriod={draftTime?.startPeriod}
+                initialEndHour={draftTime?.endHour}
+                initialEndPeriod={draftTime?.endPeriod}
+              />
             )}
             {isGuestModalOpen && (
               <GuestCounterModal
