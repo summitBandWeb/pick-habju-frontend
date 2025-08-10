@@ -13,8 +13,22 @@ export interface AvailabilityRequest {
   rooms: AvailabilityRoomReqItem[];
 }
 
+export type SlotAvailability = boolean | 'unknown';
+
+export interface AvailabilityResultItem {
+  name: string;
+  branch: string;
+  business_id: string;
+  biz_item_id: string;
+  available: SlotAvailability;
+  available_slots: Record<string, SlotAvailability>;
+}
+
 export interface AvailabilityResponse {
-  [key: string]: unknown;
+  date: string;
+  hour_slots: string[];
+  results: AvailabilityResultItem[];
+  available_biz_item_ids: string[];
 }
 
 export const postRoomAvailability = async (

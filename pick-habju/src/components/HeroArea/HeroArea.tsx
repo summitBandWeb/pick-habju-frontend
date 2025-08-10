@@ -148,17 +148,24 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
             <Button
               label="검색하기"
               onClick={() => {
-                // 필수값 체크
-                if (!selectedDate) {
-                  alert('날짜와 시간을 선택해 주세요.');
-                  return;
+                // 스토어에 값이 없으면 props의 기본값 사용
+                let dateIso: string;
+                let slots: string[];
+
+                if (selectedDate) {
+                  dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
+                    selectedDate.getDate()
+                  ).padStart(2, '0')}`;
+                } else {
+                  dateIso = dateTime.date;
                 }
-                const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-                const slots = hourSlots && hourSlots.length > 0 ? hourSlots : [];
-                if (slots.length === 0) {
-                  alert('시간을 선택해 주세요.');
-                  return;
+
+                if (hourSlots && hourSlots.length > 0) {
+                  slots = hourSlots;
+                } else {
+                  slots = dateTime.hour_slots;
                 }
+
                 // UI 라벨 업데이트 보정
                 setDateTimeText(formatReservationLabel(dateIso, slots));
                 onSearch({ date: dateIso, hour_slots: slots, peopleCount: peopleCountText });

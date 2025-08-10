@@ -1,10 +1,7 @@
 import HeroArea from '../components/HeroArea/HeroArea';
 import { ROOMS } from '../constants/data';
-import { postRoomAvailability, type AvailabilityRequest } from '../api/availabilityApi';
-import Card from '../components/Card/Card';
-import img1 from '../assets/images/1.png';
-import img2 from '../assets/images/2.png';
-import img3 from '../assets/images/3.png';
+import { postRoomAvailability, type AvailabilityRequest, type AvailabilityResponse } from '../api/availabilityApi';
+import { useSearchStore } from '../store/search/searchStore';
 
 
 const HomePage = () => {
@@ -22,6 +19,8 @@ const HomePage = () => {
   ];
   const defaultDateTimeLabel = `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${displayEndHour}시`;
   const defaultPeopleCount = 12;
+
+  const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
@@ -46,9 +45,8 @@ const HomePage = () => {
     };
 
     try {
-      await postRoomAvailability(payload);
-      // TODO: 응답을 상태/뷰에 반영 (Search Default 화면 조립)
-      // useSearchStore.setState({ phase: SearchPhase.Default, ...data }) 형태로 확장 예정
+      const resp: AvailabilityResponse = await postRoomAvailability(payload);
+      setDefaultFromResponse({ response: resp, peopleCount });
     } catch (e) {
       console.error(e);
       alert('가용 시간 조회 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
@@ -65,55 +63,9 @@ const HomePage = () => {
           onPersonCountChange={() => {}}
           onSearch={handleSearch}
         />
-        {/* 테스트용 카드 섹션 */}
-        <div className="w-full flex flex-col items-center gap-4 py-4">
-          {/* 디폴트 카드 */}
-          <Card
-            images={[img1, img2, img3]}
-            title="비쥬 합주실 3호점"
-            subtitle="Modern룸"
-            price={55000}
-            locationText="이수역"
-            walkTime="4분"
-            capacity="12인"
-          />
-
-          {/* 일부 시간만 가능 */}
-          <Card
-            images={[img2, img3, img1]}
-            title="그루브 사당점"
-            subtitle="C룸"
-            price={17000}
-            locationText="이수역"
-            walkTime="4분"
-            capacity="8인"
-            partialAvailable
-          />
-
-          {/* 오픈 대기 (기본 90일 후) */}
-          <Card
-            images={[img3, img1, img2]}
-            title="드림합주실 사당점"
-            subtitle="V룸"
-            price={25000}
-            locationText="사당역"
-            walkTime="6분"
-            capacity="17인"
-            booked
-          />
-
-          {/* 오픈 대기 (커스텀 45일 후) */}
-          <Card
-            images={[img1, img3, img2]}
-            title="비쥬 합주실 2호점"
-            subtitle="B룸"
-            price={20000}
-            locationText="이수역"
-            walkTime="7분"
-            capacity="11인"
-            booked
-            reOpenDaysFromNow={45}
-          />
+        {/* 결과 뷰는 SearchSection이 phase에 따라 렌더 */}
+        <div className="w-full">
+          <></>
         </div>
       </div>
     </div>
