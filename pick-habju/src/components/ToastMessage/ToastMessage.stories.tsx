@@ -49,4 +49,3 @@ const createToastStory = (key: ReservationToastKey): Story => ({
 export const PastTime = createToastStory(ReservationToastKey.PAST_TIME);
 export const TooLong = createToastStory(ReservationToastKey.TOO_LONG);
 export const TooShort = createToastStory(ReservationToastKey.TOO_SHORT);
-export const TooManyPeople = createToastStory(ReservationToastKey.TOO_MANY_PEOPLE);

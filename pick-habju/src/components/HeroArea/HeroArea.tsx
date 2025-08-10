@@ -9,9 +9,9 @@ import DatePicker from '../DatePicker/DatePicker';
 import TimePicker from '../TimePicker/TimePicker';
 import GuestCounterModal from '../GuestCounterModal/GuestCounterModal';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
-import ToastMessage from '../ToastMessage/ToastMessage';
 import { showToastByKey } from '../../utils/showToastByKey';
-import { ReservationToastKey } from '../ToastMessage/ToastMessageEnums';
+import { ReservationToastKey, ReservationToastSeverity } from '../ToastMessage/ToastMessageEnums';
+import ToastMessage from '../ToastMessage/ToastMessage';
 import { useReservationActions, useReservationState } from '../../hook/useReservationStore';
 import { convertTo24Hour } from '../../utils/formatDate';
 import { useToastStore } from '../../store/toast/toastStore';
@@ -22,6 +22,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
+  const [lastWarningKey, setLastWarningKey] = useState<string | null>(null);
   const { selectedDate } = useReservationState();
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
@@ -41,6 +42,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       actions.setDate(dates);
       setIsDatePickerOpen(false);
       setIsTimePickerOpen(true);
+      setLastWarningKey(null);
     },
     [actions]
   );
@@ -49,6 +51,12 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     setIsDatePickerOpen(false);
   }, []);
 
+  {
+    /*
+    이거 굳이 heroArea에 있을 필요없어서 따로 분리해도 될듯
+    SRP에 맞지않음. 따로 분리해서 사용하는게 좋을듯
+    */
+  }
   const validateTime = useCallback(
     (
       startHour: number,
@@ -59,22 +67,29 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       const start24 = convertTo24Hour(startHour, startPeriod);
       const end24 = convertTo24Hour(endHour, endPeriod);
 
-      // 1) 형식 오류: 시작과 종료가 완전히 동일한 경우만
-      if (start24 === end24 && startPeriod === endPeriod) {
-        return ReservationToastKey.INVALID_TYPE;
-      }
-
-      // 자정(12AM)은 다음날 24시로 간주하여 교차 자정 구간 허용
+      // 기본 계산
       const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
       const duration = adjustedEnd - start24; // 시간 단위
 
-      // 2) 5시간 초과
-      if (duration > 5) return ReservationToastKey.TOO_LONG;
+      // 후보 판단
+      const candidates: ReservationToastKey[] = [];
 
-      // 3) 1시간 선택
-      if (duration === 1) return ReservationToastKey.TOO_SHORT;
+      // 형식 오류: 시작과 종료가 완전히 동일
+      if (start24 === end24 && startPeriod === endPeriod) {
+        candidates.push(ReservationToastKey.INVALID_TYPE);
+      }
 
-      // 4) 과거 시간 선택: 당일이고 시작 시간이 현재 시각 이전이면
+      // 5시간 초과
+      if (duration > 5) {
+        candidates.push(ReservationToastKey.TOO_LONG);
+      }
+
+      // 1시간 선택 (경고)
+      if (duration === 1) {
+        candidates.push(ReservationToastKey.TOO_SHORT);
+      }
+
+      // 과거 시간 (당일 시작 시간이 현재 이전)
       if (selectedDate) {
         const now = new Date();
         const isSameDay =
@@ -83,21 +98,48 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           selectedDate.getDate() === now.getDate();
         if (isSameDay) {
           const currentHour24 = now.getHours();
-          if (start24 <= currentHour24) return ReservationToastKey.PAST_TIME;
+          if (start24 <= currentHour24) {
+            candidates.push(ReservationToastKey.PAST_TIME);
+          }
         }
       }
 
-      return null;
+      if (candidates.length === 0) return null;
+
+      // 우선순위: 에러 우선, 그 다음 경고. 에러 내부 우선순위 지정.
+      const errorPriority: ReservationToastKey[] = [
+        ReservationToastKey.INVALID_TYPE,
+        ReservationToastKey.PAST_TIME,
+        ReservationToastKey.TOO_LONG,
+      ];
+      const warningPriority: ReservationToastKey[] = [ReservationToastKey.TOO_SHORT];
+
+      const error = errorPriority.find((k) => candidates.includes(k));
+      if (error) return error;
+      const warning = warningPriority.find((k) => candidates.includes(k));
+      return warning ?? null;
     },
     [selectedDate]
   );
 
+  // TODO: 이것도 중복되는 코드가 너무 많음 유틸성에도 있고. 따로 분리하고 관련흐름정리 한번 필요함
   const handleTimeConfirm = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
-      const errorKey = validateTime(sh, sp, eh, ep);
-      if (errorKey) {
-        showToastByKey(errorKey);
-        return;
+      const key = validateTime(sh, sp, eh, ep);
+      if (key) {
+        const severity = ReservationToastSeverity[key];
+        showToastByKey(key);
+        if (severity === 'error') return;
+        // warning인 경우: 첫 확인에서는 토스트만 띄우고 유지, 같은 선택으로 다시 확인 시 진행
+        const dateKey = selectedDate ? selectedDate.toDateString() : 'no-date';
+        const start24 = convertTo24Hour(sh, sp);
+        const end24 = convertTo24Hour(eh, ep);
+        const selectionKey = `${dateKey}|${start24}-${end24}`;
+        if (lastWarningKey !== selectionKey) {
+          setLastWarningKey(selectionKey);
+          return; // 첫 경고: 모달 유지
+        }
+        // 동일 선택 재확인: 진행
       }
       actions.setHourSlots(sh, sp, eh, ep);
       setIsTimePickerOpen(false);
@@ -113,7 +155,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         setDateTimeText(`${month}월 ${day}일 (${weekdayKorean}) ${start24}~${displayEndHour}시`);
       }
     },
-    [actions, validateTime, selectedDate]
+    [actions, validateTime, selectedDate, lastWarningKey]
   );
 
   const handleTimeCancel = useCallback(() => {
@@ -174,7 +216,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 initialCount={peopleCountText}
               />
             )}
-            {/* 토스트는 모달 하단에 배치되도록 아래에 둔다 */}
+            {/* 모달 아래 토스트 */}
             <div className="mt-3">
               <ToastMessage />
             </div>
