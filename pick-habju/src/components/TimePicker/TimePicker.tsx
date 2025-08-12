@@ -12,6 +12,7 @@ const TimePicker = ({
   onConfirm,
   onCancel,
   disabled = false,
+  onDraftChange,
 }: TimePickerProps) => {
   const [time, setTime] = useState({
     startHour: initialStartHour,
@@ -32,6 +33,7 @@ const TimePicker = ({
       endHour: newEndHour,
       endPeriod: newEndPeriod,
     });
+    onDraftChange?.(newStartHour, newStartPeriod, newEndHour, newEndPeriod);
   };
 
   const handleConfirm = () => {

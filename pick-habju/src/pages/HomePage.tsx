@@ -69,7 +69,7 @@ const HomePage = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="flex w-[25.125rem] flex-col justify-center items-center">
+      <div className="flex w-[25.125rem] flex-col justify-center items-center bg-primary-white">
         <HeroArea
           dateTime={{ label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots }}
           peopleCount={defaultPeopleCount}

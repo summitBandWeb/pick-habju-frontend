@@ -3,7 +3,7 @@ import BeforeSearchSvg from '../../assets/svg/BeforeSearch.svg';
 const BeforeSearchView = () => {
   return (
     <div
-      className="flex w-[25.125rem] flex-col justify-center items-start bg-yellow-300"
+      className="flex w-[25.125rem] flex-col justify-center items-start"
       aria-label="Before Search Section"
     >
       <div
