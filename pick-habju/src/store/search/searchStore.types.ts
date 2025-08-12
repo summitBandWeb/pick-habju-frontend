@@ -27,6 +27,7 @@ export type SearchCardItem = {
   kind: CardKind;
   roomIndex: number; // ROOMS 인덱스
   reOpenDaysFromNow?: number;
+  availableSlots?: Record<string, SlotAvailability>; // recommend용
 };
 
 // API 응답 타입 (프론트 내부 공유용)

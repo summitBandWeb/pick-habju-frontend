@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { PartialReservationConfirmModalProps } from './PartialReservationConfirmModal.types';
 
-const PartialReservationConfirmModal = ({ open, onClose, availableTime, confirmHref = 'https://www.google.com' }: PartialReservationConfirmModalProps) => {
+const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfirm }: PartialReservationConfirmModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,14 +56,13 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, confirmH
               다시 고를게요
             </button>
             {/* 예약할게요 */}
-            <a
-              href={confirmHref}
-              target="_blank"
-              rel="noreferrer noopener"
+            <button
+              type="button"
+              onClick={() => onConfirm?.()}
               className="flex w-[8.8125rem] h-[2.6875rem] px-[1.75rem] py-[0.75rem] justify-center items-center gap-[1.5rem] flex-shrink-0 rounded-[0.625rem] bg-yellow-900 text-primary-white hover:bg-yellow-700 font-button transition"
             >
               예약할게요
-            </a>
+            </button>
           </div>
         </div>
       </div>

@@ -57,17 +57,19 @@ export const useSearchStore = create<SearchState>((set) => ({
       }
     });
 
-    // 4) Recommend time: available === false and has consecutive true slots, 단 unknown 합주실은 제외
-    results.forEach((r) => {
-      if (r.available === false && r.available_slots && typeof r.available_slots === 'object') {
-        if (hasConsecutiveTrues(r.available_slots)) {
-          const idx = ROOMS.findIndex((rm) => rm.bizItemId === r.biz_item_id);
-          if (idx !== -1 && !unknownBusinessIds.has(ROOMS[idx].businessId)) {
-            nextCards.push({ kind: 'recommend', roomIndex: idx });
+    // 4) Recommend time: 요청한 시간대가 2시간 이상일 때만 표시
+    if (Array.isArray(response.hour_slots) && response.hour_slots.length >= 2) {
+      results.forEach((r) => {
+        if (r.available === false && r.available_slots && typeof r.available_slots === 'object') {
+          if (hasConsecutiveTrues(r.available_slots)) {
+            const idx = ROOMS.findIndex((rm) => rm.bizItemId === r.biz_item_id);
+            if (idx !== -1 && !unknownBusinessIds.has(ROOMS[idx].businessId)) {
+              nextCards.push({ kind: 'recommend', roomIndex: idx, availableSlots: r.available_slots });
+            }
           }
         }
-      }
-    });
+      });
+    }
 
     if (nextCards.length === 0) {
       set({ phase: SearchPhase.NoResult, cards: [] });

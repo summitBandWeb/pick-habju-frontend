@@ -5,9 +5,25 @@ import { calculateTotalPrice } from '../../utils/calcTotalPrice';
 import { useState } from 'react';
 import BookModalStepper from '../Modal/Book/BookModal';
 import ModalOverlay from '../Modal/ModalOverlay.tsx';
+import PartialReservationConfirmModal from '../Modal/Portion/PartialReservationConfirmModal';
+import OneHourCallReservationNoticeModal from '../Modal/OneHour/OneHourCallReservationNoticeModal';
+import CallReservationNoticeModal from '../Modal/Call/CallReservationNoticeModal';
+import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots } from '../../utils/availableTimeFormatter';
+import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } from '../../utils/modalFlowLogic';
+import { getBookingUrl } from '../../utils/bookingUrl';
 
 const DefaultView = () => {
   const cards = useSearchStore((s) => s.cards);
+  const lastQuery = useSearchStore((s) => s.lastQuery);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [currentModal, setCurrentModal] = useState<{
+    type: ModalType;
+    cardIdx: number;
+    availableTime?: string;
+    studioName?: string;
+    phoneNumber?: string;
+  } | null>(null);
+
   const sorted = [...cards]
     .map((c, idx) => ({ c, idx }))
     .sort((a, b) => {
@@ -15,12 +31,19 @@ const DefaultView = () => {
       const ra = rank(a.c.kind);
       const rb = rank(b.c.kind);
       if (ra !== rb) return ra - rb;
+
+      // default 카드들끼리는 총 금액 낮은 순으로 정렬
+      if (a.c.kind === 'default' && b.c.kind === 'default' && lastQuery) {
+        const roomA = ROOMS[a.c.roomIndex];
+        const roomB = ROOMS[b.c.roomIndex];
+        const priceA = calculateTotalPrice({ room: roomA, hourSlots: lastQuery.hour_slots, peopleCount: lastQuery.peopleCount });
+        const priceB = calculateTotalPrice({ room: roomB, hourSlots: lastQuery.hour_slots, peopleCount: lastQuery.peopleCount });
+        if (priceA !== priceB) return priceA - priceB;
+      }
+
       return a.idx - b.idx; // 안정성 보장
     })
     .map((x) => x.c);
-
-  const lastQuery = useSearchStore((s) => s.lastQuery);
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
     <div className="w-full flex flex-col items-center gap-4 py-4 bg-[#FFFBF0]">
@@ -63,6 +86,15 @@ const DefaultView = () => {
               walkTime={walkTime}
               capacity={capacity}
               partialAvailable
+              onBookClick={() => {
+                if (!lastQuery || !c.availableSlots) return;
+                const availableTime = formatAvailableTimeRange(c.availableSlots);
+                setCurrentModal({
+                  type: 'partial',
+                  cardIdx: i,
+                  availableTime,
+                });
+              }}
             />
           );
         }
@@ -77,7 +109,25 @@ const DefaultView = () => {
               locationText={locationText}
               walkTime={walkTime}
               capacity={capacity}
-              onBookClick={() => setOpenIdx(i)}
+              onBookClick={() => {
+                if (!lastQuery) return;
+                const decision = decideBookModalFlow({
+                  room,
+                  dateIso: lastQuery.date,
+                  hourSlots: lastQuery.hour_slots,
+                });
+
+                if (decision.modalType === 'book') {
+                  setOpenIdx(i);
+                } else {
+                  setCurrentModal({
+                    type: decision.modalType,
+                    cardIdx: i,
+                    studioName: decision.studioName,
+                    phoneNumber: decision.phoneNumber,
+                  });
+                }
+              }}
             />
             {openIdx === i && lastQuery && (
               <ModalOverlay open onClose={() => setOpenIdx(null)}>
@@ -99,6 +149,90 @@ const DefaultView = () => {
           </div>
         );
       })}
+
+      {/* 모달들 */}
+      {currentModal && lastQuery && (() => {
+        const selectedCard = sorted[currentModal.cardIdx];
+        const selectedRoom = ROOMS[selectedCard.roomIndex];
+        // const selectedPrice = calculateTotalPrice({
+        //   room: selectedRoom,
+        //   hourSlots: lastQuery.hour_slots,
+        //   peopleCount: lastQuery.peopleCount
+        // });
+
+        const closeModal = () => setCurrentModal(null);
+
+        switch (currentModal.type) {
+          case 'partial':
+            return (
+              <PartialReservationConfirmModal
+                open
+                onClose={closeModal}
+                availableTime={currentModal.availableTime || ''}
+                onConfirm={() => {
+                  // 부분 예약 확인 후 다음 모달 결정
+                  if (!selectedCard.availableSlots) {
+                    closeModal();
+                    return;
+                  }
+
+                  // 연속된 true 구간에서 시간 슬롯 추출 (첫 번째 구간만 사용)
+                  const recommendedSlots = extractFirstConsecutiveTrueSlots(selectedCard.availableSlots);
+
+                  const nextDecision = decidePartialToNextModalFlow({
+                    room: selectedRoom,
+                    dateIso: lastQuery.date,
+                    recommendedHourSlots: recommendedSlots,
+                  });
+
+                  if (nextDecision.modalType === 'book') {
+                    // 직접 URL로 이동
+                    window.open(getBookingUrl(selectedRoom, lastQuery.date), '_blank');
+                    closeModal();
+                  } else {
+                    setCurrentModal({
+                      type: nextDecision.modalType,
+                      cardIdx: currentModal.cardIdx,
+                      studioName: nextDecision.studioName,
+                      phoneNumber: nextDecision.phoneNumber,
+                    });
+                  }
+                }}
+              />
+            );
+
+          case 'oneHourCall':
+            return (
+              <OneHourCallReservationNoticeModal
+                open
+                onClose={closeModal}
+                studioName={currentModal.studioName || ''}
+                phoneNumber={currentModal.phoneNumber || ''}
+                onConfirm={() => {
+                  window.open(getBookingUrl(selectedRoom, lastQuery.date), '_blank');
+                  closeModal();
+                }}
+              />
+            );
+
+          case 'sameDayCall':
+            return (
+              <ModalOverlay open onClose={closeModal}>
+                <div className="w-[25.125rem] transform translate-x-6.5" onClick={(e) => e.stopPropagation()}>
+                  <CallReservationNoticeModal
+                    open
+                    onClose={closeModal}
+                    studioName={currentModal.studioName || ''}
+                    phoneNumber={currentModal.phoneNumber || ''}
+                  />
+                </div>
+              </ModalOverlay>
+            );
+
+          default:
+            return null;
+        }
+      })()}
     </div>
   );
 };

@@ -349,6 +349,37 @@ const ROOMS_RAW: RoomMetadata[] = [
   },
 ];
 
+// 1시간 예약시 전화 필요한 합주실들
+export const ONE_HOUR_CALL_REQUIRED_BUSINESS_IDS = [
+  '1384809', // 준사운드
+];
+
+// 당일 예약시 전화 필요한 합주실들
+export const SAME_DAY_CALL_REQUIRED_BUSINESS_IDS = [
+  '1384809', // 준사운드
+  'dream_sadang', // 드림합주실 사당점
+];
+
+// 합주실별 전화번호
+export const BUSINESS_PHONE_NUMBERS: Record<string, string> = {
+  '522011': '070-4237-1004', // 비쥬합주실 1호점
+  '706924': '070-4237-1004', // 비쥬합주실 2호점
+  '917236': '070-4237-1004', // 비쥬합주실 3호점
+  '1384809': '010-8476-7377', // 준사운드
+  'sadang': '010-6235-1423', // 그루브 사당점
+  'dream_sadang': '0507-1423-5054', // 드림합주실 사당점
+};
+
+// 합주실별 대표명 (전화 안내용)
+export const BUSINESS_DISPLAY_NAMES: Record<string, string> = {
+  '522011': '비쥬합주실 1호점',
+  '706924': '비쥬합주실 2호점',
+  '917236': '비쥬합주실 3호점',
+  '1384809': '준사운드',
+  'sadang': '그루브 사당점',
+  'dream_sadang': '드림합주실 사당점',
+};
+
 export const ROOMS: RoomMetadata[] = ROOMS_RAW.map((room) => ({
   ...room,
   imageUrls: room.imageUrls.map((src) => src.replace('/pick-habju/public', '')),

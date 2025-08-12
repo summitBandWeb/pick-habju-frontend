@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { OneHourCallReservationNoticeModalProps } from './OneHourCallReservationNoticeModal.types';
 
-const OneHourCallReservationNoticeModal = ({ open, onClose, studioName, phoneNumber, confirmHref = 'https://www.google.com' }: OneHourCallReservationNoticeModalProps) => {
+const OneHourCallReservationNoticeModal = ({ open, onClose, studioName, phoneNumber, onConfirm }: OneHourCallReservationNoticeModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,14 +52,13 @@ const OneHourCallReservationNoticeModal = ({ open, onClose, studioName, phoneNum
               다시 고를게요
             </button>
             {/* 문구만 확인해볼래요 (기존 예약할게요 버튼 스타일, 라벨만 변경) */}
-            <a
-              href={confirmHref}
-              target="_blank"
-              rel="noreferrer noopener"
+            <button
+              type="button"
+              onClick={() => onConfirm?.()}
               className="flex w-[8.8125rem] h-[2.6875rem] px-[1.75rem] py-[0.75rem] justify-center items-center gap-[1.5rem] flex-shrink-0 rounded-[0.625rem] bg-yellow-900 text-primary-white hover:bg-yellow-700 font-button transition"
             >
               확인해볼래요
-            </a>
+            </button>
           </div>
         </div>
       </div>
