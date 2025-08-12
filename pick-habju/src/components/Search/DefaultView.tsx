@@ -4,7 +4,7 @@ import { useSearchStore } from '../../store/search/searchStore';
 import { calculateTotalPrice } from '../../utils/calcTotalPrice';
 import { useState } from 'react';
 import BookModalStepper from '../Modal/Book/BookModal';
-import ModalOverlay from '../Modal/ModalOverlay';
+import ModalOverlay from '../Modal/ModalOverlay.tsx';
 
 const DefaultView = () => {
   const cards = useSearchStore((s) => s.cards);
@@ -81,7 +81,7 @@ const DefaultView = () => {
             />
             {openIdx === i && lastQuery && (
               <ModalOverlay open onClose={() => setOpenIdx(null)}>
-                <div className="w-[25.125rem]" onClick={(e) => e.stopPropagation()}>
+                <div className="w-[25.125rem] transform translate-x-6.5" onClick={(e) => e.stopPropagation()}>
                   <BookModalStepper
                   room={room}
                   dateIso={lastQuery.date}
