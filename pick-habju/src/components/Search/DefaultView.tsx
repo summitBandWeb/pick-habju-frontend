@@ -218,7 +218,7 @@ const DefaultView = () => {
           case 'sameDayCall':
             return (
               <ModalOverlay open onClose={closeModal}>
-                <div className="w-[25.125rem] transform translate-x-6.5" onClick={(e) => e.stopPropagation()}>
+                <div className="w-[25.125rem] transform -translate-x-6.5" onClick={(e) => e.stopPropagation()}>
                   <CallReservationNoticeModal
                     open
                     onClose={closeModal}

@@ -38,6 +38,7 @@ const HomePage = () => {
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
     setLastQuery({ date, hour_slots, peopleCount });
+    setPhase(SearchPhase.Loading);
     // 인원수 기준으로 룸 필터링
     const filteredRooms = ROOMS.filter((r) => peopleCount <= r.maxCapacity).map((r) => ({
       name: r.name,
@@ -59,11 +60,19 @@ const HomePage = () => {
     };
 
     try {
-      const resp: AvailabilityResponse = await postRoomAvailability(payload);
+      const startedAt = Date.now();
+      const respPromise = postRoomAvailability(payload);
+      const resp: AvailabilityResponse = await respPromise;
+      const elapsed = Date.now() - startedAt;
+      const remain = Math.max(0, 1000 - elapsed); // 최소 1초 보장
+      if (remain > 0) {
+        await new Promise((r) => setTimeout(r, remain));
+      }
       setDefaultFromResponse({ response: resp, peopleCount });
     } catch (e) {
       console.error(e);
       alert('가용 시간 조회 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
+      setPhase(SearchPhase.BeforeSearch);
     }
   };
 
