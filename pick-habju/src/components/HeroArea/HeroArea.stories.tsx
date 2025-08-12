@@ -21,9 +21,9 @@ const Template: StoryFn<typeof HeroArea> = (args) => <HeroArea {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-  dateTime: '3월 26일 (수) 18-20시',
+  dateTime: { label: '3월 26일 (수) 18~20시', date: '2024-03-26', hour_slots: ['18:00', '19:00'] },
   peopleCount: 7,
   onDateTimeChange: () => alert('날짜 변경 클릭됨'),
   onPersonCountChange: () => alert('인원 변경 클릭됨'),
-  onSearch: () => alert('검색하기 클릭됨'),
+  onSearch: ({ date, hour_slots, peopleCount }) => alert(`검색: ${date}, ${hour_slots.join(',')}, ${peopleCount}명`),
 };
