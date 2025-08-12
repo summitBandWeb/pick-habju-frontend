@@ -13,4 +13,5 @@ export interface CardProps {
   reOpenDaysFromNow?: number;
   btnsize?: BtnSizeVariant;
   initialIndex?: number;
+  onBookClick?: () => void;
 }

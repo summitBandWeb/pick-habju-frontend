@@ -24,6 +24,7 @@ const Card = ({
   reOpenDaysFromNow = 90,
   btnsize,
   initialIndex = 0,
+  onBookClick,
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
   const total = images.length;
@@ -137,7 +138,7 @@ const Card = ({
     <Button
       label={booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기'}
       variant={ButtonVariant.Main}
-      onClick={() => alert('예약되었습니다!')}
+      onClick={onBookClick}
       disabled={booked}
       size={btnsize ?? BtnSizeVariant.XXSM}
     />

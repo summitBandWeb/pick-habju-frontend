@@ -36,9 +36,11 @@ const HomePage = () => {
 
   const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
   const setPhase = useSearchStore((s) => s.setPhase);
+  const setLastQuery = useSearchStore((s) => s.setLastQuery);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
+    setLastQuery({ date, hour_slots, peopleCount });
     // 인원수 기준으로 룸 필터링
     const filteredRooms = ROOMS.filter((r) => peopleCount <= r.maxCapacity).map((r) => ({
       name: r.name,

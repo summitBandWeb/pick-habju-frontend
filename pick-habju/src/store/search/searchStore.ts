@@ -26,6 +26,7 @@ export const useSearchStore = create<SearchState>((set) => ({
   phase: SearchPhase.BeforeSearch,
   cards: [],
   setPhase: (phase: SearchPhase) => set({ phase }),
+  setLastQuery: (q) => set({ lastQuery: q }),
   setDefaultFromResponse: ({ response }: { response: AvailabilityResponse; peopleCount: number }) => {
     const availableIds = new Set<string>(Array.isArray(response.available_biz_item_ids) ? response.available_biz_item_ids : []);
     const results = Array.isArray(response.results) ? response.results : [];
