@@ -3,7 +3,7 @@ import NoResultSvg from '../../assets/svg/NoResult.svg';
 const NoResultView = () => {
   return (
     <div
-      className="flex w-[25.125rem] flex-col justify-center items-start"
+      className="flex w-[25.125rem] flex-col justify-center items-start bg-[#FFFBF0]"
       aria-label="No Result Section"
     >
       <div

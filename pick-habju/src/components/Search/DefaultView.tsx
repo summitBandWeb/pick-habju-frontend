@@ -23,7 +23,7 @@ const DefaultView = () => {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
-    <div className="w-full flex flex-col items-center gap-4 py-4">
+    <div className="w-full flex flex-col items-center gap-4 py-4 bg-[#FFFBF0]">
       {sorted.map((c, i) => {
         const room = ROOMS[c.roomIndex];
         const images = room.imageUrls;
