@@ -32,30 +32,36 @@ export const useSearchStore = create<SearchState>((set) => ({
 
     const nextCards: SearchCardItem[] = [];
 
-    // Default: available_biz_item_ids 기준
+    // 1) 오픈 대기: available === 'unknown' → 합주실 단위 집합 구하기
+    const unknownBusinessIds = new Set<string>();
+    results.forEach((r) => {
+      if (r.available === 'unknown') {
+        unknownBusinessIds.add(r.business_id);
+      }
+    });
+
+    // 2) Default: available_biz_item_ids 기준, 단 unknown 합주실은 제외
     ROOMS.forEach((room, idx) => {
-      if (availableIds.has(room.bizItemId)) {
+      if (availableIds.has(room.bizItemId) && !unknownBusinessIds.has(room.businessId)) {
         nextCards.push({ kind: 'default', roomIndex: idx });
       }
     });
 
-    // Open wait: available === 'unknown'
-    results.forEach((r) => {
-      if (r.available === 'unknown') {
-        const idx = ROOMS.findIndex((rm) => rm.bizItemId === r.biz_item_id);
-        if (idx !== -1) {
-          const days = reopenDaysByBusinessId[r.business_id] ?? 90;
-          nextCards.push({ kind: 'open', roomIndex: idx, reOpenDaysFromNow: days });
-        }
+    // 3) Open wait: 합주실(business_id) 단위로 1개만 표시
+    unknownBusinessIds.forEach((bizId) => {
+      const idx = ROOMS.findIndex((rm) => rm.businessId === bizId);
+      if (idx !== -1) {
+        const days = reopenDaysByBusinessId[bizId] ?? 90;
+        nextCards.push({ kind: 'open', roomIndex: idx, reOpenDaysFromNow: days });
       }
     });
 
-    // Recommend time: available === false and has consecutive true slots
+    // 4) Recommend time: available === false and has consecutive true slots, 단 unknown 합주실은 제외
     results.forEach((r) => {
       if (r.available === false && r.available_slots && typeof r.available_slots === 'object') {
         if (hasConsecutiveTrues(r.available_slots)) {
           const idx = ROOMS.findIndex((rm) => rm.bizItemId === r.biz_item_id);
-          if (idx !== -1) {
+          if (idx !== -1 && !unknownBusinessIds.has(ROOMS[idx].businessId)) {
             nextCards.push({ kind: 'recommend', roomIndex: idx });
           }
         }

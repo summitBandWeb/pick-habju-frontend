@@ -2,17 +2,31 @@ import HeroArea from '../components/HeroArea/HeroArea';
 import { ROOMS } from '../constants/data';
 import { postRoomAvailability, type AvailabilityRequest, type AvailabilityResponse } from '../api/availabilityApi';
 import { useSearchStore } from '../store/search/searchStore';
+import { SearchPhase } from '../store/search/searchStore.types';
+import SearchSection from '../components/Search/SearchSection';
 
 
 const HomePage = () => {
+  // 현재 시간이 정시가 아니면, 다음 정시로 올림 (예: 14:03 -> 15:00)
   const now = new Date();
-  const month = now.getMonth() + 1;
-  const day = String(now.getDate()).padStart(2, '0');
-  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][now.getDay()];
-  const startHour = now.getHours();
+  const baseDate = new Date(now);
+  let startHour = now.getHours();
+  if (now.getMinutes() > 0) {
+    startHour += 1;
+    if (startHour === 24) {
+      // 자정 넘어가는 경우: 날짜 +1, 00시 시작
+      baseDate.setDate(baseDate.getDate() + 1);
+      startHour = 0;
+    }
+  }
+
+  const month = baseDate.getMonth() + 1;
+  const day = String(baseDate.getDate()).padStart(2, '0');
+  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][baseDate.getDay()];
+
   const rawEndHour = (startHour + 2) % 24;
   const displayEndHour = rawEndHour === 0 ? 24 : rawEndHour <= startHour ? rawEndHour + 24 : rawEndHour;
-  const defaultDateIso = `${now.getFullYear()}-${String(month).padStart(2, '0')}-${day}`;
+  const defaultDateIso = `${baseDate.getFullYear()}-${String(month).padStart(2, '0')}-${day}`;
   const defaultSlots = [
     `${String(startHour).padStart(2, '0')}:00`,
     `${String((startHour + 1) % 24).padStart(2, '0')}:00`,
@@ -21,6 +35,7 @@ const HomePage = () => {
   const defaultPeopleCount = 12;
 
   const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
+  const setPhase = useSearchStore((s) => s.setPhase);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
@@ -34,7 +49,7 @@ const HomePage = () => {
 
     // 혹시몰라 두긴했는데.. 빈 배열이 나오면 안되니까 체크
     if (filteredRooms.length === 0) {
-      alert('조건에 맞는 합주실이 없어요. 인원 수를 조정해 주세요.');
+      setPhase(SearchPhase.NoResult);
       return;
     }
 
@@ -65,7 +80,7 @@ const HomePage = () => {
         />
         {/* 결과 뷰는 SearchSection이 phase에 따라 렌더 */}
         <div className="w-full">
-          <></>
+          <SearchSection />
         </div>
       </div>
     </div>

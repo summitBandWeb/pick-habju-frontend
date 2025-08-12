@@ -85,7 +85,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           selectedDate.getDate() === now.getDate();
         if (isSameDay) {
           const currentHour24 = now.getHours();
-          if (start24 <= currentHour24) return ReservationToastKey.PAST_TIME;
+          if (start24 < currentHour24) return ReservationToastKey.PAST_TIME;
         }
       }
 

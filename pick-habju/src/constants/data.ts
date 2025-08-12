@@ -1,6 +1,6 @@
 import type {RoomMetadata} from "../types/RoomMetadata"
 
-export const ROOMS: RoomMetadata[] = [
+const ROOMS_RAW: RoomMetadata[] = [
   {
     name: "블랙룸",
     branch: "비쥬합주실 1호점",
@@ -348,3 +348,8 @@ export const ROOMS: RoomMetadata[] = [
     requiresCallOnSameDay: true
   },
 ];
+
+export const ROOMS: RoomMetadata[] = ROOMS_RAW.map((room) => ({
+  ...room,
+  imageUrls: room.imageUrls.map((src) => src.replace('/pick-habju/public', '')),
+}));
