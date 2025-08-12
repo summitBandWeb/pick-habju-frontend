@@ -7,17 +7,14 @@ import SearchSection from '../components/Search/SearchSection';
 
 
 const HomePage = () => {
-  // 현재 시간이 정시가 아니면, 다음 정시로 올림 (예: 14:03 -> 15:00)
+  // 현재 시간에서 다음 정시로 올림 (예: 14:00 -> 15:00, 14:03 -> 15:00)
   const now = new Date();
   const baseDate = new Date(now);
-  let startHour = now.getHours();
-  if (now.getMinutes() > 0) {
-    startHour += 1;
-    if (startHour === 24) {
-      // 자정 넘어가는 경우: 날짜 +1, 00시 시작
-      baseDate.setDate(baseDate.getDate() + 1);
-      startHour = 0;
-    }
+  let startHour = now.getHours() + 1;
+  if (startHour === 24) {
+    // 자정 넘어가는 경우: 날짜 +1, 00시 시작
+    baseDate.setDate(baseDate.getDate() + 1);
+    startHour = 0;
   }
 
   const month = baseDate.getMonth() + 1;
