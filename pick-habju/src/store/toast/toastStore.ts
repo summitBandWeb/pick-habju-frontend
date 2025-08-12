@@ -6,14 +6,15 @@ export const useToastStore = create<ToastState>((set) => {
 
   return {
     message: null,
+    severity: 'warning',
     isVisible: false,
-    showToast: (message) => {
+    showToast: (message, severity = 'warning') => {
       if (currentTimeoutId) {
         clearTimeout(currentTimeoutId);
         currentTimeoutId = null;
       }
 
-      set({ message, isVisible: true });
+      set({ message, severity, isVisible: true });
 
       currentTimeoutId = setTimeout(() => {
         set({ isVisible: false });
