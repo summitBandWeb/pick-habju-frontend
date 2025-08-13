@@ -17,6 +17,8 @@ import { convertTo24Hour } from '../../utils/formatDate';
 import { useToastStore } from '../../store/toast/toastStore';
 import { formatReservationLabel } from '../../utils/formatReservationLabel';
 import { generateHourSlots } from '../../utils/formatTime';
+import { useSearchStore } from '../../store/search/searchStore';
+import { SearchPhase } from '../../store/search/searchStore.types';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -24,7 +26,10 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
-  
+  const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
+  const phase = useSearchStore((s) => s.phase);
+  const isLoading = phase === SearchPhase.Loading;
+
   const [lastWarningKey, setLastWarningKey] = useState<string | null>(null);
   // TimePicker 임시 선택값 유지
   const [draftTime, setDraftTime] = useState<{
@@ -197,6 +202,9 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
             <Button
               label="검색하기"
               onClick={() => {
+                if (isLoading || isSearchClickLocked) return;
+                setIsSearchClickLocked(true);
+                setTimeout(() => setIsSearchClickLocked(false), 600);
                 // 스토어에 값이 없으면 props의 기본값 사용
                 let dateIso: string;
                 let slots: string[];
@@ -221,6 +229,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               }}
               variant={ButtonVariant.Main}
               size={BtnSizeVariant.MD}
+              disabled={isLoading}
             />
           </div>
         </div>
