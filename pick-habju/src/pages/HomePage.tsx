@@ -4,6 +4,7 @@ import { postRoomAvailability, type AvailabilityRequest, type AvailabilityRespon
 import { useSearchStore } from '../store/search/searchStore';
 import { SearchPhase } from '../store/search/searchStore.types';
 import SearchSection from '../components/Search/SearchSection';
+import { trackApiResponseTime, trackSearchResults, trackError } from '../utils/analytics';
 
 
 const HomePage = () => {
@@ -37,8 +38,11 @@ const HomePage = () => {
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
+    const searchStartTime = Date.now(); // 전체 검색 시작 시간
+
     setLastQuery({ date, hour_slots, peopleCount });
     setPhase(SearchPhase.Loading);
+
     // 인원수 기준으로 룸 필터링
     const filteredRooms = ROOMS.filter((r) => peopleCount <= r.maxCapacity).map((r) => ({
       name: r.name,
@@ -50,6 +54,9 @@ const HomePage = () => {
     // 혹시몰라 두긴했는데.. 빈 배열이 나오면 안되니까 체크
     if (filteredRooms.length === 0) {
       setPhase(SearchPhase.NoResult);
+      // 검색 결과 없음을 GA에 추적
+      const searchDuration = Date.now() - searchStartTime;
+      trackSearchResults(0, 0, searchDuration);
       return;
     }
 
@@ -60,16 +67,36 @@ const HomePage = () => {
     };
 
     try {
-      const startedAt = Date.now();
+      const apiStartTime = Date.now(); // API 호출 시작 시간
       const respPromise = postRoomAvailability(payload);
       const resp: AvailabilityResponse = await respPromise;
-      const elapsed = Date.now() - startedAt;
-      const remain = Math.max(0, 1000 - elapsed); // 최소 1초 보장
+      const apiElapsed = Date.now() - apiStartTime; // 실제 API 응답 시간
+
+      // API 응답 시간을 GA에 추적
+      const totalRooms = resp.results?.length || 0;
+      trackApiResponseTime(apiElapsed, true, totalRooms);
+
+      const remain = Math.max(0, 1000 - apiElapsed); // 최소 1초 보장
       if (remain > 0) {
         await new Promise((r) => setTimeout(r, remain));
       }
+
+      // 검색 결과를 GA에 추적
+      const searchDuration = Date.now() - searchStartTime;
+      const availableRooms = resp.results?.filter((room) =>
+        room.available === true || room.available === 'unknown'
+      ).length || 0;
+
+      trackSearchResults(totalRooms, availableRooms, searchDuration);
+
       setDefaultFromResponse({ response: resp, peopleCount });
     } catch (e) {
+      const apiElapsed = Date.now() - searchStartTime;
+
+      // 에러 발생을 GA에 추적
+      trackApiResponseTime(apiElapsed, false);
+      trackError('api_call_failed', e instanceof Error ? e.message : 'Unknown error');
+
       console.error(e);
       alert('가용 시간 조회 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       setPhase(SearchPhase.BeforeSearch);

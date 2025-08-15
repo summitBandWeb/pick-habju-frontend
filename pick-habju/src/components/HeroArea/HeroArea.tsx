@@ -19,6 +19,7 @@ import { formatReservationLabel } from '../../utils/formatReservationLabel';
 import { generateHourSlots } from '../../utils/formatTime';
 import { useSearchStore } from '../../store/search/searchStore';
 import { SearchPhase } from '../../store/search/searchStore.types';
+import { trackSearchButtonClick } from '../../utils/analytics';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -205,6 +206,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 if (isLoading || isSearchClickLocked) return;
                 setIsSearchClickLocked(true);
                 setTimeout(() => setIsSearchClickLocked(false), 600);
+
                 // 스토어에 값이 없으면 props의 기본값 사용
                 let dateIso: string;
                 let slots: string[];
@@ -222,6 +224,13 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 } else {
                   slots = dateTime.hour_slots;
                 }
+
+                // 검색 버튼 클릭 이벤트를 GA에 추적
+                trackSearchButtonClick({
+                  date: dateIso,
+                  hour_slots: slots,
+                  peopleCount: peopleCountText
+                });
 
                 // UI 라벨 업데이트 보정
                 setDateTimeText(formatReservationLabel(dateIso, slots));
