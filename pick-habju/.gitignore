@@ -25,5 +25,8 @@ dist-ssr
 
 .vercel
 .env
+.env*.local
+.env.*
+!.env.example
 
 *storybook.log
