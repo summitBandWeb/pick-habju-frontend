@@ -1,5 +1,6 @@
 export const apiBaseUrl = (() => {
   const envUrl = import.meta.env?.VITE_API_BASE_URL as string | undefined;
+  console.log(import.meta.env.MODE, import.meta.env.VITE_API_BASE_URL);
   return envUrl ?? 'http://localhost:8000';
 })();
 
