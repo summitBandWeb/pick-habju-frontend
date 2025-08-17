@@ -32,7 +32,7 @@ const OneHourCallReservationNoticeModal = ({ open, onClose, studioName, phoneNum
         <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-[2.25rem] px-[1.75rem]">
           {/* 1. 헤드 문구 (3줄) */}
           <div className="flex flex-col items-center gap-2 self-stretch">
-            <div className="text-center font-modal-default text-primary-black">해당 합주실의 1시간 예약은 <br></br>이전 시간과 이후 시간 모두<br></br>    예약이 있을 때만 <span className="text-blue-500 font-modal-default">전화</span>로 가능합니다.</div>
+            <div className="text-center font-modal-default text-primary-black">해당 합주실은 앞뒤로 예약이 있을 때<br></br>중간에 남은 1시간만 <span className="text-blue-500 font-modal-default">전화</span>로 가능합니다.</div>
           </div>
 
           {/* 2. 합주실 이름 + 전화번호 (동적) */}

@@ -7,15 +7,15 @@ import ChevronRightIcon from '../../assets/svg/chevronRight.svg';
 
 const TOUCH_AREA = 'w-10.5 h-10.5 flex items-center justify-center';
 
-const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronProps) => {
+const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext, containerClassName }: ChevronProps) => {
   const showPrev = variant === ChevronVariant.Middle || variant === ChevronVariant.Last;
   const showNext = variant === ChevronVariant.Middle || variant === ChevronVariant.First;
 
   return (
-    <div className={clsx('min-w-80 h-11 flex items-center justify-between')}>
+    <div className={clsx('h-11 flex items-center justify-between', containerClassName ?? 'min-w-80')}>
       {/* 이전 화살표 */}
       {showPrev ? (
-        <button onClick={onPrev} className={TOUCH_AREA} aria-label="Previous">
+        <button onClick={(e) => { e.stopPropagation(); onPrev?.(); }} className={TOUCH_AREA} aria-label="Previous">
           <img src={ChevronLeftIcon} alt="previous" />
         </button>
       ) : (
@@ -24,7 +24,7 @@ const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronPro
 
       {/* 다음 화살표 */}
       {showNext ? (
-        <button onClick={onNext} className={TOUCH_AREA} aria-label="Next">
+        <button onClick={(e) => { e.stopPropagation(); onNext?.(); }} className={TOUCH_AREA} aria-label="Next">
           <img src={ChevronRightIcon} alt="previous" />
         </button>
       ) : (

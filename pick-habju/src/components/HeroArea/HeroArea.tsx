@@ -45,13 +45,11 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
   const openDatePicker = useCallback(() => {
     setIsDatePickerOpen(true);
-    onDateTimeChange?.();
-  }, [onDateTimeChange]);
+  }, []);
 
   const openGuestCounter = useCallback(() => {
     setIsGuestModalOpen(true);
-    onPersonCountChange?.();
-  }, [onPersonCountChange]);
+  }, []);
 
   const handleDateConfirm = useCallback(
     (dates: Date[]) => {
@@ -168,8 +166,32 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         const slots = generateHourSlots(start24, end24);
         setDateTimeText(formatReservationLabel(dateIso, slots));
       }
+
+      // 날짜/시간 변경 여부를 직전 검색 조건과 비교하여 실제 변경 시에만 콜백 호출
+      try {
+        const last = useSearchStore.getState().lastQuery;
+        if (selectedDate) {
+          const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
+            selectedDate.getDate()
+          ).padStart(2, '0')}`;
+          const start24 = convertTo24Hour(sh, sp);
+          const end24 = convertTo24Hour(eh, ep);
+          const nextSlots = generateHourSlots(start24, end24);
+
+          const isSameDate = last?.date === dateIso;
+          const isSameSlots = Array.isArray(last?.hour_slots)
+            && last!.hour_slots.length === nextSlots.length
+            && last!.hour_slots.every((v, i) => v === nextSlots[i]);
+
+          if (!(isSameDate && isSameSlots)) {
+            onDateTimeChange?.();
+          }
+        }
+      } catch {
+        // 비교 실패 시 콜백 생략
+      }
     },
-    [actions, validateTime, selectedDate, lastWarningKey]
+    [actions, validateTime, selectedDate, lastWarningKey, onDateTimeChange]
   );
 
   const handleTimeCancel = useCallback(() => {
@@ -247,7 +269,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
           {/* wrapper 기준 폭으로 중앙 정렬 */}
-          <div className="w-[25.125rem] flex flex-col items-center">
+          <div className="relative w-[25.125rem] flex flex-col items-center">
             {isDatePickerOpen && (
               <DatePicker
                 onConfirm={handleDateConfirm}
@@ -274,12 +296,20 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 onConfirm={(val) => {
                   setPeopleCountText(val);
                   setIsGuestModalOpen(false);
+                  try {
+                    const last = useSearchStore.getState().lastQuery;
+                    if (typeof last?.peopleCount === 'number' && last.peopleCount !== val) {
+                      onPersonCountChange?.();
+                    }
+                  } catch {
+                    // 비교 실패 시 콜백 생략
+                  }
                 }}
                 initialCount={peopleCountText}
               />
             )}
-            {/* 모달 아래 토스트 */}
-            <div className="mt-3">
+            {/* 모달 아래 토스트 (모달 위치 고정, 토스트는 절대 배치) */}
+            <div className="absolute top-full mt-3 left-0 w-full flex justify-center">
               <ToastMessage />
             </div>
           </div>

@@ -30,7 +30,7 @@ const BookStepInfoCheck = ({ date, time, location, peopleCount, amount, onConfir
       </div>
 
       <div className="flex justify-center">
-        <Button label="예약하기" variant={ButtonVariant.Main} size={BtnSizeVariant.LG} onClick={onConfirm} />
+        <Button label="예약하러 가기" variant={ButtonVariant.Main} size={BtnSizeVariant.LG} onClick={onConfirm} />
       </div>
     </div>
   );

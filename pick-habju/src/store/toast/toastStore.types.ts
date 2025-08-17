@@ -5,5 +5,6 @@ export interface ToastState {
   severity: ToastSeverity;
   isVisible: boolean;
   showToast: (message: string, severity?: ToastSeverity) => void;
+  showPersistentToast: (message: string, severity?: ToastSeverity) => void;
   hideToast: () => void;
 }

@@ -21,11 +21,17 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
   const todayAtMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
   // 항상 기본 선택은 '당일' (초기값 전달 시 해당 날짜로 설정)
-  const [selected, setSelected] = useState<Date[]>([
-    initialSelectedDate ? new Date(initialSelectedDate.getFullYear(), initialSelectedDate.getMonth(), initialSelectedDate.getDate()) : todayAtMidnight,
-  ]);
+  const initialSelected = initialSelectedDate
+    ? new Date(
+        initialSelectedDate.getFullYear(),
+        initialSelectedDate.getMonth(),
+        initialSelectedDate.getDate()
+      )
+    : todayAtMidnight;
+  const [selected, setSelected] = useState<Date[]>([initialSelected]);
   const [activeStartDate, setActiveStartDate] = useState<Date>(() => {
-    return new Date(todayAtMidnight.getFullYear(), todayAtMidnight.getMonth(), 1);
+    // 초기 표시 월을 선택된 날짜의 월로 맞춘다
+    return new Date(initialSelected.getFullYear(), initialSelected.getMonth(), 1);
   });
 
   // 외부에서 props로 selectedDates를 전달했을 때, 업데이트 하기 위한 로직입니다.

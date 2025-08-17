@@ -307,6 +307,17 @@
     }
   }
 
+  /* Carousel slide animations */
+  @keyframes slide-left {
+    0% { transform: translateX(8%); opacity: 0.85; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slide-right {
+    0% { transform: translateX(-8%); opacity: 0.85; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
   /* Time Picker Scroll */
   .scroll-picker {
     scroll-snap-type: y mandatory;

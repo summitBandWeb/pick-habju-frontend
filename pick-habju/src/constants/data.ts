@@ -384,3 +384,25 @@ export const ROOMS: RoomMetadata[] = ROOMS_RAW.map((room) => ({
   ...room,
   imageUrls: room.imageUrls.map((src) => src.replace('/pick-habju/public', '')),
 }));
+
+// 합주실별(사업장 단위) unknown(오픈대기) 날짜 상수
+// - 날짜는 'YYYY-MM-DD' 형식
+// - ranges는 양끝 포함 범위
+export type UnknownDateRange = { start: string; end: string };
+export type UnknownDateRule = { dates?: string[]; ranges?: UnknownDateRange[] };
+
+// business_id 기준 설정 (예: 'sadang', 'dream_sadang', '1384809', ...)
+// 유지보수를 위해 기본값은 비워두고, 필요 시 각 키에 날짜를 추가하세요.
+export const UNKNOWN_DATES_BY_BUSINESS_ID: Record<string, UnknownDateRule> = {};
+
+// 특정 방(biz_item_id) 단위 설정이 필요한 경우 사용
+// 주의: 방 단위 설정이 적용되면 해당 방이 속한 사업장 전체가 오픈대기로 처리됩니다.
+export const UNKNOWN_DATES_BY_BIZ_ITEM_ID: Record<string, UnknownDateRule> = {};
+
+// 현재 날짜 기준 X일 이후부터 오픈대기 처리(사업장 단위)
+// 기준: 2025-08-17 기준으로 그루브 사당점은 11/9부터, 드림합주실 사당점은 12/16부터 오픈대기
+// → 동적으로 매일 +1씩 밀리도록 임계일(일수)을 상수화
+export const REOPEN_AFTER_DAYS_BY_BUSINESS_ID: Record<string, number> = {
+  sadang: 84,        // 8/17 → 11/09 (diffDays=84)부터 오픈대기
+  dream_sadang: 121, // 8/17 → 12/16 (diffDays=121)부터 오픈대기
+};

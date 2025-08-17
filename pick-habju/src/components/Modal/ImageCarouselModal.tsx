@@ -13,6 +13,7 @@ type ImageCarouselModalProps = {
 const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
   const [animKey, setAnimKey] = useState(0);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,10 +22,12 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
 
   const total = images.length;
   const prev = () => {
+    setDirection('left');
     setCurrent((p) => Math.max(0, p - 1));
     setAnimKey((k) => k + 1);
   };
   const next = () => {
+    setDirection('right');
     setCurrent((p) => Math.min(total - 1, p + 1));
     setAnimKey((k) => k + 1);
   };
@@ -79,18 +82,26 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
 
         {/* Group */}
         <div className="h-[16.25rem] self-stretch flex flex-col items-center">
-          {/* Rectangle (이미지 영역) */}
-          <div
-            key={animKey}
-            className="relative w-[23.125rem] h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden transition-opacity duration-200 ease-out"
-            style={{ backgroundImage: `url(${currentImage})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 1 }}
-            aria-label="확대 이미지"
-          >
-            {/* Frame (컨트롤 오버레이) */}
+          {/* Rectangle (이미지 프레임 고정) */}
+          <div className="relative w-[23.125rem] h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
+            {/* 이미지 레이어만 슬라이드 */}
+            <div
+              key={animKey}
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${currentImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                animation: `${direction === 'right' ? 'slide-right' : 'slide-left'} 0.35s ease-out`,
+              }}
+              aria-label="확대 이미지"
+            />
+
+            {/* 컨트롤 오버레이 (고정) */}
             <div className="absolute inset-0 flex w-[23.125rem] h-[16.25rem] flex-col justify-between items-start">
               {/* Chevron Row */}
               <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
-                <Chevron variant={variant} onPrev={prev} onNext={next} />
+                <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
               </div>
 
               {/* Pagination */}
