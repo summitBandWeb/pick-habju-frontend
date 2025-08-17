@@ -48,7 +48,7 @@ const BookStepCalculationModal = ({
 
       <div className="flex justify-center">
         <Button
-          label={`${finalTotal.toLocaleString()}원 결제하기`}
+          label={`예약정보 확인하기`}
           variant={ButtonVariant.Main}
           size={BtnSizeVariant.LG}
           disabled={finalTotal <= 0}

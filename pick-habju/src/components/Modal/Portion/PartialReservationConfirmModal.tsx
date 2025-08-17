@@ -41,7 +41,7 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
             </div>
             {/* 3. 질문 문구 */}
             <div className="w-[18.5rem] h-[1.5rem] text-center font-modal-default text-primary-black">
-              이대로 예약할까요?
+              이대로 가능한지 확인해 보시겠어요?
             </div>
           </div>
 
@@ -61,7 +61,7 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
               onClick={() => onConfirm?.()}
               className="flex w-[8.8125rem] h-[2.6875rem] px-[1.75rem] py-[0.75rem] justify-center items-center gap-[1.5rem] flex-shrink-0 rounded-[0.625rem] bg-yellow-900 text-primary-white hover:bg-yellow-700 font-button transition"
             >
-              예약할게요
+              확인해볼래요
             </button>
           </div>
         </div>
