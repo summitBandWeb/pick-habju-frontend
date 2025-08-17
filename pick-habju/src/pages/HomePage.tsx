@@ -150,8 +150,14 @@ const HomePage = () => {
           key={heroResetCounter}
           dateTime={{ label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots }}
           peopleCount={defaultPeopleCount}
-          onDateTimeChange={() => {}}
-          onPersonCountChange={() => {}}
+          onDateTimeChange={() => {
+            // 날짜/시간 변경 확정 시 결과를 숨김
+            setPhase(SearchPhase.BeforeSearch);
+          }}
+          onPersonCountChange={() => {
+            // 인원 변경 확정 시 결과를 숨김
+            setPhase(SearchPhase.BeforeSearch);
+          }}
           onSearch={handleSearch}
         />
         <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />

@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import { SearchPhase, type SearchState, type AvailabilityResponse, type SearchCardItem, type SlotAvailability } from './searchStore.types';
-import { ROOMS } from '../../constants/data';
+import { ROOMS, UNKNOWN_DATES_BY_BUSINESS_ID, REOPEN_AFTER_DAYS_BY_BUSINESS_ID, type UnknownDateRule } from '../../constants/data';
 
-const reopenDaysByBusinessId: Record<string, number> = {
-  sadang: 90,
-  dream_sadang: 100,
-};
+// 오픈대기 안내에 사용할 임계일(현재 날짜 기준 X일 이후)
+const reopenDaysByBusinessId = REOPEN_AFTER_DAYS_BY_BUSINESS_ID;
 
 const hasConsecutiveTrues = (slots: Record<string, SlotAvailability>): boolean => {
   const entries = Object.entries(slots).sort(([a], [b]) => (a < b ? -1 : 1));
@@ -33,13 +31,51 @@ export const useSearchStore = create<SearchState>((set) => ({
 
     const nextCards: SearchCardItem[] = [];
 
-    // 1) 오픈 대기: available === 'unknown' → 합주실 단위 집합 구하기
+    // 헬퍼: 상수로 정의된 날짜 규칙과 특정 날짜가 매칭되는지 검사
+    const isDateInRule = (date: string, rule?: UnknownDateRule): boolean => {
+      if (!rule) return false;
+      if (Array.isArray(rule.dates) && rule.dates.includes(date)) return true;
+      if (Array.isArray(rule.ranges)) {
+        for (const range of rule.ranges) {
+          if (range.start <= date && date <= range.end) return true;
+        }
+      }
+      return false;
+    };
+
+    // 1) 오픈 대기 집합: API 응답 + 상수 규칙 + 임계일(동적) 병합
     const unknownBusinessIds = new Set<string>();
+
+    // 1-1) API 응답 기반
     results.forEach((r) => {
       if (r.available === 'unknown') {
         unknownBusinessIds.add(r.business_id);
       }
     });
+
+    // 1-2) 상수 기반: 사업장 단위
+    Object.entries(UNKNOWN_DATES_BY_BUSINESS_ID).forEach(([bizId, rule]) => {
+      if (isDateInRule(response.date, rule)) {
+        unknownBusinessIds.add(bizId);
+      }
+    });
+
+    // 1-3) 임계일(현재 날짜 기준 X일 이후) 규칙 적용
+    const toDateOnly = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const parseYmd = (ymd: string) => {
+      const [y, m, da] = ymd.split('-').map((n) => parseInt(n, 10));
+      return new Date(y, m - 1, da);
+    };
+    const today = toDateOnly(new Date());
+    const target = toDateOnly(parseYmd(response.date));
+    const diffDays = Math.floor((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    Object.entries(reopenDaysByBusinessId).forEach(([bizId, threshold]) => {
+      if (diffDays >= threshold) {
+        unknownBusinessIds.add(bizId);
+      }
+    });
+
+    // 방 단위 설정은 사용하지 않음 (요구사항에 따라 사업장 단위만 적용)
 
     // 2) Default: available_biz_item_ids 기준, 단 unknown 합주실은 제외
     ROOMS.forEach((room, idx) => {
