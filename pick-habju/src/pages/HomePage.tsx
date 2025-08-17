@@ -6,6 +6,7 @@ import { SearchPhase } from '../store/search/searchStore.types';
 import SearchSection from '../components/Search/SearchSection';
 import { trackApiResponseTime, trackSearchResults, trackError } from '../utils/analytics';
 import { showToastByKey } from '../utils/showToastByKey';
+import { useToastStore } from '../store/toast/toastStore';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
 import { useReservationActions } from '../hook/useReservationStore';
 import { useState } from 'react';
@@ -13,6 +14,7 @@ import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 
 
 const HomePage = () => {
+  const { showPersistentToast, hideToast } = useToastStore();
   const reservationActions = useReservationActions();
   const [heroResetCounter, setHeroResetCounter] = useState(0);
   // 현재 시간에서 다음 정시로 올림 (예: 14:00 -> 15:00, 14:03 -> 15:00)
@@ -76,7 +78,15 @@ const HomePage = () => {
     try {
       const apiStartTime = Date.now(); // API 호출 시작 시간
       const respPromise = postRoomAvailabilitySmart(payload);
+
+      // 4초 넘으면 경고 토스트 노출 (스켈레톤은 SearchSection에서 렌더됨)
+      const toastTimer = setTimeout(() => {
+        showPersistentToast('서버가 혼잡합니다. 잠시만 기다려 주세요.', 'warning');
+      }, 4000);
+
       const resp: AvailabilityResponse = await respPromise;
+      clearTimeout(toastTimer);
+      hideToast();
       const apiElapsed = Date.now() - apiStartTime; // 실제 API 응답 시간
 
       // API 응답 시간을 GA에 추적
@@ -111,7 +121,9 @@ const HomePage = () => {
       }
 
       setDefaultFromResponse({ response: resp, peopleCount });
+      hideToast();
     } catch (e) {
+      hideToast();
       const apiElapsed = Date.now() - searchStartTime;
 
       // 에러 발생을 GA에 추적
