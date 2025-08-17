@@ -19,7 +19,7 @@ export const useToastStore = create<ToastState>((set) => {
       currentTimeoutId = setTimeout(() => {
         set({ isVisible: false });
         currentTimeoutId = null;
-      }, 900);
+      }, 1500);
     },
     hideToast: () => {
       // 수동으로 닫을 때도 타이머 클리어
