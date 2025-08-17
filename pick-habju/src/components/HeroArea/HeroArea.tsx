@@ -247,7 +247,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
           {/* wrapper 기준 폭으로 중앙 정렬 */}
-          <div className="w-[25.125rem] flex flex-col items-center">
+          <div className="relative w-[25.125rem] flex flex-col items-center">
             {isDatePickerOpen && (
               <DatePicker
                 onConfirm={handleDateConfirm}
@@ -278,8 +278,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 initialCount={peopleCountText}
               />
             )}
-            {/* 모달 아래 토스트 */}
-            <div className="mt-3">
+            {/* 모달 아래 토스트 (모달 위치 고정, 토스트는 절대 배치) */}
+            <div className="absolute top-full mt-3 left-0 w-full flex justify-center">
               <ToastMessage />
             </div>
           </div>
