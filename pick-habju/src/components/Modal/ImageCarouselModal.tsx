@@ -101,7 +101,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
             <div className="absolute inset-0 flex w-[23.125rem] h-[16.25rem] flex-col justify-between items-start">
               {/* Chevron Row */}
               <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
-                <Chevron variant={variant} onPrev={prev} onNext={next} />
+                <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
               </div>
 
               {/* Pagination */}
