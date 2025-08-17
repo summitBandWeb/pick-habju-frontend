@@ -1,6 +1,6 @@
 import HeroArea from '../components/HeroArea/HeroArea';
 import { ROOMS } from '../constants/data';
-import { postRoomAvailability, type AvailabilityRequest, type AvailabilityResponse } from '../api/availabilityApi';
+import { postRoomAvailabilitySmart, type AvailabilityRequest, type AvailabilityResponse } from '../api/availabilityApi';
 import { useSearchStore } from '../store/search/searchStore';
 import { SearchPhase } from '../store/search/searchStore.types';
 import SearchSection from '../components/Search/SearchSection';
@@ -75,7 +75,7 @@ const HomePage = () => {
 
     try {
       const apiStartTime = Date.now(); // API 호출 시작 시간
-      const respPromise = postRoomAvailability(payload);
+      const respPromise = postRoomAvailabilitySmart(payload);
       const resp: AvailabilityResponse = await respPromise;
       const apiElapsed = Date.now() - apiStartTime; // 실제 API 응답 시간
 
