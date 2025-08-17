@@ -15,7 +15,7 @@ const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronPro
     <div className={clsx('min-w-80 h-11 flex items-center justify-between')}>
       {/* 이전 화살표 */}
       {showPrev ? (
-        <button onClick={onPrev} className={TOUCH_AREA} aria-label="Previous">
+        <button onClick={(e) => { e.stopPropagation(); onPrev?.(); }} className={TOUCH_AREA} aria-label="Previous">
           <img src={ChevronLeftIcon} alt="previous" />
         </button>
       ) : (
@@ -24,7 +24,7 @@ const Chevron = ({ variant = ChevronVariant.Middle, onPrev, onNext }: ChevronPro
 
       {/* 다음 화살표 */}
       {showNext ? (
-        <button onClick={onNext} className={TOUCH_AREA} aria-label="Next">
+        <button onClick={(e) => { e.stopPropagation(); onNext?.(); }} className={TOUCH_AREA} aria-label="Next">
           <img src={ChevronRightIcon} alt="previous" />
         </button>
       ) : (

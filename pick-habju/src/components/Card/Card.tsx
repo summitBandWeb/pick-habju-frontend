@@ -27,6 +27,8 @@ const Card = ({
   onBookClick,
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
+  const [animKey, setAnimKey] = useState(0);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const total = images.length;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -38,8 +40,16 @@ const Card = ({
         ? ChevronVariant.Last
         : ChevronVariant.Middle;
 
-  const prev = () => setCurrent((p) => Math.max(0, p - 1));
-  const next = () => setCurrent((p) => Math.min(total - 1, p + 1));
+  const prev = () => {
+    setDirection('left');
+    setCurrent((p) => Math.max(0, p - 1));
+    setAnimKey((k) => k + 1);
+  };
+  const next = () => {
+    setDirection('right');
+    setCurrent((p) => Math.min(total - 1, p + 1));
+    setAnimKey((k) => k + 1);
+  };
 
   // 렌더 함수 분리
 
@@ -148,7 +158,16 @@ const Card = ({
     <div className="w-80 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
       <div className="relative min-w-80 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
-        <img src={images[current]} alt={`slide ${current + 1}`} className="w-full h-full object-cover cursor-pointer" />
+        {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
+        <div className="absolute inset-0">
+          <img
+            key={animKey}
+            src={images[current]}
+            alt={`slide ${current + 1}`}
+            className="w-full h-full object-cover cursor-pointer"
+            style={{ animation: `${direction === 'right' ? 'slide-right' : 'slide-left'} 0.35s ease-out` }}
+          />
+        </div>
         {renderHeader()}
         {renderOverlay()}
         {renderChevron()}
