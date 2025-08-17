@@ -55,7 +55,7 @@ const Card = ({
 
   const renderOverlay = () =>
     booked && (
-      <div className="absolute inset-0 bg-gray-booked backdrop-blur-sm text-primary-white">
+      <div className="absolute inset-0 bg-gray-booked text-primary-white">
         {/* 헤더 스타일 차용 */}
         <div className="absolute top-6 left-4 flex items-start space-x-[9px]">
           <div className="w-0.5 h-12.5 bg-white" />
