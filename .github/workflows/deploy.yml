@@ -1,43 +1,37 @@
-name: Deploy Frontend
+name: deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy-frontend:
+  build:
     runs-on: ubuntu-latest
+    container: pandoc/latex
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      # Node.js 환경 설정 (프론트엔드 빌드에 필수)
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # 프로젝트의 Node.js 버전에 맞게 설정
+      - name: Install mustache (to update the date)
+        run: apk add ruby && gem install mustache
 
-      # 프론트엔드 의존성 설치
-      - name: Install frontend dependencies
-        run: npm install
+      - name: Give build.sh execute permission
+        run: chmod +x ./pick-habju/build.sh
 
-      # 프론트엔드 빌드 단계: VITE_API_BASE_URL 환경 변수 주입
-      - name: Build frontend
-        run: npm run build
-        env:
-          # ***** 여기가 PM이 말한 "백엔드 URL을 작성하는 작업"의 핵심 부분입니다. *****
-          # 이 값은 빌드된 프론트엔드 코드에 포함되어 API 호출에 사용됩니다.
-          VITE_API_BASE_URL: http://3.39.13.6:8000 # EC2 백엔드 API 주소로 변경
+      - name: Run build script
+        run: ./pick-habju/build.sh
 
-      # 빌드된 결과물을 pick-habju-frontend 저장소로 푸시
-      - name: Pushes build output to pick-habju-frontend repository
+      - name: Pushes to another repository
+        id: push_directory
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
         with:
-          source-directory: "output" # Vite의 기본 빌드 출력 폴더 (확인 필요)
+          source-directory: "output"
           destination-github-username: S-Gihun
           destination-repository-name: pick-habju-frontend
           user-email: ${{ secrets.EMAIL }}
-          commit-message: "Feat: Deploy frontend from backend build job [skip ci]"
+          commit-message: ${{ github.event.commits[0].message }}
           target-branch: main
+
+      - name: Test get variable exported by push-to-another-repository
+        run: echo $DESTINATION_CLONED_DIRECTORY
