@@ -55,11 +55,34 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     (dates: Date[]) => {
       actions.setDate(dates);
       setIsDatePickerOpen(false);
+      // 타임피커 초기 포커스를 HeroArea의 현재 값으로 동기화
+      try {
+        const slots = (hourSlots && hourSlots.length > 0) ? hourSlots : dateTime.hour_slots;
+        if (Array.isArray(slots) && slots.length > 0) {
+          const parseHour = (hhmm: string): number => {
+            const h = parseInt(hhmm.split(':')[0], 10);
+            return isNaN(h) ? 9 : h;
+          };
+          const start24 = parseHour(slots[0]);
+          const end24 = (start24 + slots.length) % 24;
+          const to12 = (h24: number): { hour: number; period: TimePeriod } => {
+            if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
+            if (h24 < 12) return { hour: h24, period: TimePeriod.AM };
+            if (h24 === 12) return { hour: 12, period: TimePeriod.PM };
+            return { hour: h24 - 12, period: TimePeriod.PM };
+          };
+          const s12 = to12(start24);
+          const e12 = to12(end24 === 0 ? 24 % 24 : end24);
+          setDraftTime({ startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period });
+        }
+      } catch {
+        // 파싱 실패 시 무시하고 기본값 사용
+      }
       setIsTimePickerOpen(true);
       setLastWarningKey(null);
       // 날짜 확정 시 기존 시간 임시값 유지 (변경 없음)
     },
-    [actions]
+    [actions, hourSlots, dateTime.hour_slots]
   );
 
   const handleDateCancel = useCallback(() => {
