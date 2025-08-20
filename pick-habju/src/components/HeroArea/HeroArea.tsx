@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import PersonCountInput from './Input/Person/PersonCountInput';
@@ -222,6 +222,29 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     setIsTimePickerOpen(false);
     setIsDatePickerOpen(true);
   }, []);
+
+  // 오버레이 바깥 클릭으로 모달 닫기
+  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
+    setIsDatePickerOpen(false);
+    setIsTimePickerOpen(false);
+    setIsGuestModalOpen(false);
+  }, []);
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    if (!(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen)) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsDatePickerOpen(false);
+        setIsTimePickerOpen(false);
+        setIsGuestModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isDatePickerOpen, isTimePickerOpen, isGuestModalOpen]);
   return (
     <div
       className="relative w-full h-97.5 flex flex-col items-center"
@@ -290,7 +313,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       </div>
 
       {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80" onClick={handleOverlayClick}>
           {/* wrapper 기준 폭으로 중앙 정렬 */}
           <div className="relative w-[25.125rem] flex flex-col items-center">
             {isDatePickerOpen && (
