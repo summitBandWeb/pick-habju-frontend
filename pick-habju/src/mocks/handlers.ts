@@ -14,6 +14,7 @@ type ScenarioKey =
   | 'mixed-per-room'
   | 'recommend'
   | 'modal-flows'
+  | 'onehour-sameday'
   | 'slow'
   | 'error-500';
 
@@ -43,7 +44,7 @@ const getScenario = (req: Request): ScenarioKey => {
             'unknown',
             'mixed-per-room',
             'recommend',
-            'modal-flows',
+            'onehour-sameday',
           ][idx] as ScenarioKey
         );
       }
@@ -238,6 +239,27 @@ export const handlers = [
         availableIds = results
           .filter((r) => r.available === true)
           .map((r) => r.biz_item_id);
+        break;
+      }
+
+      // 당일 + 1시간 재현에 최적화: 준사운드(1384809)만 사용 가능 처리
+      // - 실제로는 사용자가 오늘 날짜 + 1개 슬롯 선택 시, 클릭 즉시 1시간 전화 모달이 우선 노출됩니다.
+      case 'onehour-sameday': {
+        results = body.rooms.map((room) => {
+          const isJunsound = room.business_id === '1384809';
+          const slots = Object.fromEntries(
+            hourSlots.map((h) => [h, isJunsound ? (true as SlotAvailability) : (false as SlotAvailability)])
+          );
+          return {
+            name: room.name,
+            branch: room.branch,
+            business_id: room.business_id,
+            biz_item_id: room.biz_item_id,
+            available: isJunsound ? (true as SlotAvailability) : (false as SlotAvailability),
+            available_slots: slots,
+          } as AvailabilityResultItem;
+        });
+        availableIds = results.filter((r) => r.business_id === '1384809' && r.available === true).map((r) => r.biz_item_id);
         break;
       }
 
