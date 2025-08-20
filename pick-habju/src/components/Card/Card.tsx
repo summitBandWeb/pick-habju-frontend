@@ -55,10 +55,10 @@ const Card = ({
 
   const renderHeader = () => (
     <div className="absolute top-6 left-4 flex items-start space-x-[9px] text-primary-white">
-      <div className="w-0.5 h-12.5 bg-white" />
+      <div className="w-0.5 h-12.5 bg-white/90" />
       <div className="space-y-1">
-        <p className="font-card-title">{title}</p>
-        <p className="font-card-title">{subtitle}</p>
+        <p className="font-card-title text-shadow-md">{title}</p>
+        <p className="font-card-title text-shadow-md">{subtitle}</p>
       </div>
     </div>
   );
@@ -171,6 +171,8 @@ const Card = ({
             fetchPriority="low"
           />
         </div>
+        {/* 상단 그라데이션: 밝은 배경에서도 텍스트 대비 강화 */}
+        <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/45 via-black/20 to-transparent" />
         {renderHeader()}
         {renderOverlay()}
         {renderChevron()}

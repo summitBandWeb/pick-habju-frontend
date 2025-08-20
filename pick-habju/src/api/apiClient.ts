@@ -5,10 +5,18 @@ export const apiBaseUrl = (() => {
 })();
 
 export const postJson = async <TReq, TRes>(path: string, body: TReq): Promise<TRes> => {
+  const scenario = ((): string | null => {
+    try {
+      return localStorage.getItem('mswScenario');
+    } catch {
+      return null;
+    }
+  })();
   const res = await fetch(`${apiBaseUrl}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(scenario ? { 'x-msw-scenario': scenario } : {}),
     },
     body: JSON.stringify(body),
   });
