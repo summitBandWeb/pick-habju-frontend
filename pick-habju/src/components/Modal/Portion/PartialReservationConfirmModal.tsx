@@ -27,9 +27,9 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
       aria-modal="true"
       role="dialog"
     >
-      <div className="w-[25.125rem] flex flex-col items-center">
+      <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
         {/* 본문 카드 */}
-        <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-[2.25rem] px-[1.75rem]">
+        <div className="w-full max-w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-[2.25rem] px-[1.75rem]">
           {/* 1. 헤드 문구 */}
           <div className="flex flex-col items-center gap-4 self-stretch">
             <div className="text-center font-modal-default text-primary-black">
@@ -46,7 +46,7 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
           </div>
 
           {/* 버튼 영역 */}
-          <div className="flex w-[18.375rem] justify-center items-center gap-3">
+          <div className="flex w-full max-w-[18.375rem] justify-center items-center gap-3">
             {/* 다시 고를게요 */}
             <button
               type="button"

@@ -15,7 +15,7 @@ const CallReservationNoticeModal = ({ open, onClose, studioName, phoneNumber }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" aria-modal="true" role="dialog">
-      <div className="w-[25.125rem] flex flex-col items-center translate-x-6">
+      <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
         <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-end gap-3 py-[3.5rem] px-[1.75rem]">
           {/* 1. 안내 문구 */}
           <div className="w-full text-center font-modal-default text-primary-black">

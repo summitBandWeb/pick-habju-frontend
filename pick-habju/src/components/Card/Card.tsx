@@ -166,6 +166,9 @@ const Card = ({
             alt={`slide ${current + 1}`}
             className="w-full h-full object-cover cursor-pointer"
             style={{ animation: `${direction === 'right' ? 'slide-right' : 'slide-left'} 0.35s ease-out` }}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
           />
         </div>
         {renderHeader()}
