@@ -12,7 +12,7 @@ const LogoHeader = () => (
 const AppHeader = () => {
   return (
     <div className="flex w-full justify-center items-center">
-      <div className="flex flex-col w-full max-w-[25.125rem]">
+      <div className="flex flex-col w-full max-w-[25.9375rem]">
         <LogoHeader />
       </div>
     </div>

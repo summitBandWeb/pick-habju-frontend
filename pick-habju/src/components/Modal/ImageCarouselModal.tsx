@@ -63,7 +63,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
   return (
     <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
-      <div className="w-full max-w-[25.125rem]">
+      <div className="w-full max-w-[25.9375rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
         <div className="w-full flex justify-end">
           <button

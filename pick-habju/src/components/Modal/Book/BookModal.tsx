@@ -42,7 +42,7 @@ const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFro
   // 바깥 클릭 닫기는 ModalOverlay에서 처리
 
   return (
-      <div className="w-full max-w-[25.125rem]" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-[25.9375rem]" onClick={(e) => e.stopPropagation()}>
         {step === 1 && (
           <BookStepCalculationModal
             basicAmount={breakdown.basicAmount}

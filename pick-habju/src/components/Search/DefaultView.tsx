@@ -131,7 +131,7 @@ const DefaultView = () => {
             />
             {openIdx === i && lastQuery && (
               <ModalOverlay open onClose={() => setOpenIdx(null)}>
-                <div className="w-full max-w-[25.125rem]" onClick={(e) => e.stopPropagation()}>
+                <div className="w-full max-w-[25.9375rem]" onClick={(e) => e.stopPropagation()}>
                   <BookModalStepper
                   room={room}
                   dateIso={lastQuery.date}
@@ -218,7 +218,7 @@ const DefaultView = () => {
           case 'sameDayCall':
             return (
               <ModalOverlay open onClose={closeModal}>
-                <div className="w-full max-w-[25.125rem]" onClick={(e) => e.stopPropagation()}>
+                <div className="w-full max-w-[25.9375rem]" onClick={(e) => e.stopPropagation()}>
                   <CallReservationNoticeModal
                     open
                     onClose={closeModal}

@@ -27,7 +27,7 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
       aria-modal="true"
       role="dialog"
     >
-      <div className="w-full max-w-[25.125rem] flex flex-col items-center">
+      <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
         {/* 본문 카드 */}
         <div className="w-full max-w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-[2.25rem] px-[1.75rem]">
           {/* 1. 헤드 문구 */}

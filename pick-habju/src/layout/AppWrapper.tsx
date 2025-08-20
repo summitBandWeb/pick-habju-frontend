@@ -11,7 +11,7 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
       {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
-      <div className="w-full max-w-[26rem] h-screen flex flex-col bg-primary-white">
+      <div className="w-full max-w-[25.9375rem] h-screen flex flex-col bg-primary-white">
         {/* 헤더(세이프 에어리어 + 로고 헤더) */}
         <AppHeader />
 
