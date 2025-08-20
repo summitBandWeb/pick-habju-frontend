@@ -63,7 +63,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
   return (
     <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
-      <div className="w-[25.125rem]">
+      <div className="w-full max-w-[25.125rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
         <div className="w-full flex justify-end">
           <button
@@ -83,7 +83,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
         {/* Group */}
         <div className="h-[16.25rem] self-stretch flex flex-col items-center">
           {/* Rectangle (이미지 프레임 고정) */}
-          <div className="relative w-[23.125rem] h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
+          <div className="relative w-full h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
             {/* 이미지 레이어만 슬라이드 */}
             <div
               key={animKey}
@@ -98,7 +98,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
             />
 
             {/* 컨트롤 오버레이 (고정) */}
-            <div className="absolute inset-0 flex w-[23.125rem] h-[16.25rem] flex-col justify-between items-start">
+            <div className="absolute inset-0 flex w-full h-[16.25rem] flex-col justify-between items-start">
               {/* Chevron Row */}
               <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
                 <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />

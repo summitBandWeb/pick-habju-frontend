@@ -9,14 +9,14 @@ type AppWrapperProps = { children?: ReactNode };
  */
 const AppWrapper = ({ children }: AppWrapperProps) => {
   return (
-    <div className="min-h-screen w-full flex justify-center bg-primary-white">
-      {/* 고정 폭 컨테이너 (디자인 기준 25.125rem → 402px 기준 확장) */}
-      <div className="w-[26rem] h-screen flex flex-col bg-primary-white">
+    <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
+      {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
+      <div className="w-full max-w-[26rem] h-screen flex flex-col bg-primary-white">
         {/* 헤더(세이프 에어리어 + 로고 헤더) */}
         <AppHeader />
 
         {/* 스크롤 영역: 헤더 제외 나머지 */}
-        <div className="flex-1 overflow-y-auto flex flex-col items-center bg-[#FFFBF0]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[#FFFBF0]">
           <div className="w-full flex flex-col items-center">
             {children}
           </div>

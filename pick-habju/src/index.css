@@ -4,6 +4,14 @@
 @import 'tailwindcss/theme' layer(theme);
 @import 'tailwindcss/utilities' layer(utilities);
 
+@layer base {
+  html, body, #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
 @layer theme {
   @theme {
     --font-sans: 'Pretendard', 'Inter', sans-serif;

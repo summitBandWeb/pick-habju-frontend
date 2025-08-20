@@ -315,7 +315,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80" onClick={handleOverlayClick}>
           {/* wrapper 기준 폭으로 중앙 정렬 */}
-          <div className="relative w-[25.125rem] flex flex-col items-center">
+          <div className="relative w-full max-w-[25.125rem] flex flex-col items-center">
             {isDatePickerOpen && (
               <DatePicker
                 onConfirm={handleDateConfirm}
