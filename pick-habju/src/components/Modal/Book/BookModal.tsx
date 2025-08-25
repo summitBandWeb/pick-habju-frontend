@@ -64,7 +64,12 @@ const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFro
             amount={finalTotalFromCard}
             onConfirm={() => {
               const url = getBookingUrl(room, dateIso);
-              window.open(url, '_blank');
+              // 새창 열기 시도, 실패시 현재 탭에서 이동
+              const newWindow = window.open(url, '_blank');
+              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                // 팝업이 차단되었을 경우 현재 탭에서 이동
+                window.location.href = url;
+              }
               onConfirm();
             }}
           />
