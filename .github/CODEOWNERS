@@ -1,0 +1,4 @@
+# pick-habju-frontend / CODEOWNERS
+
+# 기본적으로 프론트 전반은 프론트 팀이 소유
+*                          @summitBandWeb/frontend
