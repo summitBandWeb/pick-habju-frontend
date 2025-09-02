@@ -27,8 +27,6 @@ const Card = ({
   onBookClick,
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
-  const [animKey, setAnimKey] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const total = images.length;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,14 +39,10 @@ const Card = ({
         : ChevronVariant.Middle;
 
   const prev = () => {
-    setDirection('left');
     setCurrent((p) => Math.max(0, p - 1));
-    setAnimKey((k) => k + 1);
   };
   const next = () => {
-    setDirection('right');
     setCurrent((p) => Math.min(total - 1, p + 1));
-    setAnimKey((k) => k + 1);
   };
 
   // 렌더 함수 분리
@@ -87,7 +81,8 @@ const Card = ({
   };
 
   const renderChevron = () =>
-    !booked && (
+    !booked &&
+    total > 1 && (
       <div className="absolute left-0 right-0 bottom-10 flex items-center justify-between">
         <Chevron variant={variant} onPrev={prev} onNext={next} />
       </div>
@@ -104,13 +99,13 @@ const Card = ({
     <>
       {!partialAvailable ? (
         <div className="flex items-center space-x-2">
-          <span className={classNames('font-card-info', booked ? 'text-gray-300' : 'text-gray-400')}>예상 결제 금액</span>
+          <span className={classNames('font-card-info', booked ? 'text-gray-300' : 'text-gray-400')}>
+            예상 결제 금액
+          </span>
           {booked ? (
             <span className={classNames('font-card-price-num', 'text-gray-300')}>N원</span>
           ) : (
-            <span className={classNames('font-card-price-num', 'text-primary-black')}>
-              {price.toLocaleString()}원
-            </span>
+            <span className={classNames('font-card-price-num', 'text-primary-black')}>{price.toLocaleString()}원</span>
           )}
         </div>
       ) : (
@@ -159,20 +154,32 @@ const Card = ({
       {/* 이미지 & 헤더 */}
       <div className="relative min-w-80 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
         {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
-        <div className="absolute inset-0">
-          <img
-            key={animKey}
-            src={images[current]}
-            alt={`slide ${current + 1}`}
-            className="w-full h-full object-cover cursor-pointer"
-            style={{ animation: `${direction === 'right' ? 'slide-right' : 'slide-left'} 0.35s ease-out` }}
-            loading="lazy"
-            decoding="async"
-            fetchPriority="low"
-          />
+        <div className="relative w-full h-full overflow-hidden">
+          <div
+            className="flex h-full"
+            style={{
+              transform: `translateX(-${current * 100}%)`,
+              transition: 'transform 0.35s ease-out',
+            }}
+          >
+            {images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`slide ${index + 1}`}
+                className="w-full h-full object-cover flex-shrink-0 cursor-pointer"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+            ))}
+          </div>
         </div>
-        {/* 상단 그라데이션: 밝은 배경에서도 텍스트 대비 강화 */}
-        <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/45 via-black/20 to-transparent" />
+
+        {/* 상단 그라데이션 */}
+        <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/70 to-transparent" />
+        {/* 하단 그라데이션 */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
         {renderHeader()}
         {renderOverlay()}
         {renderChevron()}

@@ -12,8 +12,6 @@ type ImageCarouselModalProps = {
 
 const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
-  const [animKey, setAnimKey] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,20 +20,14 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
 
   const total = images.length;
   const prev = () => {
-    setDirection('left');
     setCurrent((p) => Math.max(0, p - 1));
-    setAnimKey((k) => k + 1);
   };
   const next = () => {
-    setDirection('right');
     setCurrent((p) => Math.min(total - 1, p + 1));
-    setAnimKey((k) => k + 1);
   };
 
   const variant: ChevronVariant =
     current === 0 ? ChevronVariant.First : current === total - 1 ? ChevronVariant.Last : ChevronVariant.Middle;
-
-  const currentImage = images[current];
 
   // ESC 닫기
   useEffect(() => {
@@ -61,7 +53,11 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
   }, []);
 
   return (
-    <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex justify-center items-center bg-black/80">
+    <div
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+      className="fixed inset-0 z-50 flex justify-center items-center bg-black/80"
+    >
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
       <div className="w-full max-w-[25.9375rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
@@ -86,28 +82,37 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
           <div className="relative w-full h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
             {/* 이미지 레이어만 슬라이드 */}
             <div
-              key={animKey}
-              className="absolute inset-0"
+              className="flex h-full"
               style={{
-                backgroundImage: `url(${currentImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                animation: `${direction === 'right' ? 'slide-right' : 'slide-left'} 0.35s ease-out`,
+                transform: `translateX(-${current * 100}%)`,
+                transition: 'transform 0.35s ease-out',
               }}
-              aria-label="확대 이미지"
-            />
+            >
+              {images.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`확대 이미지 ${index + 1}`}
+                  className="w-full h-full object-cover flex-shrink-0"
+                />
+              ))}
+            </div>
 
             {/* 컨트롤 오버레이 (고정) */}
             <div className="absolute inset-0 flex w-full h-[16.25rem] flex-col justify-between items-start">
-              {/* Chevron Row */}
-              <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
-                <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
-              </div>
+              {/* Chevron Row - 이미지가 2개 이상일 때만 표시 */}
+              {total > 1 && (
+                <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
+                  <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
+                </div>
+              )}
 
-              {/* Pagination */}
-              <div className="w-full flex justify-center pb-3">
-                <PaginationDots total={total} current={current} />
-              </div>
+              {/* Pagination - 이미지가 2개 이상일 때만 표시 */}
+              {total > 1 && (
+                <div className="w-full flex justify-center pb-3">
+                  <PaginationDots total={total} current={current} />
+                </div>
+              )}
             </div>
           </div>
         </div>

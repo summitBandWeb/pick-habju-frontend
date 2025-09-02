@@ -5,7 +5,9 @@
 @import 'tailwindcss/utilities' layer(utilities);
 
 @layer base {
-  html, body, #root {
+  html,
+  body,
+  #root {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
@@ -342,17 +344,6 @@
       transform: translateY(-8px);
       opacity: 0;
     }
-  }
-
-  /* Carousel slide animations */
-  @keyframes slide-left {
-    0% { transform: translateX(8%); opacity: 0.85; }
-    100% { transform: translateX(0); opacity: 1; }
-  }
-
-  @keyframes slide-right {
-    0% { transform: translateX(-8%); opacity: 0.85; }
-    100% { transform: translateX(0); opacity: 1; }
   }
 
   /* Time Picker Scroll */
