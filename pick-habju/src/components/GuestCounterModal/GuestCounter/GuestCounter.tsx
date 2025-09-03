@@ -1,12 +1,43 @@
 import { Minus, Plus } from 'lucide-react';
 import clsx from 'clsx';
 import type { GuestCounterProps } from './GuestCounter.types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useToastStore } from '../../../store/toast/toastStore';
 
 const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps) => {
+  const { showPersistentToast, hideToast } = useToastStore();
   // 내부 상태 추가: 입력창에 보여줄 값을 위한 별도의 state -> string 타입으로 관리
   // 부모로부터 받은 value prop을 초기값으로 설정합니다.
   const [inputValue, setInputValue] = useState(String(value));
+
+  // 타이머 참조 저장
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Toast 자동 삭제 함수
+  const showTemporaryToast = useCallback(
+    (message: string, duration = 4000) => {
+      // 기존 타이머가 있으면 정리
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+
+      showPersistentToast(message, 'error');
+      toastTimerRef.current = setTimeout(() => {
+        hideToast();
+        toastTimerRef.current = null;
+      }, duration);
+    },
+    [showPersistentToast, hideToast]
+  );
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   // 부모로부터 value prop이 변경될 때마다 inputValue를 동기화
   useEffect(() => {
@@ -29,8 +60,12 @@ const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps)
     const numValue = parseInt(sanitizedValue, 10);
     if (!isNaN(numValue) && numValue > max) {
       setInputValue(String(max));
+      onChange(max);
+      showTemporaryToast(`${max}명 이상은 선택할 수 없습니다.`);
     } else if (!isNaN(numValue) && numValue <= 0) {
       setInputValue(String(min));
+      onChange(min);
+      showTemporaryToast(`${min}명 이하는 선택할 수 없습니다.`);
     } else {
       setInputValue(sanitizedValue);
     }
