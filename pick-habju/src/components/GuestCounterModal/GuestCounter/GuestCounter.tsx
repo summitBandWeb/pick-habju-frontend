@@ -15,7 +15,7 @@ const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps)
 
   // Toast 자동 삭제 함수
   const showTemporaryToast = useCallback(
-    (message: string, duration = 4000) => {
+    (message: string, duration = 1500) => {
       // 기존 타이머가 있으면 정리
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
