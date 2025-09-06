@@ -164,11 +164,6 @@ const DefaultView = () => {
         (() => {
           const selectedCard = sorted[currentModal.cardIdx];
           const selectedRoom = ROOMS[selectedCard.roomIndex];
-          // const selectedPrice = calculateTotalPrice({
-          //   room: selectedRoom,
-          //   hourSlots: lastQuery.hour_slots,
-          //   peopleCount: lastQuery.peopleCount
-          // });
 
           const closeModal = () => setCurrentModal(null);
 
