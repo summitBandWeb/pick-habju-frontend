@@ -197,7 +197,6 @@ const Card = ({
                     className={`w-full h-full object-cover transition-all duration-500 ${
                       isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                     }`}
-                    style={{ willChange: 'transform, opacity' }}
                     onLoad={() => handleImageLoad(index)}
                     onError={() => handleImageError(index)}
                     loading={index === 0 ? 'eager' : 'lazy'}
