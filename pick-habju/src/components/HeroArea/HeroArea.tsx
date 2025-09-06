@@ -135,8 +135,13 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           selectedDate.getMonth() === now.getMonth() &&
           selectedDate.getDate() === now.getDate();
         if (isSameDay) {
-          const currentHour24 = now.getHours();
-          if (start24 < currentHour24) return ReservationToastKey.PAST_TIME;
+          // 정확한 시간 비교를 위해 Date 객체 생성 (분 단위까지 고려)
+          const selectedDateTime = new Date(selectedDate);
+          selectedDateTime.setHours(start24, 0, 0, 0); // 선택한 시간으로 설정
+
+          if (now.getTime() > selectedDateTime.getTime()) {
+            return ReservationToastKey.PAST_TIME;
+          }
         }
       }
 
