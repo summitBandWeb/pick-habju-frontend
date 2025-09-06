@@ -27,8 +27,18 @@ const Card = ({
   onBookClick,
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const total = images.length;
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 이미지 로딩 처리 함수
+  const handleImageLoad = (index: number) => {
+    setLoadedImages((prev) => new Set([...prev, index]));
+  };
+
+  const handleImageError = (index: number) => {
+    setLoadedImages((prev) => new Set([...prev, index])); // 에러 시에도 로드된 것으로 처리
+  };
 
   const variant: ChevronVariant = booked
     ? ChevronVariant.Middle
@@ -162,17 +172,41 @@ const Card = ({
               transition: 'transform 0.35s ease-out',
             }}
           >
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`slide ${index + 1}`}
-                className="w-full h-full object-cover flex-shrink-0 cursor-pointer"
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            ))}
+            {images.map((image, index) => {
+              const isLoaded = loadedImages.has(index);
+
+              return (
+                <div key={index} className="w-full h-full flex-shrink-0 relative cursor-pointer">
+                  {/* 로딩 플레이스홀더 */}
+                  {!isLoaded && (
+                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                      <div
+                        className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
+                        style={{
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 1.5s infinite',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* 실제 이미지 */}
+                  <img
+                    src={image}
+                    alt={`slide ${index + 1}`}
+                    className={`w-full h-full object-cover transition-all duration-500 ${
+                      isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                    }`}
+                    style={{ willChange: 'transform, opacity' }}
+                    onLoad={() => handleImageLoad(index)}
+                    onError={() => handleImageError(index)}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    fetchPriority={index === 0 ? 'high' : 'low'}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 
