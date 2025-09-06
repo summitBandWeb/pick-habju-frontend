@@ -351,6 +351,16 @@
     }
   }
 
+  /* Image loading shimmer effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
   /* Time Picker Scroll */
   .scroll-picker {
     scroll-snap-type: y mandatory;
