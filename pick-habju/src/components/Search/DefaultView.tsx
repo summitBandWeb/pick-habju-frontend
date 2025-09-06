@@ -69,12 +69,12 @@ const DefaultView = () => {
 
     Array.from(firstImageUrls).forEach(preloadImage);
 
-    // 5초 후 강제로 이미지 로딩 완료 처리
+    // 3초 후 강제로 이미지 로딩 완료 처리
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
         setImagesLoaded(true);
       }
-    }, 5000);
+    }, 3000);
 
     // 클린업 함수
     return () => {
