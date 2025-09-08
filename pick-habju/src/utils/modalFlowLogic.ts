@@ -2,11 +2,12 @@ import type { RoomMetadata } from '../types/RoomMetadata';
 import {
   ONE_HOUR_CALL_REQUIRED_BUSINESS_IDS,
   SAME_DAY_CALL_REQUIRED_BUSINESS_IDS,
+  ONE_HOUR_CHAT_REQUIRED_BUSINESS_IDS,
   BUSINESS_PHONE_NUMBERS,
   BUSINESS_DISPLAY_NAMES
 } from '../constants/data';
 
-export type ModalType = 'book' | 'partial' | 'oneHourCall' | 'sameDayCall';
+export type ModalType = 'book' | 'partial' | 'oneHourCall' | 'oneHourChat' | 'sameDayCall';
 
 export interface ModalFlowDecision {
   modalType: ModalType;
@@ -27,7 +28,14 @@ export function decideBookModalFlow(args: {
   const isOneHour = hourSlots.length === 1;
   const isToday = isDateToday(dateIso);
 
-  // 1시간 예약 + 해당 합주실이면 1시간 전화 모달 (최우선)
+  // 1시간 예약 + 해당 합주실이면 1) 채팅 > 2) 전화 모달 (우선순위)
+  if (isOneHour && ONE_HOUR_CHAT_REQUIRED_BUSINESS_IDS.includes(room.businessId)) {
+    return {
+      modalType: 'oneHourChat',
+      studioName: BUSINESS_DISPLAY_NAMES[room.businessId] || room.branch,
+      phoneNumber: BUSINESS_PHONE_NUMBERS[room.businessId] || '',
+    };
+  }
   if (isOneHour && ONE_HOUR_CALL_REQUIRED_BUSINESS_IDS.includes(room.businessId)) {
     return {
       modalType: 'oneHourCall',
@@ -61,7 +69,14 @@ export function decidePartialToNextModalFlow(args: {
   const isOneHour = recommendedHourSlots.length === 1;
   const isToday = isDateToday(dateIso);
 
-  // 추천된 시간이 1시간 + 해당 합주실이면 1시간 전화 모달
+  // 추천된 시간이 1시간 + 해당 합주실이면 1) 채팅 > 2) 전화 모달
+  if (isOneHour && ONE_HOUR_CHAT_REQUIRED_BUSINESS_IDS.includes(room.businessId)) {
+    return {
+      modalType: 'oneHourChat',
+      studioName: BUSINESS_DISPLAY_NAMES[room.businessId] || room.branch,
+      phoneNumber: BUSINESS_PHONE_NUMBERS[room.businessId] || '',
+    };
+  }
   if (isOneHour && ONE_HOUR_CALL_REQUIRED_BUSINESS_IDS.includes(room.businessId)) {
     return {
       modalType: 'oneHourCall',

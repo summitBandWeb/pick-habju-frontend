@@ -15,6 +15,8 @@ type ScenarioKey =
   | 'recommend'
   | 'modal-flows'
   | 'onehour-sameday'
+  | 'onehour-chat-atype'
+  | 'weekend-sounddict'
   | 'slow'
   | 'error-500';
 
@@ -48,7 +50,9 @@ const getScenario = (req: Request): ScenarioKey => {
           ][idx] as ScenarioKey
         );
       }
-    } catch {}
+    } catch {
+      // Fallback to partial-available
+    }
   }
 
   return 'partial-available';
@@ -260,6 +264,45 @@ export const handlers = [
           } as AvailabilityResultItem;
         });
         availableIds = results.filter((r) => r.business_id === '1384809' && r.available === true).map((r) => r.biz_item_id);
+        break;
+      }
+
+      // 에이타입(984268) 1시간 가능 + 다른 합주실은 불가로 만들어 oneHourChat 모달 경로 재현
+      case 'onehour-chat-atype': {
+        results = body.rooms.map((room) => {
+          const isAtype = room.business_id === '984268';
+          const slots = Object.fromEntries(
+            hourSlots.map((h) => [h, isAtype ? (true as SlotAvailability) : (false as SlotAvailability)])
+          );
+
+          return {
+            name: room.name,
+            branch: room.branch,
+            business_id: room.business_id,
+            biz_item_id: room.biz_item_id,
+            available: isAtype ? (true as SlotAvailability) : (false as SlotAvailability),
+            available_slots: slots,
+          } as AvailabilityResultItem;
+        });
+        availableIds = results.filter((r) => r.business_id === '984268' && r.available === true).map((r) => r.biz_item_id);
+        break;
+      }
+
+      // 사운딕트(1132767) 주말 시나리오 검증용. 모두 가능 처리하여 가격 표시만 확인
+      case 'weekend-sounddict': {
+        results = body.rooms.map((room) => {
+          const isSounddict = room.business_id === '1132767';
+          const slots = Object.fromEntries(hourSlots.map((h) => [h, isSounddict ? (true as SlotAvailability) : (false as SlotAvailability)]));
+          return {
+            name: room.name,
+            branch: room.branch,
+            business_id: room.business_id,
+            biz_item_id: room.biz_item_id,
+            available: isSounddict ? (true as SlotAvailability) : (false as SlotAvailability),
+            available_slots: slots,
+          } as AvailabilityResultItem;
+        });
+        availableIds = results.filter((r) => r.business_id === '1132767' && r.available === true).map((r) => r.biz_item_id);
         break;
       }
 

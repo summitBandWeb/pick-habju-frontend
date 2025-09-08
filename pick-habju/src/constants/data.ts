@@ -571,6 +571,11 @@ export const SAME_DAY_CALL_REQUIRED_BUSINESS_IDS = [
   'dream_sadang', // 드림합주실 사당점
 ];
 
+// 1시간 예약시 '채팅문의' 필요한 합주실들
+export const ONE_HOUR_CHAT_REQUIRED_BUSINESS_IDS = [
+  '984268', // 에이타입사운드 라운지점
+];
+
 // 합주실별 전화번호
 export const BUSINESS_PHONE_NUMBERS: Record<string, string> = {
   '522011': '070-4237-1004', // 비쥬합주실 1호점
