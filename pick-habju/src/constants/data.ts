@@ -475,6 +475,7 @@ const ROOMS_RAW: RoomMetadata[] = [
     maxCapacity: 8,
     recommendCapacity: 7,
     pricePerHour: 15000, // 주말에는 20000
+    weekendPricePerHour: 20000,
     subway: {
       station: '이수역',
       timeToWalk: '도보 4분',
@@ -494,6 +495,7 @@ const ROOMS_RAW: RoomMetadata[] = [
     maxCapacity: 8,
     recommendCapacity: 7,
     pricePerHour: 15000, // 주말에는 19000
+    weekendPricePerHour: 19000,
     subway: {
       station: '이수역',
       timeToWalk: '도보 4분',
@@ -513,6 +515,7 @@ const ROOMS_RAW: RoomMetadata[] = [
     maxCapacity: 8,
     recommendCapacity: 7,
     pricePerHour: 15000, // 주말에는 18000
+    weekendPricePerHour: 18000,
     subway: {
       station: '이수역',
       timeToWalk: '도보 4분',
@@ -540,7 +543,14 @@ const ROOMS_RAW: RoomMetadata[] = [
     // 오전 0시~오전 8시: 10000
     // 오전 8시~오후 2시: 15000
     // 오후 2시~오전 0시: 18000
-    pricePerHour: 15000,
+    // 시간대별 요금은 timeBandPricing으로 관리 (pricePerHour는 표시용/기본값)
+    // pricePerHour(에이타입): 계산엔 관여하지 않고, 검색 전 카드 등에서 표시용 기본값(fallback)으로만 사용됩니다.
+    pricePerHour: 18000,
+    timeBandPricing: [
+      { startHour: 0, endHour: 8, pricePerHour: 10000 },
+      { startHour: 8, endHour: 14, pricePerHour: 15000 },
+      { startHour: 14, endHour: 24, pricePerHour: 18000 },
+    ],
     subway: {
       station: '이수역',
       timeToWalk: '도보 2분',
@@ -594,6 +604,17 @@ export const ROOMS: RoomMetadata[] = ROOMS_RAW.map((room) => ({
   ...room,
   imageUrls: room.imageUrls.map((src) => src.replace('/pick-habju/public', '')),
 }));
+
+// === 가격 정책 그룹 상수 (유지보수 편의) ===
+// 1) 시간대별 요금이 적용되는 합주실(사업장) ID 목록
+export const TIMEBAND_PRICING_BUSINESS_IDS: string[] = [
+  '984268', // 에이타입사운드 라운지점
+];
+
+// 2) 주말 요금이 별도로 존재하는 합주실(사업장) ID 목록
+export const WEEKEND_PRICING_BUSINESS_IDS: string[] = [
+  '1132767', // 사운딕트합주실
+];
 
 // 합주실별(사업장 단위) unknown(오픈대기) 날짜 상수
 // - 날짜는 'YYYY-MM-DD' 형식
