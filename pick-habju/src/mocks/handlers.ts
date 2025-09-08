@@ -20,7 +20,7 @@ type ScenarioKey =
   | 'slow'
   | 'error-500';
 
-const getScenario = (req: Request): ScenarioKey => {
+const getScenario = (req: Request): ScenarioKey | null => {
   const url = new URL(req.url);
   const header = req.headers.get('x-msw-scenario') as ScenarioKey | null;
   const qp = (url.searchParams.get('scenario') as ScenarioKey | null) ?? null;
@@ -55,7 +55,8 @@ const getScenario = (req: Request): ScenarioKey => {
     }
   }
 
-  return 'partial-available';
+  // 기본값을 모의가 아닌 실제 API로 프록시하도록 null 반환
+  return null;
 };
 
 const buildResults = (
@@ -81,6 +82,11 @@ const buildResults = (
 export const handlers = [
   http.post('*/api/rooms/availability', async ({ request }) => {
     const scenario = getScenario(request);
+
+    // 시나리오가 없으면 실제 API로 프록시 (Postman과 동일한 응답 확인용)
+    if (!scenario) {
+      return fetch(request);
+    }
 
     // Simulate network slowness for specific scenario
     if (scenario === 'slow') {
