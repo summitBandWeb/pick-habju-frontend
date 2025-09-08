@@ -40,11 +40,13 @@ const DefaultView = () => {
           room: roomA,
           hourSlots: lastQuery.hour_slots,
           peopleCount: lastQuery.peopleCount,
+          dateIso: lastQuery.date,
         });
         const priceB = calculateTotalPrice({
           room: roomB,
           hourSlots: lastQuery.hour_slots,
           peopleCount: lastQuery.peopleCount,
+          dateIso: lastQuery.date,
         });
         if (priceA !== priceB) return priceA - priceB;
       }
@@ -59,7 +61,7 @@ const DefaultView = () => {
         const room = ROOMS[c.roomIndex];
         const images = room.imageUrls;
         const price = lastQuery
-          ? calculateTotalPrice({ room, hourSlots: lastQuery.hour_slots, peopleCount: lastQuery.peopleCount })
+          ? calculateTotalPrice({ room, hourSlots: lastQuery.hour_slots, peopleCount: lastQuery.peopleCount, dateIso: lastQuery.date })
           : room.pricePerHour;
         const locationText = room.subway.station;
         const walkTime = room.subway.timeToWalk.replace('도보 ', '').replace(' ', '');
