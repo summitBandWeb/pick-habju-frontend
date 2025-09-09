@@ -10,6 +10,8 @@ export type SearchState = {
   setPhase: (phase: SearchPhase) => void;
   // Default 화면 렌더링용 카드 데이터
   cards: SearchCardItem[];
+  // 필터링/정렬된 카드 데이터 (실제 렌더링용)
+  filteredCards: SearchCardItem[];
   // 마지막 검색 조건 (가격 계산 등에 사용)
   lastQuery?: {
     date: string;
@@ -19,6 +21,8 @@ export type SearchState = {
   // 응답 → Default 카드 구성 액션
   setDefaultFromResponse: (args: { response: AvailabilityResponse; peopleCount: number }) => void;
   setLastQuery: (q: { date: string; hour_slots: string[]; peopleCount: number }) => void;
+  // 필터링된 카드 설정 액션
+  setFilteredCards: (cards: SearchCardItem[]) => void;
 };
 
 export type CardKind = 'default' | 'open' | 'recommend';

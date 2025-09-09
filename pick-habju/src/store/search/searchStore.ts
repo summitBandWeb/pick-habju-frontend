@@ -23,8 +23,10 @@ const hasConsecutiveTrues = (slots: Record<string, SlotAvailability>): boolean =
 export const useSearchStore = create<SearchState>((set) => ({
   phase: SearchPhase.BeforeSearch,
   cards: [],
+  filteredCards: [],
   setPhase: (phase: SearchPhase) => set({ phase }),
   setLastQuery: (q) => set({ lastQuery: q }),
+  setFilteredCards: (cards) => set({ filteredCards: cards }),
   setDefaultFromResponse: ({ response }: { response: AvailabilityResponse; peopleCount: number }) => {
     const availableIds = new Set<string>(Array.isArray(response.available_biz_item_ids) ? response.available_biz_item_ids : []);
     const results = Array.isArray(response.results) ? response.results : [];
@@ -108,9 +110,9 @@ export const useSearchStore = create<SearchState>((set) => ({
     }
 
     if (nextCards.length === 0) {
-      set({ phase: SearchPhase.NoResult, cards: [] });
+      set({ phase: SearchPhase.NoResult, cards: [], filteredCards: [] });
     } else {
-      set({ phase: SearchPhase.Default, cards: nextCards });
+      set({ phase: SearchPhase.Default, cards: nextCards, filteredCards: nextCards });
     }
   },
 }));
