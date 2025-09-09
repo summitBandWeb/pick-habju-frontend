@@ -288,9 +288,7 @@ const HomePage = () => {
                 SearchResultNumber={filteredAndSortedCards.length}
                 sortValue={sortType}
                 onSortChange={(newSortType) => {
-                  console.log('HomePage: onSortChange called with:', newSortType);
                   setSortType(newSortType);
-                  console.log('HomePage: sortType updated to:', newSortType);
                 }}
               />
             </div>
