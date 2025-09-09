@@ -84,11 +84,13 @@ const HomePage = () => {
             room: roomA,
             hourSlots: lastQuery?.hour_slots || defaultSlots,
             peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+            dateIso: lastQuery?.date || defaultDateIso,
           });
           const totalPriceB = calculateTotalPrice({
             room: roomB,
             hourSlots: lastQuery?.hour_slots || defaultSlots,
             peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+            dateIso: lastQuery?.date || defaultDateIso,
           });
           return totalPriceA - totalPriceB;
         }
@@ -98,11 +100,13 @@ const HomePage = () => {
             room: roomA,
             hourSlots: lastQuery?.hour_slots || defaultSlots,
             peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+            dateIso: lastQuery?.date || defaultDateIso,
           });
           const totalPriceB = calculateTotalPrice({
             room: roomB,
             hourSlots: lastQuery?.hour_slots || defaultSlots,
             peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+            dateIso: lastQuery?.date || defaultDateIso,
           });
           return totalPriceB - totalPriceA;
         }
@@ -119,7 +123,17 @@ const HomePage = () => {
     });
 
     return sortedCards;
-  }, [cards, searchText, sortType, lastQuery?.hour_slots, lastQuery?.peopleCount, defaultSlots, defaultPeopleCount]);
+  }, [
+    cards,
+    searchText,
+    sortType,
+    lastQuery?.hour_slots,
+    lastQuery?.peopleCount,
+    lastQuery?.date,
+    defaultSlots,
+    defaultPeopleCount,
+    defaultDateIso,
+  ]);
 
   // 필터링된 카드를 store에 업데이트
   useEffect(() => {
