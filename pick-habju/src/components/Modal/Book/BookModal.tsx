@@ -19,7 +19,7 @@ export interface BookModalStepperProps {
 const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFromCard, onConfirm, onClose }: BookModalStepperProps) => {
   const [step, setStep] = useState<1 | 2>(1);
 
-  const breakdown = getPriceBreakdown({ room, hourSlots, peopleCount });
+  const breakdown = getPriceBreakdown({ room, hourSlots, peopleCount, dateIso });
   const locationLine = getRoomLocationLine(room);
   const timeText = formatTimeRangeFromSlots(hourSlots);
 
