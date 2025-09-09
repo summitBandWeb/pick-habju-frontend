@@ -9,9 +9,15 @@ import { showToastByKey } from '../utils/showToastByKey';
 import { useToastStore } from '../store/toast/toastStore';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
 import { useReservationActions } from '../hook/useReservationStore';
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
+import SearchBar from '../components/SearchBar/SearchBar';
+import FilterSection from '../components/FilterSection/FilterSection';
+import { calculateTotalPrice } from '../utils/calcTotalPrice';
+import { SortType } from '../components/FilterSection/FilterSection.constants';
 
+import FilterSectionSkeleton from '../components/FilterSection/FilterSectionSkeleton';
+import SearchBarSkeleton from '../components/SearchBar/SearchBarSkeleton';
 
 const HomePage = () => {
   const { showPersistentToast, hideToast } = useToastStore();
@@ -34,20 +40,99 @@ const HomePage = () => {
   const rawEndHour = (startHour + 2) % 24;
   const displayEndHour = rawEndHour === 0 ? 24 : rawEndHour <= startHour ? rawEndHour + 24 : rawEndHour;
   const defaultDateIso = `${baseDate.getFullYear()}-${String(month).padStart(2, '0')}-${day}`;
-  const defaultSlots = [
-    `${String(startHour).padStart(2, '0')}:00`,
-    `${String((startHour + 1) % 24).padStart(2, '0')}:00`,
-  ];
+  const defaultSlots = useMemo(
+    () => [`${String(startHour).padStart(2, '0')}:00`, `${String((startHour + 1) % 24).padStart(2, '0')}:00`],
+    [startHour]
+  );
   const defaultDateTimeLabel = `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${displayEndHour}시`;
   const defaultPeopleCount = 12;
 
   const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
   const setPhase = useSearchStore((s) => s.setPhase);
   const setLastQuery = useSearchStore((s) => s.setLastQuery);
+  const setFilteredCards = useSearchStore((s) => s.setFilteredCards);
+  const cards = useSearchStore((s) => s.cards);
+  const phase = useSearchStore((s) => s.phase);
+  const lastQuery = useSearchStore((s) => s.lastQuery);
+
+  // 정렬 상태 관리
+  const [sortType, setSortType] = useState<SortType>(SortType.PRICE_LOW);
+  // 검색어 상태 관리 (SearchBar에서 디바운싱 처리됨)
+  const [searchText, setSearchText] = useState('');
+
+  // 검색어와 정렬을 적용한 카드 목록
+  const filteredAndSortedCards = useMemo(() => {
+    let filteredCards = cards;
+
+    // 검색어 필터링
+    if (searchText.trim()) {
+      filteredCards = cards.filter((card) => {
+        const room = ROOMS[card.roomIndex];
+        const searchTerm = searchText.toLowerCase();
+        return room.name.toLowerCase().includes(searchTerm) || room.branch.toLowerCase().includes(searchTerm);
+      });
+    }
+
+    // 정렬 적용
+    const sortedCards = [...filteredCards].sort((a, b) => {
+      const roomA = ROOMS[a.roomIndex];
+      const roomB = ROOMS[b.roomIndex];
+
+      switch (sortType) {
+        case SortType.PRICE_LOW: {
+          const totalPriceA = calculateTotalPrice({
+            room: roomA,
+            hourSlots: lastQuery?.hour_slots || defaultSlots,
+            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+          });
+          const totalPriceB = calculateTotalPrice({
+            room: roomB,
+            hourSlots: lastQuery?.hour_slots || defaultSlots,
+            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+          });
+          return totalPriceA - totalPriceB;
+        }
+
+        case SortType.PRICE_HIGH: {
+          const totalPriceA = calculateTotalPrice({
+            room: roomA,
+            hourSlots: lastQuery?.hour_slots || defaultSlots,
+            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+          });
+          const totalPriceB = calculateTotalPrice({
+            room: roomB,
+            hourSlots: lastQuery?.hour_slots || defaultSlots,
+            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+          });
+          return totalPriceB - totalPriceA;
+        }
+
+        case SortType.CAPACITY_LOW:
+          return roomA.maxCapacity - roomB.maxCapacity;
+
+        case SortType.CAPACITY_HIGH:
+          return roomB.maxCapacity - roomA.maxCapacity;
+
+        default:
+          return 0;
+      }
+    });
+
+    return sortedCards;
+  }, [cards, searchText, sortType, lastQuery?.hour_slots, lastQuery?.peopleCount, defaultSlots, defaultPeopleCount]);
+
+  // 필터링된 카드를 store에 업데이트
+  useEffect(() => {
+    setFilteredCards(filteredAndSortedCards);
+  }, [filteredAndSortedCards, setFilteredCards]);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
     const searchStartTime = Date.now(); // 전체 검색 시작 시간
+
+    // 새로운 검색 시작 시 필터 상태 초기화
+    setSearchText('');
+    setSortType(SortType.PRICE_LOW);
 
     setLastQuery({ date, hour_slots, peopleCount });
     setPhase(SearchPhase.Loading);
@@ -100,9 +185,8 @@ const HomePage = () => {
 
       // 검색 결과를 GA에 추적
       const searchDuration = Date.now() - searchStartTime;
-      const availableRooms = resp.results?.filter((room) =>
-        room.available === true || room.available === 'unknown'
-      ).length || 0;
+      const availableRooms =
+        resp.results?.filter((room) => room.available === true || room.available === 'unknown').length || 0;
 
       trackSearchResults(totalRooms, availableRooms, searchDuration);
 
@@ -157,7 +241,7 @@ const HomePage = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-primary-white">
+      <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
         <HeroArea
           key={heroResetCounter}
           dateTime={{ label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots }}
@@ -172,6 +256,33 @@ const HomePage = () => {
           }}
           onSearch={handleSearch}
         />
+        {phase === SearchPhase.Loading && (
+          <>
+            <div className="mt-3 mb-2">
+              <SearchBarSkeleton />
+            </div>
+            <FilterSectionSkeleton />
+          </>
+        )}
+        {phase === SearchPhase.Default && (
+          <>
+            <div className="mt-3 mb-2">
+              <SearchBar value={searchText} onSearchChange={setSearchText} />
+            </div>
+            <div className="mx-auto">
+              <FilterSection
+                SearchResultNumber={filteredAndSortedCards.length}
+                sortValue={sortType}
+                onSortChange={(newSortType) => {
+                  console.log('HomePage: onSortChange called with:', newSortType);
+                  setSortType(newSortType);
+                  console.log('HomePage: sortType updated to:', newSortType);
+                }}
+              />
+            </div>
+          </>
+        )}
+
         <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />
         {/* 결과 뷰는 SearchSection이 phase에 따라 렌더 */}
         <div className="w-full">
