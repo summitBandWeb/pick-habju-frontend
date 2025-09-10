@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SearchPhase, type SearchState, type AvailabilityResponse, type SearchCardItem, type SlotAvailability } from './searchStore.types';
+import { SearchPhase, CardKind, type SearchState, type AvailabilityResponse, type SearchCardItem, type SlotAvailability } from './searchStore.types';
 import { ROOMS, UNKNOWN_DATES_BY_BUSINESS_ID, REOPEN_AFTER_DAYS_BY_BUSINESS_ID, type UnknownDateRule } from '../../constants/data';
 
 // 오픈대기 안내에 사용할 임계일(현재 날짜 기준 X일 이후)
@@ -24,9 +24,11 @@ export const useSearchStore = create<SearchState>((set) => ({
   phase: SearchPhase.BeforeSearch,
   cards: [],
   filteredCards: [],
+  includePartiallyPossible: false,
   setPhase: (phase: SearchPhase) => set({ phase }),
   setLastQuery: (q) => set({ lastQuery: q }),
   setFilteredCards: (cards) => set({ filteredCards: cards }),
+  setIncludePartiallyPossible: (include) => set({ includePartiallyPossible: include }),
   setDefaultFromResponse: ({ response }: { response: AvailabilityResponse; peopleCount: number }) => {
     const availableIds = new Set<string>(Array.isArray(response.available_biz_item_ids) ? response.available_biz_item_ids : []);
     const results = Array.isArray(response.results) ? response.results : [];
@@ -82,7 +84,7 @@ export const useSearchStore = create<SearchState>((set) => ({
     // 2) Default: available_biz_item_ids 기준, 단 unknown 합주실은 제외
     ROOMS.forEach((room, idx) => {
       if (availableIds.has(room.bizItemId) && !unknownBusinessIds.has(room.businessId)) {
-        nextCards.push({ kind: 'default', roomIndex: idx });
+        nextCards.push({ kind: CardKind.ENTIRE, roomIndex: idx });
       }
     });
 
@@ -91,7 +93,7 @@ export const useSearchStore = create<SearchState>((set) => ({
       const idx = ROOMS.findIndex((rm) => rm.businessId === bizId);
       if (idx !== -1) {
         const days = reopenDaysByBusinessId[bizId] ?? 90;
-        nextCards.push({ kind: 'open', roomIndex: idx, reOpenDaysFromNow: days });
+        nextCards.push({ kind: CardKind.NOT_YET, roomIndex: idx, reOpenDaysFromNow: days });
       }
     });
 
@@ -102,7 +104,7 @@ export const useSearchStore = create<SearchState>((set) => ({
           if (hasConsecutiveTrues(r.available_slots)) {
             const idx = ROOMS.findIndex((rm) => rm.bizItemId === r.biz_item_id);
             if (idx !== -1 && !unknownBusinessIds.has(ROOMS[idx].businessId)) {
-              nextCards.push({ kind: 'recommend', roomIndex: idx, availableSlots: r.available_slots });
+              nextCards.push({ kind: CardKind.PARTIAL, roomIndex: idx, availableSlots: r.available_slots });
             }
           }
         }
