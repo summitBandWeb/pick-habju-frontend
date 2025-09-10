@@ -12,6 +12,9 @@ export type SearchState = {
   cards: SearchCardItem[];
   // 필터링/정렬된 카드 데이터 (실제 렌더링용)
   filteredCards: SearchCardItem[];
+  // 일부가능 포함 여부
+  includePartiallyPossible: boolean;
+  setIncludePartiallyPossible: (include: boolean) => void;
   // 마지막 검색 조건 (가격 계산 등에 사용)
   lastQuery?: {
     date: string;
@@ -25,7 +28,11 @@ export type SearchState = {
   setFilteredCards: (cards: SearchCardItem[]) => void;
 };
 
-export type CardKind = 'default' | 'open' | 'recommend';
+export enum CardKind {
+  ENTIRE = 'entire',     // 전체 시간 이용 가능 (기존 'default')
+  NOT_YET = 'not_yet',   // 아직 오픈 안함 (기존 'open')
+  PARTIAL = 'partial',   // 일부 시간만 가능 (기존 'recommend')
+}
 
 export type SearchCardItem = {
   kind: CardKind;
