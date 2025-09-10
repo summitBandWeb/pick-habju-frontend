@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FilterSection from './FilterSection';
+import { SortType } from './FilterSection.constants';
 
 const meta = {
   title: 'Components/FilterSection',
@@ -16,6 +17,7 @@ type Story = StoryObj<typeof meta>;
 // 기본 스토리
 export const Default: Story = {
   args: {
-    SearchResultNumber: 25,
+    sortValue: SortType.PRICE_LOW,
+    onSortChange: (sortType) => console.log('Sort changed:', sortType),
   },
 };
