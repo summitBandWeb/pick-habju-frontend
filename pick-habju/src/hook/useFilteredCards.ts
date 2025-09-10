@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ROOMS } from '../constants/data';
 import { sortCards } from '../utils/sortCards';
+import { partialSearch } from '../utils/partialSearch';
 import { SortType } from '../components/FilterSection/FilterSection.constants';
 import type { SearchCardItem } from '../store/search/searchStore.types';
 import { CardKind } from '../store/search/searchStore.types';
@@ -32,12 +33,11 @@ export const useFilteredCards = ({
       filteredCards = cards.filter((card) => card.kind !== CardKind.PARTIAL);
     }
 
-    // 검색어 필터링
+    // 검색어 필터링 (부분검색 지원, 정렬은 기존 sortCards 로직 사용)
     if (searchText.trim()) {
       filteredCards = filteredCards.filter((card) => {
         const room = ROOMS[card.roomIndex];
-        const searchTerm = searchText.toLowerCase();
-        return room.name.toLowerCase().includes(searchTerm) || room.branch.toLowerCase().includes(searchTerm);
+        return partialSearch(searchText, room.name, room.branch);
       });
     }
 
