@@ -1,8 +1,8 @@
-import { ROOMS } from '../constants/data';
-import { calculateTotalPrice } from './calcTotalPrice';
 import { SortType } from '../components/FilterSection/FilterSection.constants';
 import type { SearchCardItem } from '../store/search/searchStore.types';
 import { CardKind } from '../store/search/searchStore.types';
+import { createPriceCache } from './priceCache';
+import { ROOMS } from '../constants/data';
 
 interface SortParams {
   hourSlots: string[];
@@ -11,24 +11,12 @@ interface SortParams {
 }
 
 export const sortCards = (cards: SearchCardItem[], sortType: SortType, sortParams: SortParams): SearchCardItem[] => {
-  // 가격 캐시 생성 - 중복 계산 방지
-  const priceCache = new Map<number, number>();
-
-  const getPrice = (roomIndex: number): number => {
-    if (priceCache.has(roomIndex)) {
-      return priceCache.get(roomIndex)!; // 캐시된 값 반환
-    }
-
-    const price = calculateTotalPrice({
-      room: ROOMS[roomIndex],
-      hourSlots: sortParams.hourSlots,
-      peopleCount: sortParams.peopleCount,
-      dateIso: sortParams.dateIso,
-    });
-
-    priceCache.set(roomIndex, price); // 캐시에 저장
-    return price;
-  };
+  // 가격 캐싱 함수 생성 - 중복 계산 방지 (별도 유틸리티로 분리됨)
+  const getPrice = createPriceCache({
+    hourSlots: sortParams.hourSlots,
+    peopleCount: sortParams.peopleCount,
+    dateIso: sortParams.dateIso,
+  });
 
   return [...cards].sort((a, b) => {
     // 카드 우선순위: not_yet 카드는 항상 맨 아래
