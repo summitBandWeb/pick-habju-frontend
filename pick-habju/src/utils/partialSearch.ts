@@ -102,28 +102,37 @@ const isConsecutiveMatch = (searchTerm: string, targetText: string): boolean => 
 };
 
 /**
- * 초성 검색 지원 (엄격한 연속 매칭)
- * @example "ㅂㅈ" → "비쥬합주실" (O), "ㅈㅅ" → "비쥬합주실" (X)
+ * 하이브리드 초성 검색을 지원하는 함수.
+ * - 다중 초성: 단어의 시작 부분과 일치해야 함 (엄격)
+ * - 단일 초성: 단어 내에 포함되면 일치 (유연)
+ * @example
+ * "ㅂㅈ" → "비쥬합주실" (O - '비쥬'의 시작과 일치)
+ * "ㅈㅅ" → "비쥬합주실" (X - '주실'은 단어의 시작이 아님)
+ * "ㅈ" → "비쥬합주실" (O - '쥬'의 초성이 포함됨)
  */
 
 const isInitialConsonantMatch = (searchTerm: string, targetText: string): boolean => {
   const searchInitials = getInitialConsonants(searchTerm);
   const targetInitials = getInitialConsonants(targetText);
 
-  if (searchInitials && searchInitials.length > 0) {
-    // 전체 문자열의 초성이 검색어 초성으로 시작하는지 확인
-    if (targetInitials.startsWith(searchInitials)) {
+  if (!searchInitials) return false;
+
+  // 전체 초성이 검색어 초성으로 '시작'하는지 (가장 우선)
+  if (targetInitials.startsWith(searchInitials)) {
+    return true;
+  }
+
+  // 각 단어의 초성이 검색어 초성으로 '시작'하는지
+  const targetWords = targetText.split(/[\s\-.]+/);
+  for (const word of targetWords) {
+    if (getInitialConsonants(word).startsWith(searchInitials)) {
       return true;
     }
+  }
 
-    // 단어 경계에서 초성이 일치하는지 확인
-    const targetWords = targetText.split(/[\s\-.]+/); // 공백, 하이픈, 점으로 단어 분리
-    for (const word of targetWords) {
-      const wordInitials = getInitialConsonants(word);
-      if (wordInitials.startsWith(searchInitials)) {
-        return true;
-      }
-    }
+  // [특별 케이스] 검색어가 단일 초성일 경우에만 '포함' 여부도 확인
+  if (searchInitials.length === 1 && targetInitials.includes(searchInitials)) {
+    return true;
   }
 
   return false;
