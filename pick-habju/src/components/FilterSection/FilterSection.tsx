@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import WhiteFilterIcon from '../../assets/svg/whitefilter.svg';
-import BlueFilterIcon from '../../assets/svg/bluefilter.svg';
+import BlackFilterIcon from '../../assets/svg/BlackFilter.svg';
+import FilterCheckIcon from '../../assets/svg/FilterCheck.svg';
 
 import type { FilterSectionProps } from './FilterSection.types';
 import { SORT_OPTIONS, SortType } from './FilterSection.constants';
+import PartiallyPossibleButton from '../PartiallyPossibleButton/PartiallyPossibleButton';
 
-const FilterSection = ({ SearchResultNumber, onSortChange, sortValue }: FilterSectionProps) => {
+const FilterSection = ({ onSortChange, sortValue }: FilterSectionProps) => {
   const [selectedSort, setSelectedSort] = useState(sortValue || SortType.PRICE_LOW);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -42,18 +43,16 @@ const FilterSection = ({ SearchResultNumber, onSortChange, sortValue }: FilterSe
 
   return (
     <div className="flex justify-between items-center w-91.5 h-12">
-      <div className="font-modal-calctype">
-        검색결과 <span className="text-blue-500">{SearchResultNumber ?? 'N'}</span>개
-      </div>
+      <PartiallyPossibleButton />
       <div className="relative" ref={dropdownRef}>
         <button
-          className={`flex items-center justify-between w-37.5 h-10 px-3 py-2 rounded-lg focus:outline-none shadow-filter ${
-            isDropdownOpen ? 'bg-blue-500 text-primary-white' : 'bg-primary-white text-blue-500 hover:bg-blue-300'
+          className={`flex items-center justify-between w-37.5 h-10 px-3 py-2 rounded-lg focus:outline-none shadow-filter bg-primary-white hover:bg-gray-100 text-gray-600 border ${
+            isDropdownOpen ? 'border-gray-600' : 'border-transparent'
           }`}
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           <span className="font-modal-call">{SORT_OPTIONS.find((option) => option.value === selectedSort)?.label}</span>
-          <img src={isDropdownOpen ? WhiteFilterIcon : BlueFilterIcon} alt="filter icon" className="w-4 h-4" />
+          <img src={BlackFilterIcon} alt="filter icon" />
         </button>
 
         {isDropdownOpen && (
@@ -62,14 +61,13 @@ const FilterSection = ({ SearchResultNumber, onSortChange, sortValue }: FilterSe
             {SORT_OPTIONS.map((option) => (
               <button
                 key={option.value}
-                className={`w-full px-3 py-2 text-left font-modal-calcdetail hover:bg-gray-200 ${
-                  selectedSort === option.value
-                    ? 'bg-primary-white text-blue-500 border-l-[0.125rem] border-blue-500'
-                    : 'text-gray-400'
+                className={`w-full px-3 py-2 text-left font-modal-calcdetail bg-primary-white hover:bg-gray-200 flex justify-between items-center ${
+                  selectedSort === option.value ? 'text-gray-600' : 'text-gray-300'
                 }`}
                 onClick={() => handleSortChange(option.value)}
               >
-                {option.label}
+                <span>{option.label}</span>
+                {selectedSort === option.value && <img src={FilterCheckIcon} alt="selected" />}
               </button>
             ))}
             <div className="h-2 rounded-b-lg"></div>
