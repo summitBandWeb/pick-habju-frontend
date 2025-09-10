@@ -9,43 +9,25 @@ import { showToastByKey } from '../utils/showToastByKey';
 import { useToastStore } from '../store/toast/toastStore';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
 import { useReservationActions } from '../hook/useReservationStore';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 import SearchBar from '../components/SearchBar/SearchBar';
 import FilterSection from '../components/FilterSection/FilterSection';
-import { calculateTotalPrice } from '../utils/calcTotalPrice';
 import { SortType } from '../components/FilterSection/FilterSection.constants';
 
 import FilterSectionSkeleton from '../components/FilterSection/FilterSectionSkeleton';
 import SearchBarSkeleton from '../components/SearchBar/SearchBarSkeleton';
 
+import { useDefaultDateTime } from '../hook/useDefaultDateTime';
+import { useFilteredCards } from '../hook/useFilteredCards';
+
 const HomePage = () => {
   const { showPersistentToast, hideToast } = useToastStore();
   const reservationActions = useReservationActions();
   const [heroResetCounter, setHeroResetCounter] = useState(0);
-  // 현재 시간에서 다음 정시로 올림 (예: 14:00 -> 15:00, 14:03 -> 15:00)
-  const now = new Date();
-  const baseDate = new Date(now);
-  let startHour = now.getHours() + 1;
-  if (startHour === 24) {
-    // 자정 넘어가는 경우: 날짜 +1, 00시 시작
-    baseDate.setDate(baseDate.getDate() + 1);
-    startHour = 0;
-  }
 
-  const month = baseDate.getMonth() + 1;
-  const day = String(baseDate.getDate()).padStart(2, '0');
-  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][baseDate.getDay()];
-
-  const rawEndHour = (startHour + 2) % 24;
-  const displayEndHour = rawEndHour === 0 ? 24 : rawEndHour <= startHour ? rawEndHour + 24 : rawEndHour;
-  const defaultDateIso = `${baseDate.getFullYear()}-${String(month).padStart(2, '0')}-${day}`;
-  const defaultSlots = useMemo(
-    () => [`${String(startHour).padStart(2, '0')}:00`, `${String((startHour + 1) % 24).padStart(2, '0')}:00`],
-    [startHour]
-  );
-  const defaultDateTimeLabel = `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${displayEndHour}시`;
-  const defaultPeopleCount = 12;
+  // 기본 날짜/시간 설정 훅
+  const { defaultDateIso, defaultSlots, defaultDateTimeLabel, defaultPeopleCount } = useDefaultDateTime();
 
   const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
   const setPhase = useSearchStore((s) => s.setPhase);
@@ -54,6 +36,7 @@ const HomePage = () => {
   const cards = useSearchStore((s) => s.cards);
   const phase = useSearchStore((s) => s.phase);
   const lastQuery = useSearchStore((s) => s.lastQuery);
+  const includePartiallyPossible = useSearchStore((s) => s.includePartiallyPossible);
 
   // 정렬 상태 관리
   const [sortType, setSortType] = useState<SortType>(SortType.PRICE_LOW);
@@ -61,79 +44,17 @@ const HomePage = () => {
   const [searchText, setSearchText] = useState('');
 
   // 검색어와 정렬을 적용한 카드 목록
-  const filteredAndSortedCards = useMemo(() => {
-    let filteredCards = cards;
-
-    // 검색어 필터링
-    if (searchText.trim()) {
-      filteredCards = cards.filter((card) => {
-        const room = ROOMS[card.roomIndex];
-        const searchTerm = searchText.toLowerCase();
-        return room.name.toLowerCase().includes(searchTerm) || room.branch.toLowerCase().includes(searchTerm);
-      });
-    }
-
-    // 정렬 적용
-    const sortedCards = [...filteredCards].sort((a, b) => {
-      const roomA = ROOMS[a.roomIndex];
-      const roomB = ROOMS[b.roomIndex];
-
-      switch (sortType) {
-        case SortType.PRICE_LOW: {
-          const totalPriceA = calculateTotalPrice({
-            room: roomA,
-            hourSlots: lastQuery?.hour_slots || defaultSlots,
-            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
-            dateIso: lastQuery?.date || defaultDateIso,
-          });
-          const totalPriceB = calculateTotalPrice({
-            room: roomB,
-            hourSlots: lastQuery?.hour_slots || defaultSlots,
-            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
-            dateIso: lastQuery?.date || defaultDateIso,
-          });
-          return totalPriceA - totalPriceB;
-        }
-
-        case SortType.PRICE_HIGH: {
-          const totalPriceA = calculateTotalPrice({
-            room: roomA,
-            hourSlots: lastQuery?.hour_slots || defaultSlots,
-            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
-            dateIso: lastQuery?.date || defaultDateIso,
-          });
-          const totalPriceB = calculateTotalPrice({
-            room: roomB,
-            hourSlots: lastQuery?.hour_slots || defaultSlots,
-            peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
-            dateIso: lastQuery?.date || defaultDateIso,
-          });
-          return totalPriceB - totalPriceA;
-        }
-
-        case SortType.CAPACITY_LOW:
-          return roomA.maxCapacity - roomB.maxCapacity;
-
-        case SortType.CAPACITY_HIGH:
-          return roomB.maxCapacity - roomA.maxCapacity;
-
-        default:
-          return 0;
-      }
-    });
-
-    return sortedCards;
-  }, [
+  const filteredAndSortedCards = useFilteredCards({
     cards,
+    includePartiallyPossible,
     searchText,
     sortType,
-    lastQuery?.hour_slots,
-    lastQuery?.peopleCount,
-    lastQuery?.date,
-    defaultSlots,
-    defaultPeopleCount,
-    defaultDateIso,
-  ]);
+    sortParams: {
+      hourSlots: lastQuery?.hour_slots || defaultSlots,
+      peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
+      dateIso: lastQuery?.date || defaultDateIso,
+    },
+  });
 
   // 필터링된 카드를 store에 업데이트
   useEffect(() => {
@@ -285,7 +206,6 @@ const HomePage = () => {
             </div>
             <div className="mx-auto">
               <FilterSection
-                SearchResultNumber={filteredAndSortedCards.length}
                 sortValue={sortType}
                 onSortChange={(newSortType) => {
                   setSortType(newSortType);
