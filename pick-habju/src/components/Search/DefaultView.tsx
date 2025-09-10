@@ -12,6 +12,8 @@ import CallReservationNoticeModal from '../Modal/Call/CallReservationNoticeModal
 import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots } from '../../utils/availableTimeFormatter';
 import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } from '../../utils/modalFlowLogic';
 import { getBookingUrl } from '../../utils/bookingUrl';
+import NoResultView from './NoResultView';
+import { CardKind } from '../../store/search/searchStore.types';
 
 const DefaultView = () => {
   const filteredCards = useSearchStore((s) => s.filteredCards);
@@ -25,6 +27,11 @@ const DefaultView = () => {
     phoneNumber?: string;
   } | null>(null);
 
+  // 검색 결과가 없을 때 NoResultView 표시 - 추후 변경 필요할듯 ?
+  if (filteredCards.length === 0) {
+    return <NoResultView />;
+  }
+
   // filteredCards는 이미 HomePage에서 정렬된 상태이므로 순서를 유지합니다
   const sorted = [...filteredCards];
 
@@ -34,13 +41,18 @@ const DefaultView = () => {
         const room = ROOMS[c.roomIndex];
         const images = room.imageUrls;
         const price = lastQuery
-          ? calculateTotalPrice({ room, hourSlots: lastQuery.hour_slots, peopleCount: lastQuery.peopleCount, dateIso: lastQuery.date })
+          ? calculateTotalPrice({
+              room,
+              hourSlots: lastQuery.hour_slots,
+              peopleCount: lastQuery.peopleCount,
+              dateIso: lastQuery.date,
+            })
           : room.pricePerHour;
         const locationText = room.subway.station;
         const walkTime = room.subway.timeToWalk.replace('도보 ', '').replace(' ', '');
         const capacity = `${room.recommendCapacity}인`;
 
-        if (c.kind === 'open') {
+        if (c.kind === CardKind.NOT_YET) {
           return (
             <Card
               key={`${c.kind}-${room.bizItemId}-${i}`}
@@ -57,7 +69,7 @@ const DefaultView = () => {
           );
         }
 
-        if (c.kind === 'recommend') {
+        if (c.kind === CardKind.PARTIAL) {
           return (
             <Card
               key={`${c.kind}-${room.bizItemId}-${i}`}
