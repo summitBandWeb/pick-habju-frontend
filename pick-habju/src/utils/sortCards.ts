@@ -11,6 +11,25 @@ interface SortParams {
 }
 
 export const sortCards = (cards: SearchCardItem[], sortType: SortType, sortParams: SortParams): SearchCardItem[] => {
+  // 가격 캐시 생성 - 중복 계산 방지
+  const priceCache = new Map<number, number>();
+
+  const getPrice = (roomIndex: number): number => {
+    if (priceCache.has(roomIndex)) {
+      return priceCache.get(roomIndex)!; // 캐시된 값 반환
+    }
+
+    const price = calculateTotalPrice({
+      room: ROOMS[roomIndex],
+      hourSlots: sortParams.hourSlots,
+      peopleCount: sortParams.peopleCount,
+      dateIso: sortParams.dateIso,
+    });
+
+    priceCache.set(roomIndex, price); // 캐시에 저장
+    return price;
+  };
+
   return [...cards].sort((a, b) => {
     // 카드 우선순위: not_yet 카드는 항상 맨 아래
     if (a.kind === CardKind.NOT_YET && b.kind !== CardKind.NOT_YET) return 1;
@@ -19,41 +38,26 @@ export const sortCards = (cards: SearchCardItem[], sortType: SortType, sortParam
     const roomA = ROOMS[a.roomIndex];
     const roomB = ROOMS[b.roomIndex];
 
+    // 가격 정렬이 필요한 경우 미리 계산 (중복 제거)
+    let totalPriceA: number | null = null;
+    let totalPriceB: number | null = null;
+
+    if (sortType === SortType.PRICE_LOW || sortType === SortType.PRICE_HIGH) {
+      totalPriceA = getPrice(a.roomIndex);
+      totalPriceB = getPrice(b.roomIndex);
+    }
+
     // 메인 정렬 기준
     let mainCompare = 0;
 
     switch (sortType) {
       case SortType.PRICE_LOW: {
-        const totalPriceA = calculateTotalPrice({
-          room: roomA,
-          hourSlots: sortParams.hourSlots,
-          peopleCount: sortParams.peopleCount,
-          dateIso: sortParams.dateIso,
-        });
-        const totalPriceB = calculateTotalPrice({
-          room: roomB,
-          hourSlots: sortParams.hourSlots,
-          peopleCount: sortParams.peopleCount,
-          dateIso: sortParams.dateIso,
-        });
-        mainCompare = totalPriceA - totalPriceB;
+        mainCompare = totalPriceA! - totalPriceB!; // 이미 계산된 값 사용
         break;
       }
 
       case SortType.PRICE_HIGH: {
-        const totalPriceA = calculateTotalPrice({
-          room: roomA,
-          hourSlots: sortParams.hourSlots,
-          peopleCount: sortParams.peopleCount,
-          dateIso: sortParams.dateIso,
-        });
-        const totalPriceB = calculateTotalPrice({
-          room: roomB,
-          hourSlots: sortParams.hourSlots,
-          peopleCount: sortParams.peopleCount,
-          dateIso: sortParams.dateIso,
-        });
-        mainCompare = totalPriceB - totalPriceA;
+        mainCompare = totalPriceB! - totalPriceA!; // 이미 계산된 값 사용
         break;
       }
 
@@ -80,18 +84,8 @@ export const sortCards = (cards: SearchCardItem[], sortType: SortType, sortParam
       if (capacityCompare !== 0) return capacityCompare;
     } else if (sortType === SortType.CAPACITY_LOW || sortType === SortType.CAPACITY_HIGH) {
       // 인원 정렬일 때 인원수가 동일하면 → 가격 낮은순으로 2차 정렬
-      const totalPriceA = calculateTotalPrice({
-        room: roomA,
-        hourSlots: sortParams.hourSlots,
-        peopleCount: sortParams.peopleCount,
-        dateIso: sortParams.dateIso,
-      });
-      const totalPriceB = calculateTotalPrice({
-        room: roomB,
-        hourSlots: sortParams.hourSlots,
-        peopleCount: sortParams.peopleCount,
-        dateIso: sortParams.dateIso,
-      });
+      const totalPriceA = getPrice(a.roomIndex); // 캐시 재사용!
+      const totalPriceB = getPrice(b.roomIndex); // 캐시 재사용!
       const priceCompare = totalPriceA - totalPriceB;
       if (priceCompare !== 0) return priceCompare;
     }
