@@ -44,6 +44,7 @@
 
     --color-primary-white: #ffffff;
     --color-primary-black: #000000;
+    --color-blue-300: #d5ecff;
     --color-blue-500: #048cfc;
 
     --color-gray-100: #f1f1f1;
@@ -59,7 +60,7 @@
     --color-yellow-900: #f5be00;
 
     --color-red-400: #dc5b6d;
-    --color-red-500: #d33248;
+    --color-red-500: #ff383c;
 
     --color-green: #2bbf53;
 
@@ -150,8 +151,9 @@
     --line-height-hero-info: normal;
     --letter-spacing-hero-info: 0em;
 
-    --box-shadow-card: 4px 4px 10px rgba(0, 0, 0, 0.25);
-    --box-shadow-search: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    --box-shadow-card: 4px 4px 10px 0px rgba(0, 0, 0, 0.25);
+    --box-shadow-search: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+    --box-shadow-filter: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -327,6 +329,9 @@
   }
   .shadow-search {
     box-shadow: var(--box-shadow-search);
+  }
+  .shadow-filter {
+    box-shadow: var(--box-shadow-filter);
   }
 
   /* Toast keyframes */

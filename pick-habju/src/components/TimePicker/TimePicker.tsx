@@ -42,7 +42,7 @@ const TimePicker = ({
   };
 
   return (
-    <div className="flex w-90 bg-white rounded-xl shadow-lg overflow-hidden px-2 pt-15 flex-col gap-15">
+    <div className="flex w-90 bg-white rounded-xl overflow-hidden px-2 pt-15 flex-col gap-15">
       <TimePickerBody
         startHour={time.startHour}
         startPeriod={time.startPeriod}

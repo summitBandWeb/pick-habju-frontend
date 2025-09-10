@@ -22,11 +22,7 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
 
   // 항상 기본 선택은 '당일' (초기값 전달 시 해당 날짜로 설정)
   const initialSelected = initialSelectedDate
-    ? new Date(
-        initialSelectedDate.getFullYear(),
-        initialSelectedDate.getMonth(),
-        initialSelectedDate.getDate()
-      )
+    ? new Date(initialSelectedDate.getFullYear(), initialSelectedDate.getMonth(), initialSelectedDate.getDate())
     : todayAtMidnight;
   const [selected, setSelected] = useState<Date[]>([initialSelected]);
   const [activeStartDate, setActiveStartDate] = useState<Date>(() => {
@@ -66,7 +62,7 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
   };
 
   return (
-    <div className="inline-block w-90 bg-primary-white rounded-xl shadow-lg overflow-hidden pt-4 px-2.5">
+    <div className="inline-block w-90 bg-primary-white rounded-xl overflow-hidden pt-4 px-2.5">
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
       <DatePickerBody
         activeStartDate={activeStartDate}

@@ -160,9 +160,9 @@ const Card = ({
   );
 
   return (
-    <div className="w-80 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
+    <div className="w-92.5 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
-      <div className="relative min-w-80 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
+      <div className="relative min-w-92.5 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
         {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
         <div className="relative w-full h-full overflow-hidden">
           <div

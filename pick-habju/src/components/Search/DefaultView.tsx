@@ -14,7 +14,7 @@ import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } fro
 import { getBookingUrl } from '../../utils/bookingUrl';
 
 const DefaultView = () => {
-  const cards = useSearchStore((s) => s.cards);
+  const filteredCards = useSearchStore((s) => s.filteredCards);
   const lastQuery = useSearchStore((s) => s.lastQuery);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [currentModal, setCurrentModal] = useState<{
@@ -25,39 +25,11 @@ const DefaultView = () => {
     phoneNumber?: string;
   } | null>(null);
 
-  const sorted = [...cards]
-    .map((c, idx) => ({ c, idx }))
-    .sort((a, b) => {
-      const rank = (kind: typeof a.c.kind) => (kind === 'default' ? 0 : kind === 'recommend' ? 1 : 2);
-      const ra = rank(a.c.kind);
-      const rb = rank(b.c.kind);
-      if (ra !== rb) return ra - rb;
-
-      // default 카드들끼리는 총 금액 낮은 순으로 정렬
-      if (a.c.kind === 'default' && b.c.kind === 'default' && lastQuery) {
-        const roomA = ROOMS[a.c.roomIndex];
-        const roomB = ROOMS[b.c.roomIndex];
-        const priceA = calculateTotalPrice({
-          room: roomA,
-          hourSlots: lastQuery.hour_slots,
-          peopleCount: lastQuery.peopleCount,
-          dateIso: lastQuery.date,
-        });
-        const priceB = calculateTotalPrice({
-          room: roomB,
-          hourSlots: lastQuery.hour_slots,
-          peopleCount: lastQuery.peopleCount,
-          dateIso: lastQuery.date,
-        });
-        if (priceA !== priceB) return priceA - priceB;
-      }
-
-      return a.idx - b.idx; // 안정성 보장
-    })
-    .map((x) => x.c);
+  // filteredCards는 이미 HomePage에서 정렬된 상태이므로 순서를 유지합니다
+  const sorted = [...filteredCards];
 
   return (
-    <div className="w-full flex flex-col items-center gap-4 py-4 bg-[#FFFBF0]">
+    <div className="w-full flex flex-col items-center gap-4 pt-3 pb-4 bg-yellow-300">
       {sorted.map((c, i) => {
         const room = ROOMS[c.roomIndex];
         const images = room.imageUrls;
