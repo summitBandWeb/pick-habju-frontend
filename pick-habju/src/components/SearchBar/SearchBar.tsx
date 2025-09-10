@@ -28,7 +28,7 @@ const SearchBar = ({ value, onSearchChange }: SearchBarProps) => {
 
   return (
     <div className="w-92.5 h-12 px-4 py-1 flex items-center justify-center rounded-lg shadow-filter bg-primary-white">
-      <img src={SearchIcon} alt="SearchIcon" className="w-4 h-4 mr-2" />
+      <img src={SearchIcon} alt="SearchIcon" className="mr-2" />
       <input
         type="text"
         placeholder="결과 내 합주실 검색"
@@ -36,7 +36,9 @@ const SearchBar = ({ value, onSearchChange }: SearchBarProps) => {
         onChange={(e) => setSearchText(e.target.value)}
         className="flex-1 outline-none text-gray-300 font-modal-call"
       />
-      <img src={DeleteIcon} alt="DeleteIcon" className="w-4 h-4 cursor-pointer" onClick={handleClearText} />
+      {searchText.trim() && (
+        <img src={DeleteIcon} alt="DeleteIcon" className="cursor-pointer" onClick={handleClearText} />
+      )}
     </div>
   );
 };
