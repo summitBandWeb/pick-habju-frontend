@@ -10,7 +10,7 @@ const PartiallyPossibleButton = () => {
 
   return (
     <button
-      className="w-[8.4375rem] h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-2.5 items-center outline-none hover:bg-gray-100"
+      className="w-[8.4375rem] h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-2.5 items-center outline-none bg-primary-white hover:bg-gray-100"
       onClick={() => setIncludePartiallyPossible(!includePartiallyPossible)}
     >
       <span className={`font-modal-call ${isActive ? 'text-blue-500' : 'text-gray-300'}`}>부분가능 포함</span>
