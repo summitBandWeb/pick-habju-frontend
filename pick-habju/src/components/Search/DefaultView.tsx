@@ -12,8 +12,8 @@ import CallReservationNoticeModal from '../Modal/Call/CallReservationNoticeModal
 import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots } from '../../utils/availableTimeFormatter';
 import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } from '../../utils/modalFlowLogic';
 import { getBookingUrl } from '../../utils/bookingUrl';
-import NoResultView from './NoResultView';
 import { CardKind } from '../../store/search/searchStore.types';
+import NoSearchResult from '../NoSearchResult/NoSearchResult.tsx';
 
 const DefaultView = () => {
   const filteredCards = useSearchStore((s) => s.filteredCards);
@@ -29,7 +29,7 @@ const DefaultView = () => {
 
   // 검색 결과가 없을 때 NoResultView 표시 - 추후 변경 필요할듯 ?
   if (filteredCards.length === 0) {
-    return <NoResultView />;
+    return <NoSearchResult />;
   }
 
   // filteredCards는 이미 HomePage에서 정렬된 상태이므로 순서를 유지합니다
