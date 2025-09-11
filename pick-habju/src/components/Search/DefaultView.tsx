@@ -13,7 +13,7 @@ import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots } from '../.
 import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } from '../../utils/modalFlowLogic';
 import { getBookingUrl } from '../../utils/bookingUrl';
 import { CardKind } from '../../store/search/searchStore.types';
-import NoSearchResult from '../NoSearchResult/NoSearchResult.tsx';
+import NoSearchResult from '../NoSearchResult/NoSearchResult';
 
 const DefaultView = () => {
   const filteredCards = useSearchStore((s) => s.filteredCards);
