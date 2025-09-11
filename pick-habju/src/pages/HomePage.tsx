@@ -20,11 +20,13 @@ import SearchBarSkeleton from '../components/SearchBar/SearchBarSkeleton';
 
 import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 import { useFilteredCards } from '../hook/useFilteredCards';
+import { useGoogleFormToastStore } from '../store/googleFormToast/googleFormToastStore';
 
 const HomePage = () => {
   const { showPersistentToast, hideToast } = useToastStore();
   const reservationActions = useReservationActions();
   const [heroResetCounter, setHeroResetCounter] = useState(0);
+  const { showToast } = useGoogleFormToastStore();
 
   // 기본 날짜/시간 설정 훅
   const { defaultDateIso, defaultSlots, defaultDateTimeLabel, defaultPeopleCount } = useDefaultDateTime();
@@ -60,6 +62,15 @@ const HomePage = () => {
   useEffect(() => {
     setFilteredCards(filteredAndSortedCards);
   }, [filteredAndSortedCards, setFilteredCards]);
+
+  // 첫 방문 시 구글폼 토스트 자동 표시
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      showToast();
+    }, 1000); // 1초 후 표시
+
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
     const { date, hour_slots, peopleCount } = params;
