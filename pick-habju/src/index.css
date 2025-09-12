@@ -32,6 +32,7 @@
   body {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-gutter: stable; /* 스크롤바 공간 유지 */
   }
 
   body::-webkit-scrollbar {
