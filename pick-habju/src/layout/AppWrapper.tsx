@@ -13,6 +13,7 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
       {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
+      {/* isWindows: 윈도우는 스크롤바 공간 확보 위해 max-w 26.875rem */}
       <div
         className={`w-full h-screen flex flex-col bg-primary-white ${
           isWindows ? 'max-w-[26.875rem]' : 'max-w-[25.9375rem]'
@@ -22,9 +23,9 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
         <AppHeader />
 
         {/* 스크롤 영역: 헤더 제외 나머지 */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[#FFFBF0] scrollbar-stable">
-          <div className="w-full flex flex-col items-center">{children}</div>
-          <div className="flex justify-center py-6 w-full bg-[#FFFBF0]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-stable">
+          <div className="w-full flex flex-col items-center bg-yellow-300">{children}</div>
+          <div className="flex justify-center py-6 w-full bg-yellow-300">
             <Footer />
           </div>
         </div>
