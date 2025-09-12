@@ -182,7 +182,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center scrollbar-hide">
       <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
         <HeroArea
           key={heroResetCounter}
