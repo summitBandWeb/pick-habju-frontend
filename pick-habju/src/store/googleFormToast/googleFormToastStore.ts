@@ -5,18 +5,23 @@ import { immer } from 'zustand/middleware/immer';
 interface GoogleFormToastState {
   isVisible: boolean;
   hasVisitedGoogleForm: boolean;
+  searchCount: number;
+  hasShownInitialToast: boolean;
   showToast: () => void;
   hideToast: () => void;
   markGoogleFormVisited: () => void;
+  incrementSearchCount: () => void;
   resetState: () => void;
 }
 
 export const GOOGLE_FORM_URL = 'https://forms.gle/uea6mtKQSBoAN7fs6';
 
-// 초기 상태를 별도 객체로 분리
+// 초기 상태를 별도 객체로 분리하여 재사용
 const initialState = {
   isVisible: false,
   hasVisitedGoogleForm: false,
+  searchCount: 0,
+  hasShownInitialToast: false,
 };
 
 export const useGoogleFormToastStore = create<GoogleFormToastState>()(
@@ -26,23 +31,40 @@ export const useGoogleFormToastStore = create<GoogleFormToastState>()(
         ...initialState,
 
         showToast: () => {
-          if (!get().hasVisitedGoogleForm) {
-            set((state) => {
-              state.isVisible = true;
+          const state = get();
+          // 초기 토스트를 아직 보여주지 않았을 때
+          if (!state.hasShownInitialToast) {
+            set((draft) => {
+              draft.isVisible = true;
+              draft.hasShownInitialToast = true;
+            });
+            return;
+          }
+
+          // 구글폼을 아직 방문하지 않았고, 검색 횟수가 2의 배수일 때만 표시
+          if (!state.hasVisitedGoogleForm && state.searchCount > 0 && state.searchCount % 2 === 0) {
+            set((draft) => {
+              draft.isVisible = true;
             });
           }
         },
 
         hideToast: () => {
-          set((state) => {
-            state.isVisible = false;
+          set((draft) => {
+            draft.isVisible = false;
           });
         },
 
         markGoogleFormVisited: () => {
-          set((state) => {
-            state.hasVisitedGoogleForm = true;
-            state.isVisible = false;
+          set((draft) => {
+            draft.hasVisitedGoogleForm = true;
+            draft.isVisible = false;
+          });
+        },
+
+        incrementSearchCount: () => {
+          set((draft) => {
+            draft.searchCount += 1;
           });
         },
 
@@ -55,6 +77,8 @@ export const useGoogleFormToastStore = create<GoogleFormToastState>()(
         storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           hasVisitedGoogleForm: state.hasVisitedGoogleForm,
+          searchCount: state.searchCount,
+          hasShownInitialToast: state.hasShownInitialToast,
         }),
       }
     )

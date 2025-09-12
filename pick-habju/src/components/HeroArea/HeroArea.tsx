@@ -20,6 +20,7 @@ import { generateHourSlots } from '../../utils/formatTime';
 import { useSearchStore } from '../../store/search/searchStore';
 import { SearchPhase } from '../../store/search/searchStore.types';
 import { trackSearchButtonClick } from '../../utils/analytics';
+import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -30,6 +31,9 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
   const phase = useSearchStore((s) => s.phase);
   const isLoading = phase === SearchPhase.Loading;
+
+  // GoogleForm Toast Store
+  const { incrementSearchCount, showToast } = useGoogleFormToastStore();
 
   const [lastWarningKey, setLastWarningKey] = useState<string | null>(null);
   // TimePicker 임시 선택값 유지
@@ -57,7 +61,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       setIsDatePickerOpen(false);
       // 타임피커 초기 포커스를 HeroArea의 현재 값으로 동기화
       try {
-        const slots = (hourSlots && hourSlots.length > 0) ? hourSlots : dateTime.hour_slots;
+        const slots = hourSlots && hourSlots.length > 0 ? hourSlots : dateTime.hour_slots;
         if (Array.isArray(slots) && slots.length > 0) {
           const parseHour = (hhmm: string): number => {
             const h = parseInt(hhmm.split(':')[0], 10);
@@ -207,9 +211,10 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           const nextSlots = generateHourSlots(start24, end24);
 
           const isSameDate = last?.date === dateIso;
-          const isSameSlots = Array.isArray(last?.hour_slots)
-            && last!.hour_slots.length === nextSlots.length
-            && last!.hour_slots.every((v, i) => v === nextSlots[i]);
+          const isSameSlots =
+            Array.isArray(last?.hour_slots) &&
+            last!.hour_slots.length === nextSlots.length &&
+            last!.hour_slots.every((v, i) => v === nextSlots[i]);
 
           if (!(isSameDate && isSameSlots)) {
             onDateTimeChange?.();
@@ -298,11 +303,15 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                   slots = dateTime.hour_slots;
                 }
 
+                // 검색 횟수 증가 및 토스트 표시 조건 확인
+                incrementSearchCount();
+                showToast();
+
                 // 검색 버튼 클릭 이벤트를 GA에 추적
                 trackSearchButtonClick({
                   date: dateIso,
                   hour_slots: slots,
-                  peopleCount: peopleCountText
+                  peopleCount: peopleCountText,
                 });
 
                 // UI 라벨 업데이트 보정
@@ -333,7 +342,9 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                 onConfirm={handleTimeConfirm}
                 onCancel={handleTimeCancel}
                 disabled={isToastVisible}
-                onDraftChange={(sh, sp, eh, ep) => setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep })}
+                onDraftChange={(sh, sp, eh, ep) =>
+                  setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep })
+                }
                 initialStartHour={draftTime?.startHour}
                 initialStartPeriod={draftTime?.startPeriod}
                 initialEndHour={draftTime?.endHour}
