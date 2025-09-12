@@ -22,7 +22,6 @@
   html {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE & Edge */
-    scrollbar-gutter: stable; /* 스크롤바 공간 유지 */
   }
 
   html::-webkit-scrollbar {
@@ -32,7 +31,6 @@
   body {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE & Edge */
-    scrollbar-gutter: stable; /* 스크롤바 공간 유지 */
   }
 
   body::-webkit-scrollbar {
@@ -381,5 +379,9 @@
   }
   .scroll-picker::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
+  }
+
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
   }
 }
