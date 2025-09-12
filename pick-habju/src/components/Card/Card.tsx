@@ -127,7 +127,7 @@ const Card = ({
       <div className="flex items-center text-gray-500 space-x-1.5">
         <div
           className={classNames(
-            'flex items-center space-x-1.5 font-card-info',
+            'flex items-center space-x-1.5 font-card-info whitespace-nowrap',
             booked ? 'text-gray-300' : 'text-gray-500'
           )}
         >
@@ -138,7 +138,7 @@ const Card = ({
         </div>
         <div
           className={classNames(
-            'flex items-center space-x-1 font-card-info',
+            'flex items-center space-x-1 font-card-info whitespace-nowrap',
             booked ? 'text-gray-300' : 'text-gray-500'
           )}
         >

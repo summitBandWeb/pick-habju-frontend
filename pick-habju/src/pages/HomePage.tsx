@@ -63,13 +63,9 @@ const HomePage = () => {
     setFilteredCards(filteredAndSortedCards);
   }, [filteredAndSortedCards, setFilteredCards]);
 
-  // 첫 방문 시 구글폼 토스트 자동 표시
+  // 첫 방문 시 구글폼 토스트 자동 표시 (렌더링 완료 후)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      showToast();
-    }, 1000); // 1초 후 표시
-
-    return () => clearTimeout(timer);
+    showToast();
   }, [showToast]);
 
   const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {

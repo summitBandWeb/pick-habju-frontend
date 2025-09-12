@@ -380,4 +380,8 @@
   .scroll-picker::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
   }
+
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
+  }
 }
