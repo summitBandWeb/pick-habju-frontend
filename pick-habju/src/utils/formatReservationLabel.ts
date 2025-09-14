@@ -1,18 +1,30 @@
+import { parseISO, format, addHours } from 'date-fns';
+import { ko } from 'date-fns/locale';
+
+/**
+ * 선택된 시간 슬롯들의 시작과 끝을 기준으로 예약 레이블을 생성합니다.
+ * (예: ['14:00', '17:00'] 선택 시 "14~18시"로 표시)
+ * @param dateIso - 'YYYY-MM-DD' 형식의 날짜 문자열
+ * @param hourSlots - ['HH:00', ...] 형식의 시간 슬롯 배열
+ * @returns 포맷팅된 예약 시간 레이블 문자열
+ */
 export const formatReservationLabel = (dateIso: string, hourSlots: string[]): string => {
-  if (!dateIso || hourSlots.length === 0) return '';
-  const [year, monthStr, dayStr] = dateIso.split('-');
-  const month = parseInt(monthStr, 10);
-  const day = dayStr.padStart(2, '0');
-  const dateObj = new Date(parseInt(year, 10), month - 1, parseInt(dayStr, 10));
-  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][dateObj.getDay()];
+  if (!dateIso || !hourSlots || hourSlots.length === 0) {
+    return '';
+  }
 
-  // 시작/종료 시간 계산
-  const first = hourSlots[0];
-  const last = hourSlots[hourSlots.length - 1];
-  const startHour = parseInt(first.split(':')[0], 10);
-  const endHourBase = parseInt(last.split(':')[0], 10) + 1;
-  // 0시는 24시로 표기
-  const endHour = endHourBase === 0 ? 24 : endHourBase;
+  const dateObj = parseISO(dateIso);
+  const datePart = format(dateObj, 'M월 d일 (E)', { locale: ko });
 
-  return `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${endHour}시`;
+  // 시작 시간 계산 (가장 빠른 슬롯)
+  const firstSlot = hourSlots[0];
+  const startTime = parseISO(`${dateIso}T${firstSlot}`);
+
+  // 종료 시간 계산 (가장 늦은 슬롯 + 1시간)
+  const lastSlot = hourSlots[hourSlots.length - 1];
+  const endTime = addHours(parseISO(`${dateIso}T${lastSlot}`), 1);
+
+  const timePart = `${format(startTime, 'HH')}~${format(endTime, 'HH')}시`;
+
+  return `${datePart} ${timePart}`;
 };
