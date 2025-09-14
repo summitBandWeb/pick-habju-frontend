@@ -255,6 +255,26 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isDatePickerOpen, isTimePickerOpen, isGuestModalOpen]);
+
+  // 모달 열렸을 때 배경 스크롤 잠금
+  useEffect(() => {
+    const anyOpen = isDatePickerOpen || isTimePickerOpen || isGuestModalOpen;
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = (document.body.style as unknown as { touchAction?: string }).touchAction;
+    if (anyOpen) {
+      document.body.style.overflow = 'hidden';
+      (document.body.style as unknown as { touchAction?: string }).touchAction = 'none';
+    }
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (originalTouchAction !== undefined) {
+        (document.body.style as unknown as { touchAction?: string }).touchAction = originalTouchAction;
+      } else {
+        (document.body.style as unknown as { touchAction?: string }).touchAction = '';
+      }
+    };
+  }, [isDatePickerOpen, isTimePickerOpen, isGuestModalOpen]);
+
   return (
     <div
       className="relative w-full h-97.5 flex flex-col items-center"
