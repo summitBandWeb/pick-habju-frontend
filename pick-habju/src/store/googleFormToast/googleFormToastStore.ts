@@ -41,8 +41,8 @@ export const useGoogleFormToastStore = create<GoogleFormToastState>()(
             return;
           }
 
-          // 구글폼을 아직 방문하지 않았고, 검색 횟수가 2의 배수일 때만 표시
-          if (!state.hasVisitedGoogleForm && state.searchCount > 0 && state.searchCount % 2 === 0) {
+          // 구글폼을 아직 방문하지 않았고, 검색 횟수가 정확히 2번일 때만 표시 (총 2번째이자 마지막)
+          if (!state.hasVisitedGoogleForm && state.searchCount === 2) {
             set((draft) => {
               draft.isVisible = true;
             });
