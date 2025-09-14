@@ -66,15 +66,17 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
         setOpen(false);
       }}
     >
-      <div className="w-[22rem] bg-white rounded-2xl shadow-lg p-6 text-center">
+      <div className="w-[22.5rem] bg-white rounded-2xl shadow-lg p-7 flex flex-col justify-center items-center gap-3">
 
-        <div className="mt-2 text-sm text-gray-600">검색 도중 시간이 지나 예약할 수 없습니다.</div>
-        <div className="mt-2 text-lg font-semibold text-gray-900 whitespace-pre-line">
-          다른 시간으로 검색하시겠어요?
+        <div className="text-gray-400 text-center text-sm font-semibold leading-normal">
+          앗, 검색 도중 시간이 지나 예약이 어려워졌어요!
         </div>
-        <div className="mt-4 flex gap-2 justify-center">
+        <div className="text-gray-900 text-center text-base font-bold leading-6">
+          다른 시간으로 다시 찾아볼까요?
+        </div>
+        <div className="flex justify-center items-center w-[18.375rem]">
           <Button
-            label="그렇게 할게요"
+            label="네, 검색할게요"
             onClick={() => {
               // 상태 초기화 및 HeroArea 기본값 재계산을 유도
               reservationActions.reset();
