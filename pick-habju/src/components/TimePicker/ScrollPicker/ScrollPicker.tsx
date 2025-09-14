@@ -84,6 +84,9 @@ const ScrollPicker = <T extends string | number>({
               opacity: isSel ? 1 : 0.4,
               fontWeight: isSel ? 600 : 400,
               color: isSel ? '#000' : '#aaa',
+              fontVariantNumeric: 'normal',
+              minWidth: '0.1ch',
+              letterSpacing: '0.01em',
             }}
           >
             {item}
