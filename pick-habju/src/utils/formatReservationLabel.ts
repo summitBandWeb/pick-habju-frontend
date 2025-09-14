@@ -9,7 +9,7 @@ import { ko } from 'date-fns/locale';
  * @returns 포맷팅된 예약 시간 레이블 문자열
  */
 export const formatReservationLabel = (dateIso: string, hourSlots: string[]): string => {
-  if (!dateIso || !hourSlots || hourSlots.length === 0) {
+  if (!dateIso || hourSlots.length === 0) {
     return '';
   }
 

@@ -18,7 +18,7 @@ export const useDefaultDateTime = (): DefaultDateTime => {
   // 기본 시간 계산
   const now = new Date();
   // 현재 시간에서 1시간을 더하고, 그 시간의 '정시'로 설정 (예: 17:30 -> 18:30 -> 18:00)
-  // 이 한 줄이 자정, 월말, 연말 등 모든 경계 케이스를 알아서 처리합니다.
+  // 경계 케이스(자정, 월말, 연말 등)는 date-fns의 startOfHour와 addHours 함수가 올바르게 처리합니다.
   const startTime = startOfHour(addHours(now, 1));
 
   // 기본값 생성
