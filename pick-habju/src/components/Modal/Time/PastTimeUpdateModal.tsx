@@ -86,6 +86,7 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
             }}
             variant={ButtonVariant.Main}
             size={BtnSizeVariant.MD}
+            className="rounded-[0.625rem] bg-yellow-900 hover:bg-yellow-700 text-primary-white px-[1.75rem] py-[0.75rem] flex justify-center items-center gap-[1.5rem] flex-[1_0_0]"
           />
         </div>
       </div>
