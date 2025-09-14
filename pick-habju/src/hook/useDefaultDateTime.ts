@@ -1,3 +1,6 @@
+import { addHours, startOfHour, format } from 'date-fns';
+import { formatReservationLabel } from '../utils/formatReservationLabel';
+
 export interface DefaultDateTime {
   defaultDateIso: string;
   defaultSlots: string[];
@@ -5,31 +8,29 @@ export interface DefaultDateTime {
   defaultPeopleCount: number;
 }
 
+/**
+ * 앱의 기본 날짜/시간 값을 계산하는 커스텀 훅입니다.
+ * 현재 시간 기준, 다음 정시부터 시작하는 2시간짜리 예약을 기본값으로 합니다.
+ * (예: 현재 17:30 -> 시작 시간 18:00, 종료 시간 20:00)
+ */
+
 export const useDefaultDateTime = (): DefaultDateTime => {
-  // 현재 시간에서 다음 정시로 올림 (예: 14:00 -> 15:00, 14:03 -> 15:00)
+  // 기본 시간 계산
   const now = new Date();
-  const baseDate = new Date(now);
-  let startHour = now.getHours() + 1;
+  // 현재 시간에서 1시간을 더하고, 그 시간의 '정시'로 설정 (예: 17:30 -> 18:30 -> 18:00)
+  // 이 한 줄이 자정, 월말, 연말 등 모든 경계 케이스를 알아서 처리합니다.
+  const startTime = startOfHour(addHours(now, 1));
 
-  if (startHour === 24) {
-    // 자정 넘어가는 경우: 날짜 +1, 00시 시작
-    baseDate.setDate(baseDate.getDate() + 1);
-    startHour = 0;
-  }
-
-  const month = baseDate.getMonth() + 1;
-  const day = String(baseDate.getDate()).padStart(2, '0');
-  const weekdayKorean = ['일', '월', '화', '수', '목', '금', '토'][baseDate.getDay()];
-
-  const rawEndHour = (startHour + 2) % 24;
-  const displayEndHour = rawEndHour === 0 ? 24 : rawEndHour <= startHour ? rawEndHour + 24 : rawEndHour;
-
-  const defaultDateIso = `${baseDate.getFullYear()}-${String(month).padStart(2, '0')}-${day}`;
+  // 기본값 생성
+  const defaultDateIso = format(startTime, 'yyyy-MM-dd');
   const defaultSlots = [
-    `${String(startHour).padStart(2, '0')}:00`,
-    `${String((startHour + 1) % 24).padStart(2, '0')}:00`,
+    format(startTime, 'HH:00'),
+    format(addHours(startTime, 1), 'HH:00'), // 시작 시간에서 1시간 뒤
   ];
-  const defaultDateTimeLabel = `${month}월 ${day}일 (${weekdayKorean}) ${startHour}~${displayEndHour}시`;
+
+  // 포맷팅 함수를 재사용하여 레이블 생성 (중복 제거)
+  const defaultDateTimeLabel = formatReservationLabel(defaultDateIso, defaultSlots);
+
   const defaultPeopleCount = 12;
 
   return {
