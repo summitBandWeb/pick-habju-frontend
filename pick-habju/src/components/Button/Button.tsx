@@ -9,13 +9,15 @@ const Button = ({
   disabled = false,
   onClick,
   size = BtnSizeVariant.DEFAULT,
+  className,
 }: ButtonProps) => {
   const isDisabled = !!disabled;
 
   const classes = classNames(
     baseStyle,
     sizeStyles[size],
-    isDisabled ? 'bg-gray-200 text-gray-300 cursor-not-allowed' : variantStyles[variant]
+    isDisabled ? 'bg-gray-200 text-gray-300 cursor-not-allowed' : variantStyles[variant],
+    className
   );
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {

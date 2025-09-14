@@ -59,7 +59,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
       className="fixed inset-0 z-50 flex justify-center items-center bg-black/80"
     >
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
-      <div className="w-full max-w-[25.9375rem]">
+      <div className="w-full max-w-[23.125rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
         <div className="w-full flex justify-end">
           <button
@@ -77,7 +77,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
         </div>
 
         {/* Group */}
-        <div className="h-[16.25rem] self-stretch flex flex-col items-center">
+        <div className="w-[23.125rem] h-[16.25rem] flex flex-col justify-between items-start flex-shrink-0">
           {/* Rectangle (이미지 프레임 고정) */}
           <div className="relative w-full h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
             {/* 이미지 레이어만 슬라이드 */}

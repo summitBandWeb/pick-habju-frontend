@@ -6,4 +6,5 @@ export interface ButtonProps {
   disabled?: boolean;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   size?: BtnSizeVariant;
+  className?: string;
 }
