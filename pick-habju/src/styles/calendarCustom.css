@@ -32,7 +32,6 @@
 .minimal-calendar .react-calendar__month-view__days {
   display: grid !important;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
 }
 
 /* 날짜 타일 기본 구조 (내용은 DateNum이 담당) */
@@ -44,6 +43,7 @@
   border: none !important;
   position: relative;
   outline: none !important;
+  padding: 0.25rem;
 }
 
 /* 이전/다음 달 날짜 흐리게 표시 */
