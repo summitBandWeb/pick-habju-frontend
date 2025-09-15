@@ -98,6 +98,11 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
               ))}
             </div>
 
+            {/* 상단 그라데이션 */}
+            <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/70 to-transparent" />
+            {/* 하단 그라데이션 */}
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+
             {/* 컨트롤 오버레이 (고정) */}
             <div className="absolute inset-0 flex w-full h-[16.25rem] flex-col justify-between items-start">
               {/* Chevron Row - 이미지가 2개 이상일 때만 표시 */}
