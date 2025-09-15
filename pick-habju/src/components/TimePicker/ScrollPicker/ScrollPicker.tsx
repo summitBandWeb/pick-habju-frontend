@@ -99,11 +99,6 @@ const ScrollPicker = <T extends string | number>({
     const { scrollTop } = ref.current;
     const centerOffset = scrollTop + (visibleCount * itemHeight) / 2;
     const newIdx = Math.floor(centerOffset / itemHeight);
-    const val = padded[newIdx];
-    if (val !== '' && list.includes(val as T) && newIdx !== selectedIdx) {
-      setSelectedIdx(newIdx);
-      onChange(val as T);
-    }
     const li = ref.current.children[newIdx] as HTMLElement;
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   };
@@ -122,8 +117,6 @@ const ScrollPicker = <T extends string | number>({
     if (didDrag.current) return; // 드래그 후 발생한 클릭은 무시
     const val = padded[i];
     if (val === '' || !list.includes(val as T)) return;
-    setSelectedIdx(i);
-    onChange(val as T);
     const li = ref.current!.children[i] as HTMLElement;
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   };
@@ -156,6 +149,7 @@ const ScrollPicker = <T extends string | number>({
               fontVariantNumeric: 'normal',
               minWidth: '0.1ch',
               letterSpacing: '0.01em',
+              transition: 'opacity 180ms ease, color 180ms ease',
               userSelect: 'none',
               cursor: 'pointer',
             }}
