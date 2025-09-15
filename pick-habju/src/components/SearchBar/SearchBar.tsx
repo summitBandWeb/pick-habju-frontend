@@ -34,7 +34,7 @@ const SearchBar = ({ value, onSearchChange }: SearchBarProps) => {
         placeholder="결과 내 합주실 검색"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        className="flex-1 outline-none text-gray-300 font-modal-call"
+        className="flex-1 outline-none text-gray-300 placeholder:text-gray-300 font-modal-call"
       />
       {searchText.trim() && (
         <img src={DeleteIcon} alt="DeleteIcon" className="cursor-pointer" onClick={handleClearText} />
