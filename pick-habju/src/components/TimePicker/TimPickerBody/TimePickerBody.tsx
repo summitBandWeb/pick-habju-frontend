@@ -18,8 +18,8 @@ export const TimePickerBody = ({
       <div className="absolute left-0 right-0 top-1/2 h-[50px] -translate-y-1/2 bg-gray-200 rounded-lg" />
       <div className="relative flex items-center space-x-[0.375rem] px-6 py-2 font-modal-timepicker">
         {/* Start */}
-        <div className="flex space-x-2 gap-2 items-center">
-          <div className="w-[1.6ch] flex justify-center">
+        <div className="flex items-center space-x-1">
+          <div className="w-[1.8ch] flex justify-center">
             <ScrollPicker
               list={hours}
               value={startHour}
@@ -28,7 +28,7 @@ export const TimePickerBody = ({
               disabled={disabled}
             />
           </div>
-          <div className="w-[2.4ch] flex justify-center">
+          <div className="w-[2.6ch] flex justify-center">
             <ScrollPicker
               list={periods}
               value={startPeriod}
@@ -38,10 +38,10 @@ export const TimePickerBody = ({
             />
           </div>
         </div>
-        <span className="text-2xl text-black w-[1.2ch] text-center">~</span>
+        <span className="text-2xl text-black w-[1.4ch] text-center">~</span>
         {/* End */}
         <div className="flex items-center space-x-1">
-          <div className="w-[2.1ch] flex justify-center">
+          <div className="w-[1.8ch] flex justify-center">
             <ScrollPicker
               list={hours}
               value={endHour}
