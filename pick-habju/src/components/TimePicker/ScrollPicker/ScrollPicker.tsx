@@ -25,6 +25,12 @@ const ScrollPicker = <T extends string | number>({
   const dragStartY = useRef(0);
   const dragStartScrollTop = useRef(0);
   const didDrag = useRef(false);
+  const wheelAccum = useRef(0);
+  const lastWheelTs = useRef(0);
+
+  // 물리적 이동 대비 스크롤 이동 저항(값이 클수록 더 많이 움직여야 한 칸 이동)
+  const DRAG_RESISTANCE = 1;
+  const WHEEL_RESISTANCE = 100;
 
   // padded 배열 내 실제 선택된 인덱스
   const [selectedIdx, setSelectedIdx] = useState(() => {
@@ -86,7 +92,8 @@ const ScrollPicker = <T extends string | number>({
     if (!isDragging.current || !ref.current) return;
     const deltaY = dragStartY.current - e.clientY;
     if (Math.abs(deltaY) > 3) didDrag.current = true;
-    ref.current.scrollTop = dragStartScrollTop.current + deltaY;
+    // 저항 적용: 더 많이 움직여야 같은 스크롤 이동량을 만들도록
+    ref.current.scrollTop = dragStartScrollTop.current + deltaY / DRAG_RESISTANCE;
     e.preventDefault();
   };
 
@@ -121,16 +128,52 @@ const ScrollPicker = <T extends string | number>({
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   };
 
+  // 휠 스크롤 저항 적용: 기본 스크롤 방지 후 감쇠 적용
+  const handleWheel: React.WheelEventHandler<HTMLUListElement> = (e) => {
+    if (disabled || !ref.current) return;
+    e.preventDefault();
+    // 제스처 타임아웃 초과 시 누적 초기화(연속성 끊기면 다시 시작)
+    const now = performance.now();
+    const WHEEL_GESTURE_TIMEOUT_MS = 80;
+    if (now - lastWheelTs.current > WHEEL_GESTURE_TIMEOUT_MS) {
+      wheelAccum.current = 0;
+    }
+    lastWheelTs.current = now;
+
+    // 변화량 누적 후 임계치(WHEEL_THRESHOLD)에 도달했을 때만 한 칸(또는 여러 칸) 이동
+    wheelAccum.current += e.deltaY;
+    const WHEEL_THRESHOLD = itemHeight * WHEEL_RESISTANCE;
+    if (WHEEL_THRESHOLD <= 0) return;
+
+    let steps = 0;
+    while (Math.abs(wheelAccum.current) >= WHEEL_THRESHOLD) {
+      steps += wheelAccum.current > 0 ? 1 : -1;
+      wheelAccum.current -= WHEEL_THRESHOLD * (wheelAccum.current > 0 ? 1 : -1);
+    }
+
+    if (steps !== 0) {
+      const { scrollTop } = ref.current;
+      const centerOffset = scrollTop + (visibleCount * itemHeight) / 2;
+      const baseIdx = Math.floor(centerOffset / itemHeight);
+      const minIdx = pad;
+      const maxIdx = pad + list.length - 1;
+      const targetIdx = Math.max(minIdx, Math.min(maxIdx, baseIdx + steps));
+      const li = ref.current.children[targetIdx] as HTMLElement;
+      li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  };
+
   return (
     <ul
       ref={ref}
       onScroll={handleScroll}
+      onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
       className="overflow-y-auto scroll-picker"
-      style={{ height: `${itemHeight * visibleCount}px`, margin: 0, padding: 0, cursor: 'grab' }}
+      style={{ height: `${itemHeight * visibleCount}px`, margin: 0, padding: 0, cursor: 'grab', touchAction: 'none' }}
     >
       {padded.map((item, i) => {
         const isSel = i === selectedIdx;
