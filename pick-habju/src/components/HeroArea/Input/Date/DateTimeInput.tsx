@@ -22,7 +22,7 @@ const DateTimeInput = ({ dateTime, onChangeClick }: DateTimeInputProps) => {
         <img src={CalendarIcon} alt="Calendar Icon" />
         <p>{dateTime}</p>
       </div>
-      <span className="text-blue-500 px-3 py-4 font-hero-edit underline">변경</span>
+      <span className="text-blue-500 px-3 py-4 font-hero-edit underline underline-offset-2">변경</span>
     </div>
   );
 };
