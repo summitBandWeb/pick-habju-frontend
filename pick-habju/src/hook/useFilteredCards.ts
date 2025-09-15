@@ -28,8 +28,12 @@ export const useFilteredCards = ({
   return useMemo(() => {
     let filteredCards = cards;
 
-    // includePartiallyPossible 상태에 따른 partial 카드 필터링
-    if (!includePartiallyPossible) {
+    // includePartiallyPossible 상태에 따른 필터링
+    if (includePartiallyPossible) {
+      // 버튼을 눌렀을 때: partial 카드만 보이기
+      filteredCards = cards.filter((card) => card.kind === CardKind.PARTIAL);
+    } else {
+      // 버튼을 누르지 않았을 때: partial 카드 제외 (기존 로직)
       filteredCards = cards.filter((card) => card.kind !== CardKind.PARTIAL);
     }
 
