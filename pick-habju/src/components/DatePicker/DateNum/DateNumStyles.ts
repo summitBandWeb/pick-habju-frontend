@@ -1,4 +1,4 @@
-export const baseStyle = 'flex items-center justify-center w-12 h-12 font-modal-default rounded-full transition';
+export const baseStyle = 'flex items-center justify-center w-10 h-10 font-modal-default rounded-full transition';
 
 export const dateNumVariants = {
   empty: 'text-gray-300 cursor-default',
