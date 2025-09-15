@@ -22,7 +22,7 @@ const PersonCountInput = ({ count, onChangeClick }: PersonCountInputProps) => {
         <img src={GuestIcon} alt="Guest Icon" />
         <p>인원 {count}명</p>
       </div>
-      <span className="text-blue-500 px-3 py-4 font-hero-edit underline">변경</span>
+      <span className="text-blue-500 px-3 py-4 font-hero-edit underline underline-offset-2">변경</span>
     </div>
   );
 };
