@@ -21,6 +21,10 @@ const ScrollPicker = <T extends string | number>({
   const padded = [...Array(pad).fill('' as T), ...list, ...Array(pad).fill('' as T)];
   const ref = useRef<HTMLUListElement>(null);
   const timer = useRef<number | null>(null);
+  const isDragging = useRef(false);
+  const dragStartY = useRef(0);
+  const dragStartScrollTop = useRef(0);
+  const didDrag = useRef(false);
 
   // padded 배열 내 실제 선택된 인덱스
   const [selectedIdx, setSelectedIdx] = useState(() => {
@@ -64,18 +68,83 @@ const ScrollPicker = <T extends string | number>({
     }, 100);
   };
 
+  // 드래그 핸들러들
+  const handlePointerDown: React.PointerEventHandler<HTMLUListElement> = (e) => {
+    if (disabled) return;
+    if (!ref.current) return;
+    didDrag.current = false;
+    isDragging.current = true;
+    dragStartY.current = e.clientY;
+    dragStartScrollTop.current = ref.current.scrollTop;
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // 드래그 중 텍스트 선택 방지
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+  };
+
+  const handlePointerMove: React.PointerEventHandler<HTMLUListElement> = (e) => {
+    if (!isDragging.current || !ref.current) return;
+    const deltaY = dragStartY.current - e.clientY;
+    if (Math.abs(deltaY) > 3) didDrag.current = true;
+    ref.current.scrollTop = dragStartScrollTop.current + deltaY;
+    e.preventDefault();
+  };
+
+  const endDrag = () => {
+    if (!isDragging.current || !ref.current) return;
+    isDragging.current = false;
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+    // 드래그 종료 후 가장 가까운 아이템으로 스냅 및 선택
+    const { scrollTop } = ref.current;
+    const centerOffset = scrollTop + (visibleCount * itemHeight) / 2;
+    const newIdx = Math.floor(centerOffset / itemHeight);
+    const val = padded[newIdx];
+    if (val !== '' && list.includes(val as T) && newIdx !== selectedIdx) {
+      setSelectedIdx(newIdx);
+      onChange(val as T);
+    }
+    const li = ref.current.children[newIdx] as HTMLElement;
+    li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  };
+
+  const handlePointerUp: React.PointerEventHandler<HTMLUListElement> = () => {
+    endDrag();
+  };
+
+  const handlePointerCancel: React.PointerEventHandler<HTMLUListElement> = () => {
+    endDrag();
+  };
+
+  // 아이템 클릭 시 해당 아이템을 중앙으로 스냅하며 선택
+  const handleItemClick = (i: number) => {
+    if (disabled) return;
+    if (didDrag.current) return; // 드래그 후 발생한 클릭은 무시
+    const val = padded[i];
+    if (val === '' || !list.includes(val as T)) return;
+    setSelectedIdx(i);
+    onChange(val as T);
+    const li = ref.current!.children[i] as HTMLElement;
+    li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  };
+
   return (
     <ul
       ref={ref}
       onScroll={handleScroll}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       className="overflow-y-auto scroll-picker"
-      style={{ height: `${itemHeight * visibleCount}px`, margin: 0, padding: 0 }}
+      style={{ height: `${itemHeight * visibleCount}px`, margin: 0, padding: 0, cursor: 'grab' }}
     >
       {padded.map((item, i) => {
         const isSel = i === selectedIdx;
         return (
           <li
             key={i}
+            onClick={() => handleItemClick(i)}
             style={{
               height: `${itemHeight}px`,
               display: 'flex',
@@ -87,6 +156,8 @@ const ScrollPicker = <T extends string | number>({
               fontVariantNumeric: 'normal',
               minWidth: '0.1ch',
               letterSpacing: '0.01em',
+              userSelect: 'none',
+              cursor: 'pointer',
             }}
           >
             {item}
