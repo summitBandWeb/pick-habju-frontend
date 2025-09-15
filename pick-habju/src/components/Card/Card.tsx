@@ -99,8 +99,9 @@ const Card = ({
     );
 
   const renderPagination = () =>
-    !booked && (
-      <div className="absolute bottom-3.5 w-full flex justify-center">
+    !booked &&
+    total > 1 && (
+      <div className="absolute bottom-4.5 w-full flex justify-center">
         <PaginationDots total={total} current={current} />
       </div>
     );
@@ -128,7 +129,7 @@ const Card = ({
         <div
           className={classNames(
             'flex items-center space-x-1.5 font-card-info whitespace-nowrap',
-            booked ? 'text-gray-300' : 'text-gray-500'
+            booked ? 'text-gray-300' : 'text-gray-400'
           )}
         >
           <img src={Location} alt="위치 아이콘" />
@@ -139,7 +140,7 @@ const Card = ({
         <div
           className={classNames(
             'flex items-center space-x-1 font-card-info whitespace-nowrap',
-            booked ? 'text-gray-300' : 'text-gray-500'
+            booked ? 'text-gray-300' : 'text-gray-400'
           )}
         >
           <img src={People} alt="인원 아이콘" />

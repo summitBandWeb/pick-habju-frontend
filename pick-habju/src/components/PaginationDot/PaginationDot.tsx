@@ -5,7 +5,7 @@ const PaginationDots = ({ total, current }: PaginationDotsProps) => (
     {Array.from({ length: total }).map((_, idx) => {
       const isActive = idx === current;
       const dotClass = isActive ? 'bg-primary-white' : 'bg-gray-300';
-      return <div key={idx} className={`w-2 h-2 rounded-full ${dotClass}`}></div>;
+      return <div key={idx} className={`w-[0.313rem] h-[0.313rem] rounded-full ${dotClass}`}></div>;
     })}
   </div>
 );
