@@ -1,21 +1,5 @@
-// Google Analytics 유틸리티 함수들
-
-// gtag 함수의 타입 정의
-declare global {
-  interface Window {
-    gtag: (
-      command: 'config' | 'event' | 'js',
-      targetId: string | Date,
-      config?: {
-        event_category?: string;
-        event_label?: string;
-        value?: number;
-        custom_map?: Record<string, string>;
-        [key: string]: any;
-      }
-    ) => void;
-  }
-}
+// GA4 이벤트를 GTM dataLayer로 전달하는 래퍼
+import { pushGtmEvent } from './gtm';
 
 /**
  * 검색 버튼 클릭 이벤트를 추적합니다.
@@ -26,13 +10,14 @@ export const trackSearchButtonClick = (searchParams: {
   hour_slots: string[];
   peopleCount: number;
 }) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'search_button_click', {
-      event_category: 'user_interaction',
-      event_label: `date:${searchParams.date}_slots:${searchParams.hour_slots.join(',')}_people:${searchParams.peopleCount}`,
-      value: searchParams.peopleCount,
-    });
-  }
+  pushGtmEvent('search_button_click', {
+    event_category: 'user_interaction',
+    event_label: `date:${searchParams.date}_slots:${searchParams.hour_slots.join(',')}_people:${searchParams.peopleCount}`,
+    value: searchParams.peopleCount,
+    date: searchParams.date,
+    hour_slots: searchParams.hour_slots,
+    people_count: searchParams.peopleCount,
+  });
 };
 
 /**
@@ -46,16 +31,14 @@ export const trackApiResponseTime = (
   isSuccess: boolean,
   roomCount?: number
 ) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'api_response_time', {
-      event_category: 'api_performance',
-      event_label: isSuccess ? 'success' : 'error',
-      value: Math.round(responseTime), // 밀리초를 반올림
-      response_time_ms: Math.round(responseTime),
-      room_count: roomCount || 0,
-      is_success: isSuccess,
-    });
-  }
+  pushGtmEvent('api_response_time', {
+    event_category: 'api_performance',
+    event_label: isSuccess ? 'success' : 'error',
+    value: Math.round(responseTime),
+    response_time_ms: Math.round(responseTime),
+    room_count: roomCount || 0,
+    is_success: isSuccess,
+  });
 };
 
 /**
@@ -69,16 +52,14 @@ export const trackSearchResults = (
   availableRooms: number,
   searchDuration: number
 ) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'search_results', {
-      event_category: 'search_performance',
-      event_label: `total:${totalRooms}_available:${availableRooms}`,
-      value: availableRooms,
-      total_rooms: totalRooms,
-      available_rooms: availableRooms,
-      search_duration_ms: Math.round(searchDuration),
-    });
-  }
+  pushGtmEvent('search_results', {
+    event_category: 'search_performance',
+    event_label: `total:${totalRooms}_available:${availableRooms}`,
+    value: availableRooms,
+    total_rooms: totalRooms,
+    available_rooms: availableRooms,
+    search_duration_ms: Math.round(searchDuration),
+  });
 };
 
 /**
@@ -87,11 +68,9 @@ export const trackSearchResults = (
  * @param errorMessage 에러 메시지
  */
 export const trackError = (errorType: string, errorMessage: string) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'error_occurred', {
-      event_category: 'error',
-      event_label: errorType,
-      error_message: errorMessage,
-    });
-  }
+  pushGtmEvent('error_occurred', {
+    event_category: 'error',
+    event_label: errorType,
+    error_message: errorMessage,
+  });
 };
