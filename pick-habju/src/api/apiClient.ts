@@ -4,6 +4,8 @@ export const apiBaseUrl = (() => {
   return envUrl ?? 'http://localhost:8000';
 })();
 
+let apiCallCountInSession = 0;
+
 export const postJson = async <TReq, TRes>(path: string, body: TReq): Promise<TRes> => {
   const scenario = ((): string | null => {
     try {
@@ -12,6 +14,7 @@ export const postJson = async <TReq, TRes>(path: string, body: TReq): Promise<TR
       return null;
     }
   })();
+  apiCallCountInSession += 1;
   const res = await fetch(`${apiBaseUrl}${path}`, {
     method: 'POST',
     headers: {
@@ -26,3 +29,5 @@ export const postJson = async <TReq, TRes>(path: string, body: TReq): Promise<TR
   }
   return (await res.json()) as TRes;
 };
+
+export const getApiCallCountInSession = () => apiCallCountInSession;

@@ -21,6 +21,7 @@ import { useSearchStore } from '../../store/search/searchStore';
 import { SearchPhase } from '../../store/search/searchStore.types';
 import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
+import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -321,6 +322,17 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                   slots = hourSlots;
                 } else {
                   slots = dateTime.hour_slots;
+                }
+
+                // 직전 사이클 요약 전송 및 새 사이클 시작
+                try {
+                  useAnalyticsCycleStore.getState().endCycleAndFlush({
+                    date: dateIso,
+                    hour_slots: slots,
+                    people_count: peopleCountText,
+                  });
+                } catch (e) {
+                  console.debug('endCycleAndFlush failed', e);
                 }
 
                 // 검색 횟수 증가 및 토스트 표시 조건 확인
