@@ -4,7 +4,8 @@ import Button from '../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
 import { useSearchStore } from '../../../store/search/searchStore';
 import { SearchPhase } from '../../../store/search/searchStore.types';
-import { useReservationActions } from '../../../hook/useReservationStore';
+import { useReservationActions, useReservationState } from '../../../hook/useReservationStore';
+import { useDefaultDateTime } from '../../../hook/useDefaultDateTime';
 
 type PastTimeUpdateModalProps = {
   onHeroReset: () => void;
@@ -18,20 +19,38 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
   const reservationActions = useReservationActions();
   const [open, setOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
+  const { formattedDate, hourSlots } = useReservationState();
+  const { defaultDateIso, defaultSlots } = useDefaultDateTime();
 
   const startDateTime = useMemo(() => {
-    if (!lastQuery || !Array.isArray(lastQuery.hour_slots) || lastQuery.hour_slots.length === 0) return null;
-    const first = lastQuery.hour_slots[0];
     try {
-      return new Date(`${lastQuery.date}T${first}`);
+      // 1) 검색 결과(Default) 화면에서는 직전 검색 조건을 기준으로 모니터링
+      if (
+        phase === SearchPhase.Default &&
+        lastQuery &&
+        Array.isArray(lastQuery.hour_slots) &&
+        lastQuery.hour_slots.length > 0
+      ) {
+        return new Date(`${lastQuery.date}T${lastQuery.hour_slots[0]}`);
+      }
+
+      // 2) 사용자가 날짜/시간을 선택해 둔 경우(아직 검색 전), 해당 선택값을 기준으로 모니터링
+      if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
+        return new Date(`${formattedDate}T${hourSlots[0]}`);
+      }
+
+      // 3) 그 외(첫 방문 등)에는 HeroArea가 초기 표시하는 기본값을 기준으로 모니터링
+      if (defaultDateIso && Array.isArray(defaultSlots) && defaultSlots.length > 0) {
+        return new Date(`${defaultDateIso}T${defaultSlots[0]}`);
+      }
     } catch {
-      return null;
+      // fallthrough
     }
-  }, [lastQuery]);
+    return null;
+  }, [phase, lastQuery, formattedDate, hourSlots, defaultDateIso, defaultSlots]);
 
   useEffect(() => {
-    // Default 상태에서만 감지
-    if (phase !== SearchPhase.Default || !startDateTime) {
+    if (!startDateTime) {
       setOpen(false);
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -55,7 +74,7 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [phase, startDateTime]);
+  }, [startDateTime]);
 
   if (!open) return null;
 
