@@ -15,7 +15,8 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
+      GIT_AUTHOR_EMAIL: ${{ secrets.EMAIL }}
+      GIT_AUTHOR_NAME: "S-Gihun"
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +29,12 @@ jobs:
       - name: Build Project
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd=pick-habju
 
+      - name: Override Git Author
+        run: |
+          git config --global user.email "${GIT_AUTHOR_EMAIL}"
+          git config --global user.name "${GIT_AUTHOR_NAME}"
+          git commit --amend --no-edit --author="${GIT_AUTHOR_NAME} <${GIT_AUTHOR_EMAIL}>"
+
       - name: Deploy to Preview
         id: deploy
         run: |
@@ -39,3 +46,6 @@ jobs:
         with:
           message: |
             🎉 구현한 기능 Preview: ${{ steps.deploy.outputs.preview_url }}
+
+          comment_tag: "vercel_preview_${{ github.event.pull_request.number }}"
+          mode: "upsert"
