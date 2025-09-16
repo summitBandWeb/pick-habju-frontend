@@ -5,6 +5,8 @@ import type { RoomMetadata } from '../../../types/RoomMetadata';
 import { getPriceBreakdown, getRoomLocationLine } from '../../../utils/calcTotalPrice';
 import { getBookingUrl } from '../../../utils/bookingUrl';
 import { formatDateKoreanWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
+import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
+import { pushGtmEvent } from '../../../utils/gtm';
 
 export interface BookModalStepperProps {
   room: RoomMetadata;
@@ -18,6 +20,10 @@ export interface BookModalStepperProps {
 
 const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFromCard, onConfirm, onClose }: BookModalStepperProps) => {
   const [step, setStep] = useState<1 | 2>(1);
+  const incrementBookModalOpen = useSessionAnalyticsStore((s) => s.incrementBookModalOpen);
+  const markEnterStep1 = useSessionAnalyticsStore((s) => s.markEnterStep1);
+  const markEnterStep2 = useSessionAnalyticsStore((s) => s.markEnterStep2);
+  const markStep2Confirm = useSessionAnalyticsStore((s) => s.markStep2Confirm);
 
   const breakdown = getPriceBreakdown({ room, hourSlots, peopleCount, dateIso });
   const locationLine = getRoomLocationLine(room);
@@ -29,6 +35,13 @@ const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFro
     setStep(1);
     onClose?.();
   }, [onClose]);
+  // 모달 최초 마운트 시 세션 카운트 증가 및 Step1 진입 타임스탬프 기록
+  useEffect(() => {
+    incrementBookModalOpen();
+    markEnterStep1();
+    pushGtmEvent('book_modal_open');
+  }, [incrementBookModalOpen, markEnterStep1]);
+
 
   // ESC 닫기
   useEffect(() => {
@@ -52,7 +65,11 @@ const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFro
             baseTotal={breakdown.baseTotal}
             addTotal={breakdown.addTotal}
             finalTotal={finalTotalFromCard}
-            onNext={() => setStep(2)}
+            onNext={() => {
+              setStep(2);
+              markEnterStep2();
+              pushGtmEvent('book_modal_step_change', { to_step: 2 });
+            }}
           />
         )}
         {step === 2 && (
@@ -70,6 +87,8 @@ const BookModalStepper = ({ room, dateIso, hourSlots, peopleCount, finalTotalFro
                 // 팝업이 차단되었을 경우 현재 탭에서 이동
                 window.location.href = url;
               }
+              markStep2Confirm();
+              pushGtmEvent('book_modal_step2_confirm');
               onConfirm();
             }}
           />

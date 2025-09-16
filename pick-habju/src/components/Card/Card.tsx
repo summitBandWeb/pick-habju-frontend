@@ -10,6 +10,7 @@ import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import type { CardProps } from './Card.types';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
+import { pushGtmEvent } from '../../utils/gtm';
 
 const Card = ({
   images,
@@ -154,7 +155,11 @@ const Card = ({
     <Button
       label={booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기'}
       variant={ButtonVariant.Main}
-      onClick={onBookClick}
+      onClick={() => {
+        const actionType = booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기';
+        pushGtmEvent('card_action_click', { action_type: actionType });
+        onBookClick?.();
+      }}
       disabled={booked}
       size={btnsize ?? BtnSizeVariant.XXSM}
     />
