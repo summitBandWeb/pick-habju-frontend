@@ -3,11 +3,14 @@ import { useGoogleFormToastStore, GOOGLE_FORM_URL } from '../../store/googleForm
 import FlightIcon from '../../assets/svg/Flight.svg';
 import LargeDelete from '../../assets/svg/LargeDelete.svg';
 import { useState, useEffect } from 'react';
+import { pushGtmEvent } from '../../utils/gtm';
 
 const GoogleFormToast = () => {
   const { isVisible, hideToast, markGoogleFormVisited } = useGoogleFormToastStore();
+  const searchCount = useGoogleFormToastStore((s) => s.searchCount);
   const [isIconLoaded, setIsIconLoaded] = useState(false);
   const [shouldShow, setShouldShow] = useState(false);
+  const showIndex = searchCount === 2 ? 2 : 1;
 
   // 컴포넌트 마운트 시 아이콘 미리 로딩
   useEffect(() => {
@@ -30,13 +33,22 @@ const GoogleFormToast = () => {
     }
   }, [isVisible, isIconLoaded]);
 
+  // 노출 시점 추적 (impression)
+  useEffect(() => {
+    if (shouldShow) {
+      pushGtmEvent('google_form_toast_impression', { show_index: showIndex });
+    }
+  }, [shouldShow, showIndex]);
+
   const handleToastClick = () => {
+    pushGtmEvent('google_form_toast_click', { show_index: showIndex });
     markGoogleFormVisited();
     window.open(GOOGLE_FORM_URL, '_blank', 'noopener,noreferrer');
   };
 
   const handleCloseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    pushGtmEvent('google_form_toast_close', { show_index: showIndex });
     hideToast();
   };
 
