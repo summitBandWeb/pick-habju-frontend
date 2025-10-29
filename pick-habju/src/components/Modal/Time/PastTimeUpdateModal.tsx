@@ -5,7 +5,6 @@ import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
 import { useSearchStore } from '../../../store/search/searchStore';
 import { SearchPhase } from '../../../store/search/searchStore.types';
 import { useReservationActions, useReservationState } from '../../../hook/useReservationStore';
-import { useDefaultDateTime } from '../../../hook/useDefaultDateTime';
 
 type PastTimeUpdateModalProps = {
   onHeroReset: () => void;
@@ -20,11 +19,19 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
   const [open, setOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
   const { formattedDate, hourSlots } = useReservationState();
-  const { defaultDateIso, defaultSlots } = useDefaultDateTime();
 
   const startDateTime = useMemo(() => {
     try {
-      // 1) 검색 결과(Default) 화면에서는 직전 검색 조건을 기준으로 모니터링
+      // 1) 사용자가 선택한 값이 있으면(검색 전 포함) 그 값을 기준으로 감지
+      if (
+        formattedDate &&
+        Array.isArray(hourSlots) &&
+        hourSlots.length > 0
+      ) {
+        return new Date(`${formattedDate}T${hourSlots[0]}`);
+      }
+
+      // 2) 선택값이 없고 Default 상태라면 직전 검색 조건을 기준으로 감지
       if (
         phase === SearchPhase.Default &&
         lastQuery &&
@@ -33,42 +40,36 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
       ) {
         return new Date(`${lastQuery.date}T${lastQuery.hour_slots[0]}`);
       }
-
-      // 2) 사용자가 날짜/시간을 선택해 둔 경우(아직 검색 전), 해당 선택값을 기준으로 모니터링
-      if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
-        return new Date(`${formattedDate}T${hourSlots[0]}`);
-      }
-
-      // 3) 그 외(첫 방문 등)에는 HeroArea가 초기 표시하는 기본값을 기준으로 모니터링
-      if (defaultDateIso && Array.isArray(defaultSlots) && defaultSlots.length > 0) {
-        return new Date(`${defaultDateIso}T${defaultSlots[0]}`);
-      }
     } catch {
       // fallthrough
     }
     return null;
-  }, [phase, lastQuery, formattedDate, hourSlots, defaultDateIso, defaultSlots]);
+  }, [formattedDate, hourSlots, phase, lastQuery]);
 
   useEffect(() => {
-    if (!startDateTime) {
+    if (!startDateTime || Number.isNaN(startDateTime.getTime())) {
       setOpen(false);
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
       return;
     }
 
-    const now = Date.now();
     const due = startDateTime.getTime();
-    if (now >= due) {
-      setOpen(true);
-      return;
-    }
+    const MAX_TIMEOUT_MS = 2147483647 - 1000; // 약 24.8일, 안전 마진
 
-    const delay = Math.max(0, due - now);
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => {
-      setOpen(true);
-    }, delay);
+    const schedule = () => {
+      const now = Date.now();
+      if (now >= due) {
+        setOpen(true);
+        return;
+      }
+      const remaining = due - now;
+      const nextDelay = Math.min(remaining, MAX_TIMEOUT_MS);
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(schedule, nextDelay);
+    };
+
+    schedule();
 
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
