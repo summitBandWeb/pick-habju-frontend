@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import PersonCountInput from './Input/Person/PersonCountInput';
-import DateTimeInput from './Input/\bDate/DateTimeInput';
+import DateTimeInput from './Input/Date/DateTimeInput';
 import BackGroundImage from '../../assets/images/background.jpg';
 import type { HeroAreaProps } from './HeroArea.types';
 import DatePicker from '../DatePicker/DatePicker';
