@@ -1,203 +1,73 @@
-import HeroArea from '../components/HeroArea/HeroArea';
-import { ROOMS } from '../constants/data';
-import { postRoomAvailabilitySmart, type AvailabilityRequest, type AvailabilityResponse } from '../api/availabilityApi';
-import { useSearchStore } from '../store/search/searchStore';
-import { SearchPhase } from '../store/search/searchStore.types';
-import SearchSection from '../components/Search/SearchSection';
-import { trackApiResponseTime, trackSearchResults, trackError } from '../utils/analytics';
-import { showToastByKey } from '../utils/showToastByKey';
-import { useToastStore } from '../store/toast/toastStore';
-import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
-import { useReservationActions } from '../hook/useReservationStore';
 import { useState, useEffect } from 'react';
-import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
+
+// Components
+import HeroArea from '../components/HeroArea/HeroArea';
 import SearchBar from '../components/SearchBar/SearchBar';
-import FilterSection from '../components/FilterSection/FilterSection';
-import { SortType } from '../components/FilterSection/FilterSection.constants';
-
-import FilterSectionSkeleton from '../components/FilterSection/FilterSectionSkeleton';
 import SearchBarSkeleton from '../components/SearchBar/SearchBarSkeleton';
+import FilterSection from '../components/FilterSection/FilterSection';
+import FilterSectionSkeleton from '../components/FilterSection/FilterSectionSkeleton';
+import SearchSection from '../components/Search/SearchSection';
+import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 
-import { useDefaultDateTime } from '../hook/useDefaultDateTime';
-import { useFilteredCards } from '../hook/useFilteredCards';
+// Stores & Types
+import { useSearchStore } from '../store/search/searchStore';
 import { useGoogleFormToastStore } from '../store/googleFormToast/googleFormToastStore';
+import { SearchPhase } from '../store/search/searchStore.types';
+
+// Hooks
+import { useDefaultDateTime } from '../hook/useDefaultDateTime';
+import { useHomePageFilter } from '../hook/useHomePageFilter';
+import { useHomePageSearch } from '../hook/useHomePageSearch';
 
 const HomePage = () => {
-  const { showPersistentToast, hideToast } = useToastStore();
-  const reservationActions = useReservationActions();
+  // 1. UI 상태 관리 (HeroArea 강제 리렌더링용)
   const [heroResetCounter, setHeroResetCounter] = useState(0);
+
+  // 2. Global Stores (UI 렌더링 제어용)
+  const phase = useSearchStore((s) => s.phase);
+  const setPhase = useSearchStore((s) => s.setPhase);
   const { showToast } = useGoogleFormToastStore();
 
-  // 기본 날짜/시간 설정 훅
+  // 3. 초기 데이터 (Default Values)
   const { defaultDateIso, defaultSlots, defaultDateTimeLabel, defaultPeopleCount } = useDefaultDateTime();
 
-  const setDefaultFromResponse = useSearchStore((s) => s.setDefaultFromResponse);
-  const setPhase = useSearchStore((s) => s.setPhase);
-  const setLastQuery = useSearchStore((s) => s.setLastQuery);
-  const setFilteredCards = useSearchStore((s) => s.setFilteredCards);
-  const cards = useSearchStore((s) => s.cards);
-  const phase = useSearchStore((s) => s.phase);
-  const lastQuery = useSearchStore((s) => s.lastQuery);
-  const includePartiallyPossible = useSearchStore((s) => s.includePartiallyPossible);
+  // 4. Custom Hooks: 필터 로직 (검색어, 정렬, 필터링 결과 처리)
+  const { searchText, setSearchText, sortType, setSortType, resetFilters } = useHomePageFilter();
 
-  // 정렬 상태 관리
-  const [sortType, setSortType] = useState<SortType>(SortType.PRICE_LOW);
-  // 검색어 상태 관리 (SearchBar에서 디바운싱 처리됨)
-  const [searchText, setSearchText] = useState('');
-
-  // 검색어와 정렬을 적용한 카드 목록
-  const filteredAndSortedCards = useFilteredCards({
-    cards,
-    includePartiallyPossible,
-    searchText,
-    sortType,
-    sortParams: {
-      hourSlots: lastQuery?.hour_slots || defaultSlots,
-      peopleCount: lastQuery?.peopleCount || defaultPeopleCount,
-      dateIso: lastQuery?.date || defaultDateIso,
-    },
+  // 5. Custom Hooks: 검색 비즈니스 로직 (API 호출, 에러 핸들링)
+  const { handleSearch: executeSearch } = useHomePageSearch({
+    onReset: () => setHeroResetCounter((c) => c + 1), // 에러/과거시간 발생 시 UI 카운터 증가
   });
 
-  // 필터링된 카드를 store에 업데이트
-  useEffect(() => {
-    setFilteredCards(filteredAndSortedCards);
-  }, [filteredAndSortedCards, setFilteredCards]);
+  // 6. Event Handler: 검색 시작 (필터 초기화 후 API 호출)
+  const onSearch = (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
+    resetFilters(); // 새로운 검색 시 기존 필터(검색어, 정렬) 초기화
+    executeSearch(params);
+  };
 
-  // 첫 방문 시 구글폼 토스트 자동 표시 (렌더링 완료 후)
+  // 7. Effects: 첫 진입 시 구글 폼 토스트 노출
   useEffect(() => {
     showToast();
   }, [showToast]);
 
-  const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
-    const { date, hour_slots, peopleCount } = params;
-    const searchStartTime = Date.now(); // 전체 검색 시작 시간
-
-    // 새로운 검색 시작 시 필터 상태 초기화
-    setSearchText('');
-    setSortType(SortType.PRICE_LOW);
-
-    setLastQuery({ date, hour_slots, peopleCount });
-    setPhase(SearchPhase.Loading);
-
-    // 인원수 기준으로 룸 필터링
-    const filteredRooms = ROOMS.filter((r) => peopleCount <= r.maxCapacity).map((r) => ({
-      name: r.name,
-      branch: r.branch,
-      business_id: r.businessId,
-      biz_item_id: r.bizItemId,
-    }));
-
-    // 혹시몰라 두긴했는데.. 빈 배열이 나오면 안되니까 체크
-    if (filteredRooms.length === 0) {
-      setPhase(SearchPhase.NoResult);
-      // 검색 결과 없음을 GA에 추적
-      const searchDuration = Date.now() - searchStartTime;
-      trackSearchResults(0, 0, searchDuration);
-      return;
-    }
-
-    const payload: AvailabilityRequest = {
-      date,
-      hour_slots,
-      rooms: filteredRooms,
-    };
-
-    try {
-      const apiStartTime = Date.now(); // API 호출 시작 시간
-      const respPromise = postRoomAvailabilitySmart(payload);
-
-      // 4초 넘으면 경고 토스트 노출 (스켈레톤은 SearchSection에서 렌더됨)
-      const toastTimer = setTimeout(() => {
-        showPersistentToast('서버가 혼잡합니다. 잠시만 기다려 주세요.', 'warning');
-      }, 4000);
-
-      const resp: AvailabilityResponse = await respPromise;
-      clearTimeout(toastTimer);
-      hideToast();
-      const apiElapsed = Date.now() - apiStartTime; // 실제 API 응답 시간
-
-      // API 응답 시간을 GA에 추적
-      const totalRooms = resp.results?.length || 0;
-      trackApiResponseTime(apiElapsed, true, totalRooms);
-
-      const remain = Math.max(0, 1000 - apiElapsed); // 최소 1초 보장
-      if (remain > 0) {
-        await new Promise((r) => setTimeout(r, remain));
-      }
-
-      // 검색 결과를 GA에 추적
-      const searchDuration = Date.now() - searchStartTime;
-      const availableRooms =
-        resp.results?.filter((room) => room.available === true || room.available === 'unknown').length || 0;
-
-      trackSearchResults(totalRooms, availableRooms, searchDuration);
-
-      // 검색 도중 시간이 지나 선택 시작 시간이 현재를 과거가 되었는지 재확인
-      const firstSlot = Array.isArray(hour_slots) && hour_slots.length > 0 ? hour_slots[0] : null;
-      if (firstSlot) {
-        const startDateTime = new Date(`${date}T${firstSlot}`);
-        const nowCheck = new Date();
-        if (nowCheck.getTime() > startDateTime.getTime()) {
-          showToastByKey(ReservationToastKey.PAST_TIME);
-          reservationActions.reset();
-          setPhase(SearchPhase.BeforeSearch);
-          setHeroResetCounter((c) => c + 1);
-          return;
-        }
-      }
-
-      setDefaultFromResponse({ response: resp, peopleCount });
-      hideToast();
-    } catch (e) {
-      hideToast();
-      const apiElapsed = Date.now() - searchStartTime;
-
-      // 에러 발생을 GA에 추적
-      trackApiResponseTime(apiElapsed, false);
-      const errMsg = e instanceof Error ? e.message : String(e);
-      trackError('api_call_failed', errMsg);
-
-      // 백엔드 과거시간 오류(Hour-002) 처리: 토스트 + 상태 초기화 + HeroArea 기본값 재설정
-      try {
-        const jsonStart = errMsg.indexOf('{');
-        if (jsonStart >= 0) {
-          const jsonText = errMsg.slice(jsonStart);
-          const parsed = JSON.parse(jsonText);
-          if (parsed?.errorCode === 'Hour-002' || /과거 시간은 허용되지 않습니다/.test(parsed?.message)) {
-            showToastByKey(ReservationToastKey.PAST_TIME);
-            reservationActions.reset();
-            setPhase(SearchPhase.BeforeSearch);
-            setHeroResetCounter((c: number) => c + 1);
-            return;
-          }
-        }
-      } catch {
-        // 파싱 실패 시 일반 에러 처리로 폴백
-      }
-
-      console.error(e);
-      alert('가용 시간 조회 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
-      setPhase(SearchPhase.BeforeSearch);
-    }
-  };
-
   return (
     <div className="w-full flex flex-col items-center">
       <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
+        {/* Hero Area: 날짜, 시간, 인원 선택 */}
         <HeroArea
           key={heroResetCounter}
-          dateTime={{ label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots }}
+          dateTime={{
+            label: defaultDateTimeLabel,
+            date: defaultDateIso,
+            hour_slots: defaultSlots,
+          }}
           peopleCount={defaultPeopleCount}
-          onDateTimeChange={() => {
-            // 날짜/시간 변경 확정 시 결과를 숨김
-            setPhase(SearchPhase.BeforeSearch);
-          }}
-          onPersonCountChange={() => {
-            // 인원 변경 확정 시 결과를 숨김
-            setPhase(SearchPhase.BeforeSearch);
-          }}
-          onSearch={handleSearch}
+          onDateTimeChange={() => setPhase(SearchPhase.BeforeSearch)}
+          onPersonCountChange={() => setPhase(SearchPhase.BeforeSearch)}
+          onSearch={onSearch}
         />
+
+        {/* Loading State: 스켈레톤 UI */}
         {phase === SearchPhase.Loading && (
           <>
             <div className="mt-3 mb-2">
@@ -206,24 +76,23 @@ const HomePage = () => {
             <FilterSectionSkeleton />
           </>
         )}
+
+        {/* Default State (Search Completed): 필터 및 검색바 */}
         {phase === SearchPhase.Default && (
           <>
             <div className="mt-3 mb-2">
               <SearchBar value={searchText} onSearchChange={setSearchText} />
             </div>
             <div className="mx-auto">
-              <FilterSection
-                sortValue={sortType}
-                onSortChange={(newSortType) => {
-                  setSortType(newSortType);
-                }}
-              />
+              <FilterSection sortValue={sortType} onSortChange={setSortType} />
             </div>
           </>
         )}
 
+        {/* Modal: 과거 시간 선택 시 갱신 유도 */}
         <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />
-        {/* 결과 뷰는 SearchSection이 phase에 따라 렌더 */}
+
+        {/* Search Results: 결과 리스트 (내부에서 phase에 따라 렌더링) */}
         <div className="w-full">
           <SearchSection />
         </div>
