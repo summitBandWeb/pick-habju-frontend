@@ -1,32 +1,14 @@
-import { useEffect, useRef } from 'react';
+import ModalOverlay from '../ModalOverlay';
 import type { PartialReservationConfirmModalProps } from './PartialReservationConfirmModal.types';
 
-const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfirm }: PartialReservationConfirmModalProps) => {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  const onOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === overlayRef.current) onClose();
-  };
-
+const PartialReservationConfirmModal = ({
+  open,
+  onClose,
+  availableTime,
+  onConfirm,
+}: PartialReservationConfirmModalProps) => {
   return (
-    <div
-      ref={overlayRef}
-      onClick={onOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-      aria-modal="true"
-      role="dialog"
-    >
+    <ModalOverlay open={open} onClose={onClose} dimmedClassName="bg-black/80">
       <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
         {/* 본문 카드 */}
         <div className="w-full max-w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-[2.25rem] px-[1.75rem]">
@@ -66,7 +48,7 @@ const PartialReservationConfirmModal = ({ open, onClose, availableTime, onConfir
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 
