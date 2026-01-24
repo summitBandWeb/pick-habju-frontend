@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Chevron from '../../components/Chevron/Chevron';
 import PaginationDots from '../../components/PaginationDot/PaginationDot';
 import { ChevronVariant } from '../../components/Chevron/ChevronEnums';
+import ModalOverlay from './ModalOverlay';
 
 type ImageCarouselModalProps = {
   images: string[];
@@ -12,7 +13,6 @@ type ImageCarouselModalProps = {
 
 const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setCurrent(initialIndex);
@@ -29,35 +29,13 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
   const variant: ChevronVariant =
     current === 0 ? ChevronVariant.First : current === total - 1 ? ChevronVariant.Last : ChevronVariant.Middle;
 
-  // ESC 닫기
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  // 바깥 클릭 닫기
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === overlayRef.current) onClose();
-  };
-
-  // 스크롤 잠금
-  useEffect(() => {
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, []);
-
   return (
-    <div
-      ref={overlayRef}
-      onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex justify-center items-center bg-black/80"
+    <ModalOverlay
+      open={true} // 부모 컴포넌트에서 조건부 렌더링으로 제어한다고 가정 (항상 열림 상태 전달)
+      onClose={onClose}
+      dimmedClassName="bg-black/80" // 기존 디자인(더 어두운 배경) 유지
     >
+      {/* 내부 컨텐츠: 중앙 정렬 등 레이아웃은 ModalOverlay가 처리하므로 내용물만 배치 */}
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
       <div className="w-full max-w-[23.125rem]">
         {/* Close 버튼 영역 (오른쪽 정렬) */}
@@ -122,7 +100,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 
