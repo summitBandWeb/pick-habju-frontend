@@ -4,6 +4,9 @@ import { postRoomAvailabilitySmart, type AvailabilityRequest, type AvailabilityR
 import { useToastStore } from '../store/toast/toastStore';
 import { trackApiResponseTime, trackError } from '../utils/analytics';
 
+const SLOW_API_THRESHOLD = 4000; // 4초 이상 지연 시 서버 혼잡 토스트 노출
+const MIN_LOADING_DURATION_MS = 1000; // 깜빡임 방지를 위한 최소 로딩 시간
+
 interface ApiResult {
   response: AvailabilityResponse | null; // 결과 데이터
   error: unknown | null; // 에러 정보
@@ -34,7 +37,7 @@ export const useRoomAvailabilityApi = (): UseRoomAvailabilityApiReturn => {
       // 4초 이상 소요 시 '서버 혼잡' 토스트 예약
       toastTimer = setTimeout(() => {
         showPersistentToast('서버가 혼잡합니다. 잠시만 기다려 주세요.', 'warning');
-      }, 4000);
+      }, SLOW_API_THRESHOLD);
 
       const respPromise = postRoomAvailabilitySmart(payload);
       const response: AvailabilityResponse = await respPromise;
@@ -50,7 +53,7 @@ export const useRoomAvailabilityApi = (): UseRoomAvailabilityApiReturn => {
       trackApiResponseTime(apiElapsed, true, totalRooms);
 
       // 최소 1초 대기 (UX - 깜빡임 방지)
-      const remain = Math.max(0, 1000 - apiElapsed);
+      const remain = Math.max(0, MIN_LOADING_DURATION_MS - apiElapsed);
       if (remain > 0) {
         await new Promise((r) => setTimeout(r, remain));
       }
