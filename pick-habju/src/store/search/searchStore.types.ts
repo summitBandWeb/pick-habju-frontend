@@ -1,3 +1,9 @@
+export interface SearchParams {
+  date: string;
+  hour_slots: string[];
+  peopleCount: number;
+}
+
 export enum SearchPhase {
   BeforeSearch = 'BeforeSearch',
   Loading = 'Loading',
@@ -29,9 +35,9 @@ export type SearchState = {
 };
 
 export enum CardKind {
-  ENTIRE = 'entire',     // 전체 시간 이용 가능 (기존 'default')
-  NOT_YET = 'not_yet',   // 아직 오픈 안함 (기존 'open')
-  PARTIAL = 'partial',   // 일부 시간만 가능 (기존 'recommend')
+  ENTIRE = 'entire', // 전체 시간 이용 가능 (기존 'default')
+  NOT_YET = 'not_yet', // 아직 오픈 안함 (기존 'open')
+  PARTIAL = 'partial', // 일부 시간만 가능 (기존 'recommend')
 }
 
 export type SearchCardItem = {

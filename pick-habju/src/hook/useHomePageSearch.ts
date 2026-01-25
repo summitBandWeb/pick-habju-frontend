@@ -1,7 +1,7 @@
 import { useSearchStore } from '../store/search/searchStore';
 import { useReservationActions } from '../hook/useReservationStore';
 import { ROOMS } from '../constants/data';
-import { SearchPhase } from '../store/search/searchStore.types';
+import { SearchPhase, type SearchParams } from '../store/search/searchStore.types';
 import { trackSearchResults } from '../utils/analytics';
 import { showToastByKey } from '../utils/showToastByKey';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
@@ -22,7 +22,7 @@ export const useHomePageSearch = ({ onReset }: UseHomePageSearchProps) => {
   const reservationActions = useReservationActions();
 
   // 3. 핵심 검색 함수
-  const handleSearch = async (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
+  const handleSearch = async (params: SearchParams) => {
     const { date, hour_slots, peopleCount } = params;
     const searchStartTime = Date.now();
 
