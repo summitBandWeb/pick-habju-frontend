@@ -2,7 +2,7 @@ import ModalOverlay from '../ModalOverlay';
 import type { OneHourCallReservationNoticeModalProps } from './OneHourCallReservationNoticeModal.types';
 
 const OneHourCallReservationNoticeModal = ({
-  open,
+  open = true,
   onClose,
   studioName,
   phoneNumber,

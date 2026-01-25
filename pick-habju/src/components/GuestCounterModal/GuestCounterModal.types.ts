@@ -1,5 +1,5 @@
 export interface GuestCounterModalProps {
-  open: boolean;
+  open?: boolean;
   onClose: () => void;
   onConfirm: (guestCount: number) => void;
   initialCount?: number;

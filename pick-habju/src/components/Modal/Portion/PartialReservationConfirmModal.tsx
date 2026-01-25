@@ -2,7 +2,7 @@ import ModalOverlay from '../ModalOverlay';
 import type { PartialReservationConfirmModalProps } from './PartialReservationConfirmModal.types';
 
 const PartialReservationConfirmModal = ({
-  open,
+  open = true,
   onClose,
   availableTime,
   onConfirm,

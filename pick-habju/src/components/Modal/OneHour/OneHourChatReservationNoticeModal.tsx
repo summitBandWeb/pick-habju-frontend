@@ -1,7 +1,11 @@
 import ModalOverlay from '../ModalOverlay';
 import type { OneHourChatReservationNoticeModalProps } from './OneHourChatReservationNoticeModal.types';
 
-const OneHourChatReservationNoticeModal = ({ open, onClose, onConfirm }: OneHourChatReservationNoticeModalProps) => {
+const OneHourChatReservationNoticeModal = ({
+  open = true,
+  onClose,
+  onConfirm,
+}: OneHourChatReservationNoticeModalProps) => {
   return (
     <ModalOverlay open={open} onClose={onClose} dimmedClassName="bg-black/80">
       <div className="w-full max-w-[25.9375rem] flex flex-col items-center">

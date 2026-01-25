@@ -1,7 +1,12 @@
 import ModalOverlay from '../ModalOverlay';
 import type { CallReservationNoticeModalProps } from './CallReservationNoticeModal.types';
 
-const CallReservationNoticeModal = ({ open, onClose, studioName, phoneNumber }: CallReservationNoticeModalProps) => {
+const CallReservationNoticeModal = ({
+  open = true,
+  onClose,
+  studioName,
+  phoneNumber,
+}: CallReservationNoticeModalProps) => {
   return (
     <ModalOverlay open={open} onClose={onClose}>
       <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
