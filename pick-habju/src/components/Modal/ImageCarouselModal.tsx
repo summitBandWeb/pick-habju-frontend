@@ -5,13 +5,20 @@ import { ChevronVariant } from '../../components/Chevron/ChevronEnums';
 import ModalOverlay from './ModalOverlay';
 
 type ImageCarouselModalProps = {
+  open?: boolean;
   images: string[];
   initialIndex?: number;
   onClose: () => void;
   closeIconSrc?: string; // 아이콘 경로 제공 시 사용. 없으면 텍스트 버튼 사용
 };
 
-const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }: ImageCarouselModalProps) => {
+const ImageCarouselModal = ({
+  open = true,
+  images,
+  initialIndex = 0,
+  onClose,
+  closeIconSrc,
+}: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
 
   useEffect(() => {
@@ -31,7 +38,7 @@ const ImageCarouselModal = ({ images, initialIndex = 0, onClose, closeIconSrc }:
 
   return (
     <ModalOverlay
-      open={true} // 부모 컴포넌트에서 조건부 렌더링으로 제어한다고 가정 (항상 열림 상태 전달)
+      open={open}
       onClose={onClose}
       dimmedClassName="bg-black/80" // 기존 디자인(더 어두운 배경) 유지
     >

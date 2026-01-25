@@ -23,11 +23,7 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
   const startDateTime = useMemo(() => {
     try {
       // 1) 사용자가 선택한 값이 있으면(검색 전 포함) 그 값을 기준으로 감지
-      if (
-        formattedDate &&
-        Array.isArray(hourSlots) &&
-        hourSlots.length > 0
-      ) {
+      if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
         return new Date(`${formattedDate}T${hourSlots[0]}`);
       }
 
@@ -77,8 +73,6 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
     };
   }, [startDateTime]);
 
-  if (!open) return null;
-
   return (
     <ModalOverlay
       open={open}
@@ -87,13 +81,10 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
       }}
     >
       <div className="w-[22.5rem] bg-white rounded-2xl shadow-lg p-7 flex flex-col justify-center items-center gap-3">
-
         <div className="text-gray-400 text-center text-sm font-semibold leading-normal">
           앗, 검색 도중 시간이 지나 예약이 어려워졌어요!
         </div>
-        <div className="text-gray-900 text-center text-base font-bold leading-6">
-          다른 시간으로 다시 찾아볼까요?
-        </div>
+        <div className="text-gray-900 text-center text-base font-bold leading-6">다른 시간으로 다시 찾아볼까요?</div>
         <div className="flex justify-center items-center w-[18.375rem]">
           <Button
             label="네, 검색할게요"

@@ -1,5 +1,5 @@
 export interface OneHourChatReservationNoticeModalProps {
-  open: boolean;
+  open?: boolean;
   onClose: () => void;
   onConfirm?: () => void;
 }

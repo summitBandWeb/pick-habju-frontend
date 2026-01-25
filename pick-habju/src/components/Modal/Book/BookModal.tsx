@@ -10,6 +10,7 @@ import { pushGtmEvent } from '../../../utils/gtm';
 import ModalOverlay from '../ModalOverlay';
 
 export interface BookModalStepperProps {
+  open?: boolean;
   room: RoomMetadata;
   dateIso: string; // YYYY-MM-DD
   hourSlots: string[]; // 예: ["18:00","19:00"]
@@ -20,6 +21,7 @@ export interface BookModalStepperProps {
 }
 
 const BookModalStepper = ({
+  open = true,
   room,
   dateIso,
   hourSlots,
@@ -53,7 +55,7 @@ const BookModalStepper = ({
 
   return (
     <ModalOverlay
-      open={true} // 부모에서 렌더링 여부를 결정하므로 항상 true
+      open={open}
       onClose={close}
       // dimmedClassName="bg-black/60" // 기본값이므로 생략 가능
     >

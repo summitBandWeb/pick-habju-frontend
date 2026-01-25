@@ -1,5 +1,5 @@
 export interface PartialReservationConfirmModalProps {
-  open: boolean;
+  open?: boolean;
   onClose: () => void;
   /** 예: "15:00 - 17:00" */
   availableTime: string;

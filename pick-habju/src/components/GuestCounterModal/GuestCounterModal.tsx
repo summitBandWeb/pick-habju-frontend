@@ -5,7 +5,7 @@ import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import type { GuestCounterModalProps } from './GuestCounterModal.types';
 import ModalOverlay from '../Modal/ModalOverlay';
 
-const GuestCounterModal = ({ open, onClose, onConfirm, initialCount = 12 }: GuestCounterModalProps) => {
+const GuestCounterModal = ({ open = true, onClose, onConfirm, initialCount = 12 }: GuestCounterModalProps) => {
   const [guestCount, setGuestCount] = useState(initialCount);
 
   useEffect(() => {

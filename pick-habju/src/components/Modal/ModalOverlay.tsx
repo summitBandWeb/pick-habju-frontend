@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 type ModalOverlayProps = {
-  open: boolean;
+  open?: boolean;
   onClose: () => void;
   children: React.ReactNode;
   /** 배경색 투명도 조절이 필요한 경우 (예: 이미지 캐러셀은 더 어둡게) */
@@ -11,7 +11,7 @@ type ModalOverlayProps = {
 };
 
 const ModalOverlay = ({
-  open,
+  open = true,
   onClose,
   children,
   dimmedClassName = 'bg-black/60',
