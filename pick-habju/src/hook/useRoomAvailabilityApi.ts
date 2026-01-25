@@ -9,6 +9,11 @@ interface ApiResult {
   error: unknown | null; // 에러 정보
 }
 
+interface UseRoomAvailabilityApiReturn {
+  fetchAvailability: (payload: AvailabilityRequest) => Promise<ApiResult>;
+  isLoading: boolean;
+}
+
 /**
  * 룸 가용성 조회를 담당하는 커스텀 훅
  * - API 호출, 로딩 상태 관리, 에러 핸들링, GA 트래킹을 수행합니다.
@@ -16,7 +21,7 @@ interface ApiResult {
  * - 4초 이상 지연 시 '서버 혼잡' 안내 토스트를 표시합니다.
  */
 
-export const useRoomAvailabilityApi = () => {
+export const useRoomAvailabilityApi = (): UseRoomAvailabilityApiReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const { showPersistentToast, hideToast } = useToastStore();
 
