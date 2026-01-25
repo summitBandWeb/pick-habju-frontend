@@ -59,7 +59,7 @@ const BookModalStepper = ({
       onClose={close}
       // dimmedClassName="bg-black/60" // 기본값이므로 생략 가능
     >
-      // ModalOverlay 내부에서 stopPropagation을 처리해주므로 단순히 컨텐츠의 크기와 레이아웃만 정의하면 됨
+      {/* ModalOverlay 내부에서 stopPropagation을 처리해주므로 단순히 컨텐츠의 크기와 레이아웃만 정의하면 됨 */}
       <div className="w-full max-w-[25.9375rem]">
         {step === 1 && (
           <BookStepCalculationModal
