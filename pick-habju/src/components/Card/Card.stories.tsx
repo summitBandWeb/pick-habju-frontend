@@ -33,8 +33,6 @@ export const First: Story = {
     title: '비쥬 합주실 3호점',
     subtitle: 'Modern룸',
     price: 55000,
-    locationText: '이수역',
-    walkTime: '4분',
     capacity: '12인',
     booked: false,
     initialIndex: 0,

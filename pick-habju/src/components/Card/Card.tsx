@@ -3,7 +3,6 @@ import classNames from 'classnames';
 import Button from '../Button/Button';
 import PaginationDots from '../PaginationDot/PaginationDot';
 import Chevron from '../Chevron/Chevron';
-import Location from '../../assets/svg/location.svg';
 import People from '../../assets/svg/people.svg';
 import ImageCarouselModal from '../Modal/ImageCarouselModal';
 import TurnOffIcon from '../../assets/svg/turnOff.svg';
@@ -17,8 +16,6 @@ const Card = ({
   title,
   subtitle,
   price,
-  locationText,
-  walkTime,
   capacity,
   booked = false,
   partialAvailable = false,
@@ -127,17 +124,6 @@ const Card = ({
       <div className="bg-gray-200 w-46 h-0.25 mt-2 mb-2" />
 
       <div className="flex items-center text-gray-500 space-x-1.5">
-        <div
-          className={classNames(
-            'flex items-center space-x-1.5 font-card-info whitespace-nowrap',
-            booked ? 'text-gray-300' : 'text-gray-400'
-          )}
-        >
-          <img src={Location} alt="위치 아이콘" />
-          <span>
-            {locationText} 도보 {walkTime}
-          </span>
-        </div>
         <div
           className={classNames(
             'flex items-center space-x-1 font-card-info whitespace-nowrap',

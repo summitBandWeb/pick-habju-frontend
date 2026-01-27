@@ -5,8 +5,6 @@ export interface CardProps {
   title: string;
   subtitle: string;
   price: number;
-  locationText: string;
-  walkTime: string;
   capacity: string;
   booked?: boolean;
   partialAvailable?: boolean;
