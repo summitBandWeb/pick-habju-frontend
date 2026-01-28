@@ -22,6 +22,12 @@ const meta: Meta<CardProps> = {
       ],
     },
   },
+
+  argTypes: {
+    onLike: { action: 'clicked', description: '즐겨찾기 버튼 클릭' },
+    onBookClick: { action: 'clicked', description: '예약하기 버튼 클릭' },
+    isLiked: { control: 'boolean', description: '즐겨찾기 상태' },
+  },
 };
 export default meta;
 
@@ -37,6 +43,7 @@ export const First: Story = {
     booked: false,
     initialIndex: 0,
     btnsize: BtnSizeVariant.XXSM,
+    isLiked: false, 
   },
 };
 
@@ -53,6 +60,14 @@ export const Last: Story = {
   args: {
     ...First.args!,
     initialIndex: exampleImages.length - 1,
+  },
+};
+
+export const Liked: Story = {
+  name: '즐겨찾기 됨',
+  args: {
+    ...First.args!,
+    isLiked: true,
   },
 };
 

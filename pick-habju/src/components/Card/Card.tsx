@@ -6,6 +6,9 @@ import Chevron from '../Chevron/Chevron';
 import People from '../../assets/svg/people.svg';
 import ImageCarouselModal from '../Modal/ImageCarouselModal';
 import TurnOffIcon from '../../assets/svg/turnOff.svg';
+import FaveOff from '../../assets/svg/FaveOff.svg';
+import FaveOn from '../../assets/svg/FaveOn.svg';
+import Full from '../../assets/svg/Full.svg';
 import type { CardProps } from './Card.types';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
@@ -22,7 +25,9 @@ const Card = ({
   reOpenDaysFromNow = 90,
   btnsize,
   initialIndex = 0,
+  isLiked = false,
   onBookClick,
+  onLike,
 }: CardProps) => {
   const [current, setCurrent] = useState(initialIndex);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
@@ -51,6 +56,16 @@ const Card = ({
   };
   const next = () => {
     setCurrent((p) => Math.min(total - 1, p + 1));
+  };
+
+  const handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
+  const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onLike?.();
   };
 
   // 렌더 함수 분리
@@ -87,6 +102,38 @@ const Card = ({
     const day = base.getDate();
     return `${month}/${day}부터 예약가능합니다`;
   };
+
+  const renderFloatingButtons = () => (
+    <div className="absolute top-6 right-4 z-30 flex flex-col items-center gap-2.5">
+      {!booked && (
+        <button
+        type="button"
+        onClick={handleLikeClick}
+        className="hover:opacity-80 transition-opacity"
+      >
+        <img
+          src={isLiked ? FaveOn : FaveOff}
+          alt={isLiked ? '즐겨찾기 해제' : '즐겨찾기'}
+          className="w-5 h-5"
+        />
+      </button>
+      )}
+
+      {!booked && (
+        <button
+          type="button"
+          onClick={handleZoomClick}
+          className="hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={Full}
+            alt="이미지 확대"
+            className="w-5 h-5 filter brightness-0 invert"
+          />
+        </button>
+      )}
+    </div>
+  );
 
   const renderChevron = () =>
     !booked &&
@@ -154,7 +201,7 @@ const Card = ({
   return (
     <div className="w-92.5 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
-      <div className="relative min-w-92.5 h-45 bg-gray-100" onClick={() => setIsModalOpen(true)}>
+      <div className="relative min-w-92.5 h-45 bg-gray-100">
         {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
         <div className="relative w-full h-full overflow-hidden">
           <div
@@ -168,7 +215,7 @@ const Card = ({
               const isLoaded = loadedImages.has(index);
 
               return (
-                <div key={index} className="w-full h-full flex-shrink-0 relative cursor-pointer">
+                <div key={index} className="w-full h-full flex-shrink-0 relative">
                   {/* 로딩 플레이스홀더 */}
                   {!isLoaded && (
                     <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
@@ -206,6 +253,7 @@ const Card = ({
         {/* 하단 그라데이션 */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
         {renderHeader()}
+        {renderFloatingButtons()}
         {renderOverlay()}
         {renderChevron()}
         {renderPagination()}
