@@ -3,6 +3,6 @@ export interface SEOProps {
   description: string;
   keywords?: string;
   ogImage?: string;
-  url?: string;
+  url: string;
   type?: 'website' | 'article';
 }
