@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Components
+import { SEO } from '../components/SEO/SEO';
 import HeroArea from '../components/HeroArea/HeroArea';
 import SearchBar from '../components/SearchBar/SearchBar';
 import SearchBarSkeleton from '../components/SearchBar/SearchBarSkeleton';
@@ -13,6 +14,9 @@ import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 import { useSearchStore } from '../store/search/searchStore';
 import { useGoogleFormToastStore } from '../store/googleFormToast/googleFormToastStore';
 import { SearchPhase } from '../store/search/searchStore.types';
+
+// Constants
+import { SEO_METADATA, DEFAULT_SEO } from '../constants/seo';
 
 // Hooks
 import { useDefaultDateTime } from '../hook/useDefaultDateTime';
@@ -51,8 +55,10 @@ const HomePage = () => {
   }, [showToast]);
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
+    <>
+      <SEO {...SEO_METADATA.home} ogImage={DEFAULT_SEO.defaultImage} url={DEFAULT_SEO.siteUrl} />
+      <div className="w-full flex flex-col items-center">
+        <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
         {/* Hero Area: 날짜, 시간, 인원 선택 */}
         <HeroArea
           key={heroResetCounter}
@@ -98,6 +104,7 @@ const HomePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
