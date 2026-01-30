@@ -82,7 +82,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
             [&>button]:pointer-events-auto
             [&>button:first-child]:-translate-x-10
             [&>button:last-child]:translate-x-10
-            [&_path]:fill-gray-400
+            [&_path]:text-gray-400
           "
                 />
               </div>
