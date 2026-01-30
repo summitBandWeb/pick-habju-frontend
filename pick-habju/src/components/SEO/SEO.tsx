@@ -13,9 +13,7 @@ export const SEO = ({
   title,
   description,
   keywords,
-  ogImage,
   url = 'https://pickhabju.com',
-  type = 'website',
 }: SEOProps) => {
   return (
     <>
@@ -25,21 +23,6 @@ export const SEO = ({
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="author" content="픽합주" />
       <link rel="canonical" href={url} />
-
-      {/* Open Graph (카카오톡, 페이스북 등) */}
-      <meta property="og:type" content={type} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={url} />
-      <meta property="og:site_name" content="픽합주" />
-      <meta property="og:locale" content="ko_KR" />
-      {ogImage && <meta property="og:image" content={ogImage} />}
-
-      {/* Twitter Card (트위터/X 공유) */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      {ogImage && <meta name="twitter:image" content={ogImage} />}
     </>
   );
 };

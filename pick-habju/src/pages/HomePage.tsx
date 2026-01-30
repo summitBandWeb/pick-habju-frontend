@@ -56,7 +56,7 @@ const HomePage = () => {
 
   return (
     <>
-      <SEO {...SEO_METADATA.home} ogImage={DEFAULT_SEO.defaultImage} url={DEFAULT_SEO.siteUrl} />
+      <SEO {...SEO_METADATA.home} url={DEFAULT_SEO.siteUrl} />
       <div className="w-full flex flex-col items-center">
         <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
         {/* Hero Area: 날짜, 시간, 인원 선택 */}
