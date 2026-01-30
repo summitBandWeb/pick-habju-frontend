@@ -88,21 +88,36 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
   return (
     // [L1] 조건부 마운트 + 등장/퇴장 애니메이션
     <AnimatePresence>
-      {isOpen && rooms.length > 0 && (
-        // [L2] 고정 위치 오버레이 (하단 풀폭, z-50, 등장 시 아래→위 슬라이드)
+      {(isOpen && rooms.length > 0) && [
+        /* 그라데이션: 화면 하단 고정 (애니메이션과 분리해 간격 방지) */
         <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-50 w-full pb-8 pointer-events-none"
-        >
-          {/* [L3] 카드 영역 프레임: 데스크탑 1장 폭(w-100.5), 모바일 풀폭. relative로 Chevron 기준점 제공 */}
+          key="carousel-gradient"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed bottom-0 left-0 right-0 z-40 h-[192px] w-full pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(29, 20, 20, 0.8) 100%)',
+          }}
+          aria-hidden
+        />,
+
+        /* [L2] 고정 위치 오버레이 (하단 풀폭, z-50, 등장 시 아래→위 슬라이드) */
+        <motion.div
+          key="carousel-content"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 z-50 w-full pb-8 pointer-events-none"
+          >
+            {/* [L3] 카드 영역 프레임: 데스크탑 1장 폭(w-100.5), 모바일 풀폭. relative로 Chevron 기준점 제공 */}
           <div
             className={
               isDesktop
-                ? 'relative mx-auto w-100.5 overflow-visible pointer-events-auto'
-                : 'relative w-full pointer-events-auto'
+                ? 'relative z-10 mx-auto w-100.5 overflow-visible pointer-events-auto'
+                : 'relative z-10 w-full pointer-events-auto'
             }
           >
             {/* [L4] 데스크탑 전용: Chevron 좌우 네비게이션 (프레임 기준 absolute) */}
@@ -153,8 +168,8 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
               ))}
             </Swiper>
           </div>
-        </motion.div>
-      )}
+        </motion.div>,
+      ]}
     </AnimatePresence>
   );
 };
