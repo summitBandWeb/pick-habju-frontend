@@ -13,7 +13,7 @@ export const SEO = ({
   title,
   description,
   keywords,
-  url = 'https://pickhabju.com',
+  url = 'https://www.pickhabju.com',
 }: SEOProps) => {
   return (
     <>

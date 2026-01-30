@@ -9,8 +9,8 @@ import type { SEOProps } from '../components/SEO/SEO.types';
 /* 기본 SEO 정보 */
 export const DEFAULT_SEO = {
   siteName: '픽합주',
-  siteUrl: 'https://pickhabju.com',
-  defaultImage: 'https://pickhabju.com/images/test-image.jpg',
+  siteUrl: 'https://www.pickhabju.com',
+  defaultImage: 'https://www.pickhabju.com/images/test-image.jpg',
 } as const;
 
 /* 페이지별 SEO 메타데이터 */
