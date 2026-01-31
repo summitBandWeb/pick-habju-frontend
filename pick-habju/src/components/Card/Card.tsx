@@ -8,7 +8,6 @@ import ImageCarouselModal from '../Modal/ImageCarouselModal';
 import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import FaveOff from '../../assets/svg/FaveOff.svg';
 import FaveOn from '../../assets/svg/FaveOn.svg';
-import Full from '../../assets/svg/Full.svg';
 import type { CardProps } from './Card.types';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
@@ -58,11 +57,6 @@ const Card = ({
     setCurrent((p) => Math.min(total - 1, p + 1));
   };
 
-  const handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsModalOpen(true);
-  };
-
   const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     onLike?.();
@@ -107,28 +101,14 @@ const Card = ({
     <div className="absolute top-6 right-4 z-30 flex flex-col items-center gap-2.5">
       {!booked && (
         <button
-        type="button"
-        onClick={handleLikeClick}
-        className="hover:opacity-80 transition-opacity"
-      >
-        <img
-          src={isLiked ? FaveOn : FaveOff}
-          alt={isLiked ? '즐겨찾기 해제' : '즐겨찾기'}
-          className="w-5 h-5"
-        />
-      </button>
-      )}
-
-      {!booked && (
-        <button
           type="button"
-          onClick={handleZoomClick}
+          onClick={handleLikeClick}
           className="hover:opacity-80 transition-opacity"
         >
           <img
-            src={Full}
-            alt="이미지 확대"
-            className="w-5 h-5 filter brightness-0 invert"
+            src={isLiked ? FaveOn : FaveOff}
+            alt={isLiked ? '즐겨찾기 해제' : '즐겨찾기'}
+            className="w-5 h-5"
           />
         </button>
       )}
@@ -201,7 +181,7 @@ const Card = ({
   return (
     <div className="w-92.5 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 & 헤더 */}
-      <div className="relative min-w-92.5 h-45 bg-gray-100">
+      <div className="relative min-w-92.5 h-45 bg-gray-100 cursor-pointer" onClick={() => setIsModalOpen(true)}>
         {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
         <div className="relative w-full h-full overflow-hidden">
           <div
