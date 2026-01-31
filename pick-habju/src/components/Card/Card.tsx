@@ -259,11 +259,14 @@ const Card = ({
   );
 
   return (
-    <div className="w-92.5 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
+        <div className="w-86.5 h-60.5 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 영역: 그리드 + 그라데이션 + 헤더/즐겨찾기/오버레이 */}
-      <div className="relative min-w-92.5 h-45 bg-gray-100 overflow-hidden">
+            <div className="relative w-full h-40.75 bg-gray-100 overflow-hidden">
         {renderImages()}
+
+        {/* 상단 그라데이션 */}
         <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/70 to-transparent" />
+        {/* 하단 그라데이션 */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
         {renderHeader()}
         {renderFloatingButtons()}
