@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import classNames from 'classnames';
 import Button from '../Button/Button';
-import PaginationDots from '../PaginationDot/PaginationDot';
-import Chevron from '../Chevron/Chevron';
 import People from '../../assets/svg/people.svg';
 import ImageCarouselModal from '../Modal/ImageCarouselModal';
 import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import FaveOff from '../../assets/svg/FaveOff.svg';
 import FaveOn from '../../assets/svg/FaveOn.svg';
+import ImgIcon from '../../assets/svg/ImgIcon.svg';
 import type { CardProps } from './Card.types';
-import { ChevronVariant } from '../Chevron/ChevronEnums';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import { pushGtmEvent } from '../../utils/gtm';
 
@@ -23,38 +21,24 @@ const Card = ({
   partialAvailable = false,
   reOpenDaysFromNow = 90,
   btnsize,
-  initialIndex = 0,
   isLiked = false,
   onBookClick,
   onLike,
 }: CardProps) => {
-  const [current, setCurrent] = useState(initialIndex);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const total = images.length;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 이미지 로딩 처리 함수
   const handleImageLoad = (index: number) => {
     setLoadedImages((prev) => new Set([...prev, index]));
   };
 
   const handleImageError = (index: number) => {
-    setLoadedImages((prev) => new Set([...prev, index])); // 에러 시에도 로드된 것으로 처리
+    setLoadedImages((prev) => new Set([...prev, index]));
   };
 
-  const variant: ChevronVariant = booked
-    ? ChevronVariant.Middle
-    : current === 0
-      ? ChevronVariant.First
-      : current === total - 1
-        ? ChevronVariant.Last
-        : ChevronVariant.Middle;
-
-  const prev = () => {
-    setCurrent((p) => Math.max(0, p - 1));
-  };
-  const next = () => {
-    setCurrent((p) => Math.min(total - 1, p + 1));
+  const handleImageClick = () => {
+    setIsModalOpen(true);
   };
 
   const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,21 +99,87 @@ const Card = ({
     </div>
   );
 
-  const renderChevron = () =>
-    !booked &&
-    total > 1 && (
-      <div className="absolute left-0 right-0 bottom-10 flex items-center justify-between">
-        <Chevron variant={variant} onPrev={prev} onNext={next} />
+  const renderImageCell = (image: string, index: number, className?: string) => {
+    const isLoaded = loadedImages.has(index);
+    return (
+      <div key={index} className={classNames('relative overflow-hidden', className)}>
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-gray-200">
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
+              style={{ backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }}
+            />
+          </div>
+        )}
+        <img
+          src={image}
+          alt={`slide ${index + 1}`}
+          className={`w-full h-full object-cover transition-all duration-500 ${
+            isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+          }`}
+          onLoad={() => handleImageLoad(index)}
+          onError={() => handleImageError(index)}
+          loading={index < 4 ? 'eager' : 'lazy'}
+          decoding="async"
+        />
       </div>
     );
+  };
 
-  const renderPagination = () =>
-    !booked &&
-    total > 1 && (
-      <div className="absolute bottom-4.5 w-full flex justify-center">
-        <PaginationDots total={total} current={current} />
+  const renderImages = () => {
+    if (total === 0) return null;
+    if (total === 1) {
+      return (
+        <div
+          className="absolute inset-0 cursor-pointer"
+          onClick={handleImageClick}
+        >
+          {renderImageCell(images[0], 0, 'w-full h-full')}
+        </div>
+      );
+    }
+    if (total === 2) {
+      return (
+        <div
+          className="absolute inset-0 flex cursor-pointer"
+          onClick={handleImageClick}
+        >
+          {renderImageCell(images[0], 0, 'w-[13.75rem] shrink-0 h-full')}
+          {renderImageCell(images[1], 1, 'flex-1 h-full')}
+        </div>
+      );
+    }
+    // 3장 이상: 왼쪽 1장 + 오른쪽 2장, 4장 이상일 때만 세 번째 이미지에 4+ 오버레이
+    return (
+      <div
+        className="absolute inset-0 flex cursor-pointer"
+        onClick={handleImageClick}
+      >
+        <div className="w-[13.75rem] shrink-0 h-full">{renderImageCell(images[0], 0, 'w-full h-full')}</div>
+        <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col">
+          {renderImageCell(images[1], 1, 'w-full flex-1 min-h-0')}
+          <div className="relative flex-1 min-h-0">
+            {renderImageCell(images[2], 2, 'w-full h-full')}
+            {/* 4장 이상일 때 추가 레이아웃, 4+ 이미지 아이콘 노출 */}
+            {total >= 4 && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col justify-between items-center h-6">
+                  <img src={ImgIcon} alt="" />
+                  <div
+                    className="flex justify-center items-center self-stretch px-[0.3125rem] gap-[0.125rem]"
+                    style={{ fontFamily: 'Inter', fontSize: '0.6875rem' }}
+                  >
+                    <span className="text-primary-white font-medium leading-none">4</span>
+                    <span className="text-primary-white font-medium leading-none">+</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
+  };
 
   const renderInfo = () => (
     <>
@@ -180,53 +230,8 @@ const Card = ({
 
   return (
     <div className="w-92.5 h-65 rounded-xl shadow-card bg-primary-white overflow-hidden">
-      {/* 이미지 & 헤더 */}
-      <div className="relative min-w-92.5 h-45 bg-gray-100 cursor-pointer" onClick={() => setIsModalOpen(true)}>
-        {/* 이미지 프레임 고정, 내부 레이어만 슬라이드 */}
-        <div className="relative w-full h-full overflow-hidden">
-          <div
-            className="flex h-full"
-            style={{
-              transform: `translateX(-${current * 100}%)`,
-              transition: 'transform 0.35s ease-out',
-            }}
-          >
-            {images.map((image, index) => {
-              const isLoaded = loadedImages.has(index);
-
-              return (
-                <div key={index} className="w-full h-full flex-shrink-0 relative">
-                  {/* 로딩 플레이스홀더 */}
-                  {!isLoaded && (
-                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                      <div
-                        className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
-                        style={{
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 1.5s infinite',
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* 실제 이미지 */}
-                  <img
-                    src={image}
-                    alt={`slide ${index + 1}`}
-                    className={`w-full h-full object-cover transition-all duration-500 ${
-                      isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-                    }`}
-                    onLoad={() => handleImageLoad(index)}
-                    onError={() => handleImageError(index)}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    fetchPriority={index === 0 ? 'high' : 'low'}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      <div className="relative min-w-92.5 h-45 bg-gray-100 overflow-hidden">
+        {renderImages()}
 
         {/* 상단 그라데이션 */}
         <div className="pointer-events-none absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/70 to-transparent" />
@@ -235,8 +240,6 @@ const Card = ({
         {renderHeader()}
         {renderFloatingButtons()}
         {renderOverlay()}
-        {renderChevron()}
-        {renderPagination()}
       </div>
 
       {/* 정보 & 버튼 */}
@@ -249,7 +252,6 @@ const Card = ({
       {isModalOpen && (
         <ImageCarouselModal
           images={images}
-          initialIndex={current}
           onClose={() => setIsModalOpen(false)}
           closeIconSrc={TurnOffIcon}
         />

@@ -10,7 +10,6 @@ export interface CardProps {
   partialAvailable?: boolean;
   reOpenDaysFromNow?: number;
   btnsize?: BtnSizeVariant;
-  initialIndex?: number;
   isLiked?: boolean;
   onLike?: () => void; // 즐겨찾기 클릭 이벤트 핸들러
   onBookClick?: () => void;
