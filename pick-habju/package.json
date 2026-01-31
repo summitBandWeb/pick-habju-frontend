@@ -17,9 +17,9 @@
     "framer-motion": "^12.23.12",
     "immer": "^10.1.1",
     "lucide-react": "^0.510.0",
-    "react": "^19.1.0",
+    "react": "^19.1.2",
     "react-calendar": "^5.1.0",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.1.2",
     "tailwind-scrollbar-hide": "^2.0.0",
     "zustand": "^5.0.5"
   },
