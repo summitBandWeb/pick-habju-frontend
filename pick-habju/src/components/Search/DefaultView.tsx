@@ -48,8 +48,6 @@ const DefaultView = () => {
               dateIso: lastQuery.date,
             })
           : room.pricePerHour;
-        const locationText = room.subway.station;
-        const walkTime = room.subway.timeToWalk.replace('도보 ', '').replace(' ', '');
         const capacity = `${room.recommendCapacity}인`;
 
         if (c.kind === CardKind.NOT_YET) {
@@ -60,8 +58,6 @@ const DefaultView = () => {
               title={room.branch}
               subtitle={room.name}
               price={price}
-              locationText={locationText}
-              walkTime={walkTime}
               capacity={capacity}
               booked
               reOpenDaysFromNow={c.reOpenDaysFromNow}
@@ -77,8 +73,6 @@ const DefaultView = () => {
               title={room.branch}
               subtitle={room.name}
               price={price}
-              locationText={locationText}
-              walkTime={walkTime}
               capacity={capacity}
               partialAvailable
               onBookClick={() => {
@@ -101,8 +95,6 @@ const DefaultView = () => {
               title={room.branch}
               subtitle={room.name}
               price={price}
-              locationText={locationText}
-              walkTime={walkTime}
               capacity={capacity}
               onBookClick={() => {
                 if (!lastQuery) return;
