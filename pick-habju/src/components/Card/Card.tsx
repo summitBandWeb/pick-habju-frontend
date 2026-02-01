@@ -17,6 +17,9 @@ import type { CardProps } from './Card.types';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import { pushGtmEvent } from '../../utils/gtm';
 
+/** 카드 이미지 그리드 좌우 비율 (13.75rem : 7.875rem ≈ 1.746 : 1) - 카드 너비가 줄어들어도 비율 유지 */
+const IMAGE_GRID_COLS = 'grid-cols-[1.746fr_minmax(0,1fr)]';
+
 const Card = ({
   images,
   title,
@@ -148,8 +151,8 @@ const Card = ({
   /**
    * 이미지 개수별 그리드 레이아웃
    * - 1장: 전체
-   * - 2장: 좌(13.75rem 고정) | 우(나머지)
-   * - 3장 이상: 좌(13.75rem 1장) | 우(위·아래 2장), 4장 이상이면 세 번째 칸에 4+ 오버레이
+   * - 2장: 좌(~63.6%) | 우(~36.4%) 비율 유지
+   * - 3장 이상: 좌(1장) | 우(위·아래 2장), 4장 이상이면 세 번째 칸에 4+ 오버레이
    */
   const renderImages = () => {
     if (total === 0) return null;
@@ -168,11 +171,11 @@ const Card = ({
     if (total === 2) {
       return (
         <div
-          className="absolute inset-0 flex cursor-pointer"
+          className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`}
           onClick={handleImageClick}
         >
-          {renderImageCell(images[0], 0, 'w-[13.75rem] shrink-0 h-full')}
-          {renderImageCell(images[1], 1, 'flex-1 h-full')}
+          {renderImageCell(images[0], 0, 'min-w-0 h-full')}
+          {renderImageCell(images[1], 1, 'min-w-0 h-full')}
         </div>
       );
     }
@@ -180,23 +183,22 @@ const Card = ({
     // 3장 이상: 왼쪽 1장 + 오른쪽 2장 세로 배치, 4장 이상일 때만 세 번째 이미지에 4+ 오버레이
     return (
       <div
-        className="absolute inset-0 flex cursor-pointer"
+        className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`}
         onClick={handleImageClick}
       >
-        <div className="w-[13.75rem] shrink-0 h-full">{renderImageCell(images[0], 0, 'w-full h-full')}</div>
-        <div className="flex-1 min-w-0 min-h-0 h-full flex flex-col">
-          {renderImageCell(images[1], 1, 'w-full flex-1 min-h-0')}
-          <div className="relative flex-1 min-h-0">
+        <div className="min-w-0 h-full overflow-hidden">{renderImageCell(images[0], 0, 'w-full h-full')}</div>
+        <div className="min-w-0 min-h-0 h-full overflow-hidden grid grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="min-h-0 overflow-hidden">
+            {renderImageCell(images[1], 1, 'w-full h-full')}
+          </div>
+          <div className="relative min-h-0 overflow-hidden">
             {renderImageCell(images[2], 2, 'w-full h-full')}
             {/* 4장 이상: 세 번째 칸 위에 반투명 + ImgIcon + "4+" 텍스트 */}
             {total >= 4 && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
                 <div className="flex flex-col justify-between items-center h-6">
                   <img src={ImgIcon} alt="" />
-                  <div
-                    className="flex justify-center items-center self-stretch px-[0.3125rem] gap-[0.125rem]"
-                    style={{ fontFamily: 'Inter', fontSize: '0.6875rem' }}
-                  >
+                  <div className="flex justify-center items-center self-stretch px-[0.3125rem] gap-[0.125rem] font-summary">
                     <span className="text-primary-white font-medium leading-none">4</span>
                     <span className="text-primary-white font-medium leading-none">+</span>
                   </div>

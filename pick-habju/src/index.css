@@ -146,6 +146,22 @@
     --line-height-modal-num: normal;
     --letter-spacing-modal-num: 0.04em;
 
+    --font-price-chip-weight: 600;
+    --font-price-chip-size: 14px;
+    --line-height-price-chip: normal;
+    --letter-spacing-price-chip: 0;
+    --font-price-chip-hover-size: 19px;
+
+    --font-cluster-weight: 700;
+    --font-cluster-size: 18px;
+    --line-height-cluster: 24px;
+    --letter-spacing-cluster: 0;
+
+    --font-summary-weight: 500;
+    --font-summary-size: 11px;
+    --line-height-summary: normal;
+    --letter-spacing-summary: 0;
+
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
@@ -247,6 +263,31 @@
   }
   .text-decoration-card-book {
     text-decoration: var(--text-decoration-card-book);
+  }
+
+  .font-price-chip {
+    font-family: var(--font-sans);
+    font-weight: var(--font-price-chip-weight);
+    font-size: var(--font-price-chip-size);
+    line-height: var(--line-height-price-chip);
+    letter-spacing: var(--letter-spacing-price-chip);
+  }
+  .font-price-chip:hover {
+    font-size: var(--font-price-chip-hover-size);
+  }
+  .font-cluster {
+    font-family: var(--font-sans);
+    font-weight: var(--font-cluster-weight);
+    font-size: var(--font-cluster-size);
+    line-height: var(--line-height-cluster);
+    letter-spacing: var(--letter-spacing-cluster);
+  }
+  .font-summary {
+    font-family: var(--font-sans);
+    font-weight: var(--font-summary-weight);
+    font-size: var(--font-summary-size);
+    line-height: var(--line-height-summary);
+    letter-spacing: var(--letter-spacing-summary);
   }
 
   /* Modal */
