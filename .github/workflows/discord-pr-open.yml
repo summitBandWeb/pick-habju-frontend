@@ -1,0 +1,96 @@
+name: Discord PR Open/Label Notify
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, labeled]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  notify:
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build & Send Discord message
+        uses: actions/github-script@v7
+        env:
+          DISCORD_WEBHOOK_PR_ALERTS: ${{ secrets.DISCORD_WEBHOOK_PR_ALERTS }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = (pr.labels || []).map(l => l.name);
+            const action = context.payload.action;
+
+            // ✅ 하드코딩 멘션 (긴급 전용)
+            // 디스코드 유저 ID 기반으로 <@ID> 형태로 넣어야 확실히 멘션됩니다.
+            const URGENT_MENTIONS = [
+                "<@317972480704774144>",
+                "<@1221742784759988237>",
+            ].join(" ");
+
+            // Only notify on:
+            // - opened / ready_for_review => always notify
+            // - labeled => only when relevant labels added
+            const isOpenEvent = (action === "opened" || action === "ready_for_review");
+            const labeledName = context.payload.label?.name || "";
+            const isRelevantLabelEvent =
+              action === "labeled" && ["priority/high", "review/24h", "review/48h", "risk/high"].includes(labeledName);
+
+            if (!isOpenEvent && !isRelevantLabelEvent) {
+              core.info("Not an event we notify on.");
+              return;
+            }
+
+            const hasPriorityHigh = labels.includes("priority/high");
+            const hasReview24 = labels.includes("review/24h");
+            const hasReview48 = labels.includes("review/48h");
+            const hasRiskHigh = labels.includes("risk/high");
+
+            // 강조 알림 조건: priority/high + review/24h or review/48h
+            const isUrgent = hasPriorityHigh && (hasReview24 || hasReview48);
+            const reviewWindow = hasReview24 ? "24h" : (hasReview48 ? "48h" : null);
+
+            // ✅ 모든 알림에 라벨 표시(필드)
+            const labelText = labels.length ? labels.join(", ") : "(none)";
+
+            let title = "🆕 PR이 올라왔어요";
+            let content = ""; // 기본은 멘션 없음
+
+            if (isUrgent && reviewWindow) {
+              title = `🚨 긴급 PR: ${reviewWindow} 내 첫 리뷰가 필요해요`;
+              content = URGENT_MENTIONS || "@here"; // 멘션 리스트 비어있으면 @here fallback
+            } else if (hasRiskHigh && (hasReview24 || hasReview48)) {
+              // risk/high + review/* 자체는 "긴급"까진 아니어도 신호는 주기
+              title = `🟠 주의 PR: review/${reviewWindow || "?"} (risk/high)`;
+              // 멘션은 안 함 (원하면 여기에도 멘션 넣을 수 있음)
+            }
+
+            const payload = {
+              content,
+              embeds: [{
+                title,
+                url: pr.html_url,
+                description: `**${pr.title}**\nPR #${pr.number} • ${pr.base.ref} ← ${pr.head.ref}`,
+                fields: [
+                  { name: "작성자", value: pr.user.login, inline: true },
+                  { name: "라벨", value: labelText, inline: false }
+                ],
+                timestamp: new Date().toISOString()
+              }]
+            };
+
+            const webhook = process.env.DISCORD_WEBHOOK_PR_ALERTS;
+            if (!webhook) throw new Error("Missing DISCORD_WEBHOOK_PR_ALERTS secret.");
+
+            const res = await fetch(webhook, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+              const txt = await res.text();
+              throw new Error(`Discord webhook failed: ${res.status} ${txt}`);
+            }
