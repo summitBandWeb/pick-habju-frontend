@@ -64,7 +64,7 @@ const ImageCarouselModal = ({
         {/* Group */}
         <div className="w-[23.125rem] h-[16.25rem] flex flex-col justify-between items-start flex-shrink-0">
           {/* Rectangle (이미지 프레임 고정) */}
-          <div className="relative w-full h-[16.25rem] flex-shrink-0 rounded-[0.75rem] overflow-hidden">
+          <div className="relative w-full h-[16.25rem] flex-shrink-0 overflow-hidden">
             {/* 이미지 레이어만 슬라이드 */}
             <div
               className="flex h-full"

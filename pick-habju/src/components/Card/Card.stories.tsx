@@ -6,8 +6,6 @@ import image3 from '../../assets/images/3.png';
 import type { CardProps } from './Card.types';
 import { BtnSizeVariant } from '../Button/ButtonEnums';
 
-const exampleImages = [image1, image2, image3];
-
 const meta: Meta<CardProps> = {
   title: 'Components/Card',
   component: Card,
@@ -22,47 +20,75 @@ const meta: Meta<CardProps> = {
       ],
     },
   },
+  argTypes: {
+    onLike: { action: 'clicked', description: '즐겨찾기 버튼 클릭' },
+    onBookClick: { action: 'clicked', description: '예약하기 버튼 클릭' },
+    isLiked: { control: 'boolean', description: '즐겨찾기 상태' },
+  },
 };
 export default meta;
 
 type Story = StoryObj<CardProps>;
 
-export const First: Story = {
+const baseArgs: CardProps = {
+  images: [image1],
+  title: '비쥬 합주실 3호점',
+  subtitle: 'Modern룸',
+  price: 55000,
+  capacity: '12인',
+  booked: false,
+  btnsize: BtnSizeVariant.XXSM,
+  isLiked: false,
+};
+
+// 이미지 개수별 스토리
+export const OneImage: Story = {
+  name: '이미지 1장',
   args: {
-    images: exampleImages,
-    title: '비쥬 합주실 3호점',
-    subtitle: 'Modern룸',
-    price: 55000,
-    locationText: '이수역',
-    walkTime: '4분',
-    capacity: '12인',
-    booked: false,
-    initialIndex: 0,
-    btnsize: BtnSizeVariant.XXSM,
+    ...baseArgs,
+    images: [image1],
   },
 };
 
-export const Middle: Story = {
-  name: '두 번째 이미지',
+export const TwoImages: Story = {
+  name: '이미지 2장',
   args: {
-    ...First.args!,
-    initialIndex: 1,
+    ...baseArgs,
+    images: [image1, image2],
   },
 };
 
-export const Last: Story = {
-  name: '마지막 이미지',
+export const ThreeImages: Story = {
+  name: '이미지 3장',
   args: {
-    ...First.args!,
-    initialIndex: exampleImages.length - 1,
+    ...baseArgs,
+    images: [image1, image2, image3],
   },
 };
 
-// 오픈 대기 상태
+export const FourPlusImages: Story = {
+  name: '이미지 4장 이상',
+  args: {
+    ...baseArgs,
+    images: [image1, image2, image3, image1, image2],
+  },
+};
+
+// 상태별 스토리
+export const Liked: Story = {
+  name: '즐겨찾기 됨',
+  args: {
+    ...baseArgs,
+    images: [image1, image2, image3],
+    isLiked: true,
+  },
+};
+
 export const Booked: Story = {
   name: '오픈 대기',
   args: {
-    ...First.args!,
+    ...baseArgs,
+    images: [image1, image2, image3],
     booked: true,
   },
 };
