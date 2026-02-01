@@ -35,6 +35,9 @@ const DefaultView = () => {
   // filteredCards는 이미 HomePage에서 정렬된 상태이므로 순서를 유지합니다
   const sorted = [...filteredCards];
 
+  // TODO: 즐겨찾기 기능 - Card 컴포넌트에 isLiked, onLike props 전달 필요.
+  // 현재 UI만 구현된 상태로 즐겨찾기 동작하지 않음. 구현 시 즐겨찾기 상태 관리(zustand 등) 및 onLike 핸들러 연결 필요.
+
   return (
     <div className="w-full flex flex-col items-center gap-4 pt-3 pb-4 bg-yellow-300">
       {sorted.map((c, i) => {

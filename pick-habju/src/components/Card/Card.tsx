@@ -85,7 +85,6 @@ const Card = ({
             <p className="font-card-title">{getReopenText()}</p>
           </div>
         </div>
-        {/* 중앙 메시지는 제거하고 헤더만 노출 */}
       </div>
     );
 
