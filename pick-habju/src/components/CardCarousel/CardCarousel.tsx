@@ -41,7 +41,6 @@ function CarouselSlideContent({
   isMobile: boolean;
   isDesktop: boolean;
 }) {
-  const walkTimeCleaned = room.subway?.timeToWalk?.replace('도보 ', '')?.replace(' ', '') || '';
   const shouldScale = isMobile && isActive;
 
   return (
@@ -56,8 +55,6 @@ function CarouselSlideContent({
           title={room.branch}
           subtitle={room.name}
           price={room.pricePerHour}
-          locationText={room.subway?.station}
-          walkTime={walkTimeCleaned}
           capacity={`${room.recommendCapacity}인`}
         />
       </div>
@@ -116,7 +113,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
           <div
             className={
               isDesktop
-                ? 'relative z-10 mx-auto w-100.5 overflow-visible pointer-events-auto'
+                ? 'relative z-10 mx-auto w-92.5 overflow-visible pointer-events-auto'
                 : 'relative z-10 w-full pointer-events-auto'
             }
           >
@@ -130,8 +127,8 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
                   containerClassName="
             w-full justify-between pointer-events-none
             [&>button]:pointer-events-auto
-            [&>button:first-child]:-translate-x-10
-            [&>button:last-child]:translate-x-10
+            [&>button:first-child]:-translate-x-7.5
+            [&>button:last-child]:translate-x-7.5
             [&_path]:text-gray-400
           "
                 />
