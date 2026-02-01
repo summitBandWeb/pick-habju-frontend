@@ -69,7 +69,7 @@ const GoogleFormToast = () => {
           <img src={FlightIcon} alt="FlightIcon" className="h-11 mr-2 flex-shrink-0" />
           <div className="flex flex-col items-start justify-center mr-3 gap-0.5 flex-1">
             <div className="font-modal-default text-primary-black whitespace-nowrap">
-              오류 및 건의사항을 알려주세요!
+              오류 및 건의사항을 알려주세요!!
             </div>
             <div className="font-modal-calcdetail text-gray-300">몇 분 내로 답변드리겠습니다</div>
           </div>
