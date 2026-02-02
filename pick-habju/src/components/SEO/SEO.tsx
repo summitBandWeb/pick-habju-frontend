@@ -13,8 +13,13 @@ export const SEO = ({
   title,
   description,
   keywords,
-  url = 'https://www.pickhabju.com',
+  url = 'https://pickhabju.com',
 }: SEOProps) => {
+  const canonical =
+    typeof window !== 'undefined'
+      ? window.location.origin + window.location.pathname.replace(/\/$/, '')
+      : url.replace(/\/$/, '');
+
   return (
     <>
       {/* 기본 메타 태그 */}
@@ -22,7 +27,7 @@ export const SEO = ({
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="author" content="픽합주" />
-      <link rel="canonical" href={url} />
+      <link rel="canonical" href={canonical} />
     </>
   );
 };
