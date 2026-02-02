@@ -11,7 +11,7 @@ import Card from '../Card/Card';
 import Chevron from '../Chevron/Chevron';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
 
-import 'swiper/swiper-bundle.css';
+import 'swiper/css';
 
 /** 데스크탑/모바일 Swiper 옵션 (디바이스별 분기) */
 const getSwiperProps = (isDesktop: boolean) =>
