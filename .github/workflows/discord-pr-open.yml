@@ -4,8 +4,14 @@ on:
   pull_request:
     types: [opened, ready_for_review, labeled]
 
+# 라벨 2개 붙이면 labeled 이벤트 2번 → 동시 실행 시 둘 다 알림 전송. 같은 PR은 직렬 실행해 두 번째 run에서 라벨 보고 스킵.
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 permissions:
   pull-requests: read
+  issues: write
   contents: read
 
 jobs:
@@ -41,6 +47,21 @@ jobs:
             if (!isOpenEvent && !isRelevantLabelEvent) {
               core.info("Not an event we notify on.");
               return;
+            }
+
+            // labeled 이벤트는 라벨 1개마다 1번 발생 → PR당 1번만 알림 (직렬 실행 + 최신 라벨로 중복 판단)
+            const LABELED_NOTIFIED = "bot/discord-labeled-notified";
+            if (action === "labeled") {
+              const { data: fresh } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              const hasNotified = (fresh.labels || []).some(l => l.name === LABELED_NOTIFIED);
+              if (hasNotified) {
+                core.info("Already sent a labeled notification for this PR, skipping.");
+                return;
+              }
             }
 
             const hasPriorityHigh = labels.includes("priority/high");
@@ -93,4 +114,34 @@ jobs:
             if (!res.ok) {
               const txt = await res.text();
               throw new Error(`Discord webhook failed: ${res.status} ${txt}`);
+            }
+
+            if (action === "labeled") {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: [LABELED_NOTIFIED]
+                });
+              } catch (e) {
+                const status = e?.status ?? e?.response?.status;
+                if (status === 404 || status === 422) {
+                  try {
+                    await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: LABELED_NOTIFIED,
+                      color: "ededed",
+                      description: "internal: already sent Discord for labeled event"
+                    });
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      labels: [LABELED_NOTIFIED]
+                    });
+                  } catch (_) {}
+                }
+              }
             }
