@@ -13,6 +13,15 @@ import { ChevronVariant } from '../Chevron/ChevronEnums';
 
 import 'swiper/css';
 
+/** Chevron 컨테이너 스타일: nested 선택자 분리로 가독성 향상 */
+const CHEVRON_CONTAINER_STYLES = `
+  w-full justify-between pointer-events-none
+  [&>button]:pointer-events-auto
+  [&>button:first-child]:-translate-x-7.5
+  [&>button:last-child]:translate-x-7.5
+  [&_path]:text-gray-400
+`;
+
 /** 데스크탑/모바일 Swiper 옵션 (디바이스별 분기) */
 const getSwiperProps = (isDesktop: boolean) =>
   isDesktop
@@ -125,13 +134,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
                   variant={ChevronVariant.Middle}
                   onPrev={handlePrev}
                   onNext={handleNext}
-                  containerClassName="
-            w-full justify-between pointer-events-none
-            [&>button]:pointer-events-auto
-            [&>button:first-child]:-translate-x-7.5
-            [&>button:last-child]:translate-x-7.5
-            [&_path]:text-gray-400
-          "
+                  containerClassName={CHEVRON_CONTAINER_STYLES}
                 />
               </div>
             )}
