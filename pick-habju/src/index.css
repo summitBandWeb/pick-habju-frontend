@@ -162,6 +162,21 @@
     --line-height-summary: normal;
     --letter-spacing-summary: 0.03em;
 
+    --font-footer-button-weight: 500;
+    --font-footer-button-size: 12px;
+    --line-height-footer-button: normal;
+    --letter-spacing-footer-button: 0.03em;
+
+    --font-footer-copyright-weight: 300;
+    --font-footer-copyright-size: 12px;
+    --line-height-footer-copyright: normal;
+    --letter-spacing-footer-copyright: 0.03em;
+
+    --font-footer-email-weight: 400;
+    --font-footer-email-size: 12px;
+    --line-height-footer-email: normal;
+    --letter-spacing-footer-email: 0.03em;
+
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
@@ -302,15 +317,24 @@
   /* Footer */
   .font-footer-button {
     font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 0.75rem; /* 12px */
-    line-height: normal;
+    font-weight: var(--font-footer-button-weight);
+    font-size: var(--font-footer-button-size);
+    line-height: var(--line-height-footer-button);
+    letter-spacing: var(--letter-spacing-footer-button);
   }
   .font-footer-copyright {
     font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 0.75rem; /* 12px */
-    line-height: normal;
+    font-weight: var(--font-footer-copyright-weight);
+    font-size: var(--font-footer-copyright-size);
+    line-height: var(--line-height-footer-copyright);
+    letter-spacing: var(--letter-spacing-footer-copyright);
+  }
+  .font-footer-email {
+    font-family: var(--font-sans);
+    font-weight: var(--font-footer-email-weight);
+    font-size: var(--font-footer-email-size);
+    line-height: var(--line-height-footer-email);
+    letter-spacing: var(--letter-spacing-footer-email);
   }
   .font-modal-call {
     font-family: var(--font-sans);
