@@ -85,10 +85,11 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
   return (
     // [L1] 조건부 마운트 + 등장/퇴장 애니메이션
     <AnimatePresence>
-      {(isOpen && rooms.length > 0) && [
-        /* 그라데이션: 화면 하단 고정 (애니메이션과 분리해 간격 방지) */
-        <motion.div
-          key="carousel-gradient"
+      {(isOpen && rooms.length > 0) && (
+        <>
+          {/* 그라데이션: 화면 하단 고정 (애니메이션과 분리해 간격 방지) */}
+          <motion.div
+            key="carousel-gradient"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -97,12 +98,12 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
           style={{
             background: 'linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(29, 20, 20, 0.8) 100%)',
           }}
-          aria-hidden
-        />,
+          aria-hidden="true"
+        />
 
-        /* [L2] 고정 위치 오버레이 (하단 풀폭, z-50, 등장 시 아래→위 슬라이드) */
-        <motion.div
-          key="carousel-content"
+          {/* [L2] 고정 위치 오버레이 (하단 풀폭, z-50, 등장 시 아래→위 슬라이드) */}
+          <motion.div
+            key="carousel-content"
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
@@ -137,6 +138,8 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
 
             {/* [L5] Swiper 캐러셀: 루프, 디바이스별 옵션, 슬라이드 변경 시 onCardChange로 부모에 알림 */}
             <Swiper
+              role="region"
+              aria-label="룸 카드 캐러셀"
               modules={[Navigation]}
               loop={true}
               navigation={false}
@@ -165,8 +168,9 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
               ))}
             </Swiper>
           </div>
-        </motion.div>,
-      ]}
+        </motion.div>
+        </>
+      )}
     </AnimatePresence>
   );
 };
