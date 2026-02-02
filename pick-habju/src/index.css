@@ -72,100 +72,115 @@
     --font-hero-headline-weight: 700;
     --font-hero-headline-size: 24px;
     --line-height-hero-headline: normal;
-    --letter-spacing-hero-headline: 0.02em;
+    --letter-spacing-hero-headline: 0.05em;
 
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
-    --letter-spacing-hero-info: 0em;
+    --letter-spacing-hero-info: 0.03em;
 
     --font-hero-edit-weight: 600;
     --font-hero-edit-size: 14px;
     --line-height-hero-edit: normal;
-    --letter-spacing-hero-edit: 0em;
+    --letter-spacing-hero-edit: 0.03em;
     --text-decoration-hero-edit: underline;
 
     --font-card-title-weight: 600;
     --font-card-title-size: 19px;
     --line-height-card-title: normal;
-    --letter-spacing-card-title: -0.01em;
+    --letter-spacing-card-title: 0.02em;
 
     --font-card-price-num-weight: 600;
     --font-card-price-num-size: 20px;
     --line-height-card-price-num: normal;
-    --letter-spacing-card-price-num: -0.03em;
+    --letter-spacing-card-price-num: 0em;
 
     --font-card-price-text-weight: 600;
     --font-card-price-text-size: 13px;
     --line-height-card-price-text: normal;
-    --letter-spacing-card-price-text: -0.02em;
+    --letter-spacing-card-price-text: 0.01em;
 
     --font-card-info-weight: 600;
     --font-card-info-size: 12px;
     --line-height-card-info: normal;
-    --letter-spacing-card-info: -0.02em;
+    --letter-spacing-card-info: 0.01em;
 
     --font-card-book-weight: 600;
     --font-card-book-size: 13px;
     --line-height-card-book: normal;
-    --letter-spacing-card-book: -0.02em;
+    --letter-spacing-card-book: 0.01em;
     --text-decoration-card-book: underline;
 
     --font-modal-default-weight: 600;
     --font-modal-default-size: 16px;
     --line-height-modal-default: 24px;
-    --letter-spacing-modal-default: 0em;
+    --letter-spacing-modal-default: 0.03em;
 
     --font-modal-call-weight: 600;
     --font-modal-call-size: 14px;
     --line-height-modal-call: normal;
-    --letter-spacing-modal-call: 0em;
+    --letter-spacing-modal-call: 0.03em;
 
     --font-modal-description-weight: 500;
     --font-modal-description-size: 16px;
     --line-height-modal-description: 14px;
-    --letter-spacing-modal-description: 0em;
+    --letter-spacing-modal-description: 0.03em;
 
     --font-modal-calctype-weight: 600;
     --font-modal-calctype-size: 16px;
     --line-height-modal-calctype: 14px;
-    --letter-spacing-modal-calctype: 0em;
+    --letter-spacing-modal-calctype: 0.03em;
 
     --font-modal-calcdetail-weight: 500;
     --font-modal-calcdetail-size: 14px;
     --line-height-modal-calcdetail: 20px;
-    --letter-spacing-modal-calcdetail: 0em;
+    --letter-spacing-modal-calcdetail: 0.03em;
 
     --font-modal-timepicker-weight: 500;
     --font-modal-timepicker-size: 28px;
     --line-height-modal-timepicker: 44px;
-    --letter-spacing-modal-timepicker: 0em;
+    --letter-spacing-modal-timepicker: 0.03em;
 
     --font-modal-num-weight: 500;
     --font-modal-num-size: 18px;
     --line-height-modal-num: normal;
-    --letter-spacing-modal-num: 0.04em;
+    --letter-spacing-modal-num: 0.07em;
 
     --font-price-chip-weight: 600;
     --font-price-chip-size: 14px;
     --line-height-price-chip: normal;
-    --letter-spacing-price-chip: 0;
+    --letter-spacing-price-chip: 0.03em;
     --font-price-chip-hover-size: 19px;
 
     --font-cluster-weight: 700;
     --font-cluster-size: 18px;
     --line-height-cluster: 24px;
-    --letter-spacing-cluster: 0;
+    --letter-spacing-cluster: 0.03em;
 
     --font-summary-weight: 500;
-    --font-summary-size: 11px;
+    --font-summary-size: 14px;
     --line-height-summary: normal;
-    --letter-spacing-summary: 0;
+    --letter-spacing-summary: 0.03em;
+
+    --font-footer-button-weight: 500;
+    --font-footer-button-size: 12px;
+    --line-height-footer-button: normal;
+    --letter-spacing-footer-button: 0.03em;
+
+    --font-footer-copyright-weight: 300;
+    --font-footer-copyright-size: 12px;
+    --line-height-footer-copyright: normal;
+    --letter-spacing-footer-copyright: 0.03em;
+
+    --font-footer-email-weight: 400;
+    --font-footer-email-size: 12px;
+    --line-height-footer-email: normal;
+    --letter-spacing-footer-email: 0.03em;
 
     --font-hero-info-weight: 600;
     --font-hero-info-size: 16px;
     --line-height-hero-info: normal;
-    --letter-spacing-hero-info: 0em;
+    --letter-spacing-hero-info: 0.03em;
 
     --box-shadow-card: 4px 4px 10px 0px rgba(0, 0, 0, 0.25);
     --box-shadow-search: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
@@ -302,15 +317,24 @@
   /* Footer */
   .font-footer-button {
     font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 0.75rem; /* 12px */
-    line-height: normal;
+    font-weight: var(--font-footer-button-weight);
+    font-size: var(--font-footer-button-size);
+    line-height: var(--line-height-footer-button);
+    letter-spacing: var(--letter-spacing-footer-button);
   }
   .font-footer-copyright {
     font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 0.75rem; /* 12px */
-    line-height: normal;
+    font-weight: var(--font-footer-copyright-weight);
+    font-size: var(--font-footer-copyright-size);
+    line-height: var(--line-height-footer-copyright);
+    letter-spacing: var(--letter-spacing-footer-copyright);
+  }
+  .font-footer-email {
+    font-family: var(--font-sans);
+    font-weight: var(--font-footer-email-weight);
+    font-size: var(--font-footer-email-size);
+    line-height: var(--line-height-footer-email);
+    letter-spacing: var(--letter-spacing-footer-email);
   }
   .font-modal-call {
     font-family: var(--font-sans);
