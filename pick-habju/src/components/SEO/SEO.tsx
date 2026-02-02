@@ -6,18 +6,18 @@ import type { SEOProps } from './SEO.types';
  * React 19의 네이티브 기능을 사용하여 메타 태그를 관리합니다.
  * 컴포넌트 내부에서 직접 <title>, <meta> 태그를 렌더링할 수 있습니다.
  * react-helmet-async 라이브러리를 사용하지 않습니다. >> React 19에서 지원하지 않음
- * 
+ * ㅋ
  */
 
 export const SEO = ({
   title,
   description,
   keywords,
-  url = 'https://pickhabju.com',
+  url = 'https://www.pickhabju.com',
 }: SEOProps) => {
   const canonical =
     typeof window !== 'undefined'
-      ? window.location.origin + window.location.pathname.replace(/\/$/, '')
+      ? `https://www.pickhabju.com${window.location.pathname.replace(/\/$/, '')}`
       : url.replace(/\/$/, '');
 
   return (
