@@ -36,9 +36,6 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
   // 외부에서 props로 selectedDates를 전달했을 때, 업데이트 하기 위한 로직입니다.
   // selectedDates를 삭제 처리하였습니다. (부모에서 전달할 수 없습니다.)
 
-  const isSameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-
   const toggleDate = (date: Date) => {
     const exists = selected.some((d) => d.getTime() === date.getTime());
 
@@ -75,15 +72,6 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
         selectedDates={selected ?? []}
         onChange={toggleDate}
       />
-      {selected.length > 0 && isSameDay(selected[0], todayAtMidnight) && (
-        <div className="flex w-full px-3 py-2.5 items-center justify-start">
-          <p className="font-modal-calcdetail text-gray-300 text-left">
-            당일 예약은 취소 시 전액 위약금이 발생합니다.
-            <br />
-            신중히 선택해주세요!
-          </p>
-        </div>
-      )}
       <PickerFooter onConfirm={handleConfirm} onCancel={handleCancel} />
     </div>
   );

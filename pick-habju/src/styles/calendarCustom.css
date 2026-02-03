@@ -1,9 +1,3 @@
-/* DatePickerBody 슬라이드 래퍼: 고정 크기 유지 */
-.date-picker-body-wrapper {
-  width: 100%;
-  min-height: 280px;
-}
-
 /* 요일 헤더: 고정 (슬라이드 대상 아님) */
 .date-picker-weekdays {
   color: var(--color-text-light-gray);

@@ -47,9 +47,9 @@ const DatePickerBody = ({
   const daysGrid = useMemo(() => getDaysGrid(year, month), [year, month]);
 
   return (
-    <div className="date-picker-body-wrapper w-full pt-2">
-      {/* 고정: 요일 헤더 */}
-      <div className="date-picker-weekdays grid grid-cols-7 justify-items-center mb-2.5 text-base font-medium">
+    <div className="w-[19.88rem] h-[17.5rem] px-[1.19rem]">
+      {/* 고정: 요일 헤더 - 7열 40x40 셀, 간격 없음 */}
+      <div className="date-picker-weekdays grid grid-cols-[repeat(7,2.5rem)] justify-items-center text-base font-medium">
         {WEEKDAYS.map((day) => (
           <div key={day} className="w-10 h-10 flex items-center justify-center">
             {day}
@@ -57,8 +57,8 @@ const DatePickerBody = ({
         ))}
       </div>
 
-      {/* 슬라이드: 날짜 숫자 그리드 */}
-      <div className="overflow-hidden relative min-h-[240px]">
+      {/* 슬라이드: 날짜 숫자 그리드 - 7열 40x40 셀, 간격없이 붙어있음 */}
+      <div className="overflow-hidden relative w-[17.5rem] h-[15rem]">
         <AnimatePresence initial={false} custom={slideDirection}>
           <motion.div
             key={monthKey}
@@ -68,22 +68,21 @@ const DatePickerBody = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="absolute inset-0 w-full grid grid-cols-7"
+            className="absolute inset-0 w-[17.5rem] grid grid-cols-[repeat(7,2.5rem)] grid-rows-6 place-items-center"
           >
-            {daysGrid.map((date, i) => (
-              <div key={i} className="flex items-center justify-center p-1">
-                {date ? (
-                  <DateNum
-                    date={date}
-                    currentMonth={activeStartDate.getMonth()}
-                    selectedList={selectedDates}
-                    onSelect={onChange}
-                  />
-                ) : (
-                  <div className="w-10 h-10" aria-hidden />
-                )}
-              </div>
-            ))}
+            {daysGrid.map((date, i) =>
+              date ? (
+                <DateNum
+                  key={i}
+                  date={date}
+                  currentMonth={activeStartDate.getMonth()}
+                  selectedList={selectedDates}
+                  onSelect={onChange}
+                />
+              ) : (
+                <div key={i} className="w-10 h-10" aria-hidden />
+              ),
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
