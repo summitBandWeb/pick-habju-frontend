@@ -22,15 +22,33 @@ const Template = () => {
     console.log('현재 선택된 날짜:', updated);
   };
 
+  const [activeMonth, setActiveMonth] = useState(new Date(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), 1));
+  const [slideDirection, setSlideDirection] = useState<'prev' | 'next'>('next');
+
+  const goPrev = () => {
+    setSlideDirection('prev');
+    setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  };
+  const goNext = () => {
+    setSlideDirection('next');
+    setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  };
+
   return (
-    <div className="p-4 bg-white">
+    <div className="p-4 bg-white w-90">
+      <div className="flex justify-between mb-2">
+        <button type="button" onClick={goPrev}>
+          ← 이전
+        </button>
+        <button type="button" onClick={goNext}>
+          다음 →
+        </button>
+      </div>
       <DatePickerBody
-        activeStartDate={new Date(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), 1)}
+        activeStartDate={activeMonth}
+        slideDirection={slideDirection}
         selectedDates={selectedDates}
         onChange={toggleDate}
-        onActiveStartDateChange={({ activeStartDate }) => {
-          console.log('보여지는 시작 월 변경:', activeStartDate);
-        }}
       />
     </div>
   );

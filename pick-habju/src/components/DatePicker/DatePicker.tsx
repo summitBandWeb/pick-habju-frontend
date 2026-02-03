@@ -8,6 +8,8 @@ import PickerFooter from '../PickerFooter/PickerFooter';
 import DatePickerHeader from './Header/DatePickerHeader';
 import DatePickerBody from './Body/DatePickerBody';
 
+type SlideDirection = 'prev' | 'next';
+
 /**
  * DatePicker.tsx
  *
@@ -29,6 +31,7 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
     // 초기 표시 월을 선택된 날짜의 월로 맞춘다
     return new Date(initialSelected.getFullYear(), initialSelected.getMonth(), 1);
   });
+  const [slideDirection, setSlideDirection] = useState<SlideDirection>('next');
 
   // 외부에서 props로 selectedDates를 전달했을 때, 업데이트 하기 위한 로직입니다.
   // selectedDates를 삭제 처리하였습니다. (부모에서 전달할 수 없습니다.)
@@ -46,11 +49,13 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
     onChange?.(updated);
   };
 
-  // 이전/다음 달 이동
+  // 이전/다음 달 이동 (슬라이드 방향 설정 후 헤더·캘린더 동시 업데이트)
   const prev = () => {
+    setSlideDirection('prev');
     setActiveStartDate(new Date(activeStartDate.getFullYear(), activeStartDate.getMonth() - 1, 1));
   };
   const next = () => {
+    setSlideDirection('next');
     setActiveStartDate(new Date(activeStartDate.getFullYear(), activeStartDate.getMonth() + 1, 1));
   };
 
@@ -66,9 +71,9 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
       <DatePickerBody
         activeStartDate={activeStartDate}
+        slideDirection={slideDirection}
         selectedDates={selected ?? []}
         onChange={toggleDate}
-        onActiveStartDateChange={({ activeStartDate }) => activeStartDate && setActiveStartDate(activeStartDate)}
       />
       {selected.length > 0 && isSameDay(selected[0], todayAtMidnight) && (
         <div className="flex w-full px-3 py-2.5 items-center justify-start">
