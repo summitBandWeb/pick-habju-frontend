@@ -48,3 +48,11 @@ export const Mobile: Story = {
     forceDevice: 'mobile',
   },
 };
+
+// 단일 카드 케이스
+export const SingleCard: Story = {
+  args: {
+    rooms: [rooms[0]],
+    selectedRoomId: rooms[0]?.bizItemId ?? null,
+  },
+};
