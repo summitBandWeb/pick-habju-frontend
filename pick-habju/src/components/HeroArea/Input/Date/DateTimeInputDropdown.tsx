@@ -52,6 +52,12 @@ const DateTimeInputDropdown = ({
     initialSelectedDate ? [initialSelectedDate] : [new Date()]
   );
   const [tempDate, setTempDate] = useState<Date | null>(null);
+  const [draftTime, setDraftTime] = useState({
+    startHour: initialStartHour,
+    startPeriod: initialStartPeriod,
+    endHour: initialEndHour,
+    endPeriod: initialEndPeriod,
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
@@ -78,18 +84,24 @@ const DateTimeInputDropdown = ({
     setIsOpen(false);
   }, [onClose]);
 
-  const handleTimeConfirm = useCallback(
+  const handleTimeDraftChange = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
-      const date = tempDate ?? selectedDates[0];
-      if (!date) return;
-      const shouldClose = onConfirm(date, sh, sp, eh, ep);
-      if (shouldClose !== false) {
-        setIsOpen(false);
-        setStep('DATE');
-      }
+      setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep });
+      onDraftChange?.(sh, sp, eh, ep);
     },
-    [tempDate, selectedDates, onConfirm]
+    [onDraftChange]
   );
+
+  const handleTimeConfirm = useCallback(() => {
+    const date = tempDate ?? selectedDates[0];
+    if (!date) return;
+    const { startHour, startPeriod, endHour, endPeriod } = draftTime;
+    const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod);
+    if (shouldClose !== false) {
+      setIsOpen(false);
+      setStep('DATE');
+    }
+  }, [tempDate, selectedDates, draftTime, onConfirm]);
 
   const handleTimeCancel = useCallback(() => {
     setStep('DATE');
@@ -101,6 +113,18 @@ const DateTimeInputDropdown = ({
       setSelectedDates([initialSelectedDate]);
     }
   }, [initialSelectedDate]);
+
+  // TIME 단계 진입 시 draftTime 초기화
+  useEffect(() => {
+    if (step === 'TIME') {
+      setDraftTime({
+        startHour: initialStartHour,
+        startPeriod: initialStartPeriod,
+        endHour: initialEndHour,
+        endPeriod: initialEndPeriod,
+      });
+    }
+  }, [step, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
 
   // 바깥 클릭으로 닫기
   useEffect(() => {
@@ -150,16 +174,23 @@ const DateTimeInputDropdown = ({
               />
             </>
           ) : (
-            <TimePicker
-              initialStartHour={initialStartHour}
-              initialStartPeriod={initialStartPeriod}
-              initialEndHour={initialEndHour}
-              initialEndPeriod={initialEndPeriod}
-              onConfirm={handleTimeConfirm}
-              onCancel={handleTimeCancel}
-              disabled={disabled}
-              onDraftChange={onDraftChange}
-            />
+            <>
+              <TimePicker
+                initialStartHour={initialStartHour}
+                initialStartPeriod={initialStartPeriod}
+                initialEndHour={initialEndHour}
+                initialEndPeriod={initialEndPeriod}
+                disabled={disabled}
+                onDraftChange={handleTimeDraftChange}
+              />
+              <PickerFooter
+                onConfirm={handleTimeConfirm}
+                onCancel={handleTimeCancel}
+                disabled={disabled}
+                confirmText="확인"
+                cancelText="이전"
+              />
+            </>
           )}
         </div>
       )}

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import TimePicker from './TimePicker';
-import { action } from '@storybook/addon-actions';
 import { TimePeriod } from './TimePickerEnums';
 
 interface TimePickerArgs {
@@ -51,17 +50,7 @@ export const Default: Story = {
     initialEndPeriod: TimePeriod.PM,
     disabled: false,
   },
-  render: ({ initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod, disabled }) => (
-    <TimePicker
-      initialStartHour={initialStartHour}
-      initialStartPeriod={initialStartPeriod}
-      initialEndHour={initialEndHour}
-      initialEndPeriod={initialEndPeriod}
-      disabled={disabled}
-      onConfirm={action('onConfirm')}
-      onCancel={action('onCancel')}
-    />
-  ),
+  render: (args) => <TimePicker {...args} />,
 };
 
 export const Inactive: Story = {
@@ -72,15 +61,5 @@ export const Inactive: Story = {
     initialEndPeriod: TimePeriod.PM,
     disabled: true,
   },
-  render: ({ initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod, disabled }) => (
-    <TimePicker
-      initialStartHour={initialStartHour}
-      initialStartPeriod={initialStartPeriod}
-      initialEndHour={initialEndHour}
-      initialEndPeriod={initialEndPeriod}
-      disabled={disabled}
-      onConfirm={action('onConfirm')}
-      onCancel={action('onCancel')}
-    />
-  ),
+  render: (args) => <TimePicker {...args} />,
 };

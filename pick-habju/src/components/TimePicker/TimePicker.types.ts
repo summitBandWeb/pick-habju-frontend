@@ -5,10 +5,8 @@ export interface TimePickerProps {
   initialStartPeriod?: TimePeriod;
   initialEndHour?: number;
   initialEndPeriod?: TimePeriod;
-  onConfirm: (startHour: number, startPeriod: TimePeriod, endHour: number, endPeriod: TimePeriod) => void;
-  onCancel: () => void;
   disabled?: boolean;
-  // 사용자가 선택 중인 값을 부모에서 임시 저장할 수 있도록 제공
+  /** 사용자가 선택 중인 값을 부모에서 임시 저장. 푸터(확인/이전)는 상위 컴포넌트에서 렌더링 */
   onDraftChange?: (
     startHour: number,
     startPeriod: TimePeriod,
