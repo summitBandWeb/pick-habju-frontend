@@ -64,7 +64,7 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
   };
 
   return (
-    <div className="inline-block w-90 bg-primary-white rounded-xl overflow-hidden pt-4 px-2.5">
+    <div className="inline-block w-[19.875rem] bg-primary-white overflow-hidden pt-1 pb-2 px-0">
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
       <DatePickerBody
         activeStartDate={activeStartDate}
