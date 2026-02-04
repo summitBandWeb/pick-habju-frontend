@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import type { DatePickerProps } from './DatePicker.types';
 
-import PickerFooter from '../PickerFooter/PickerFooter';
 import DatePickerHeader from './Header/DatePickerHeader';
 import DatePickerBody from './Body/DatePickerBody';
 
@@ -13,12 +12,12 @@ type SlideDirection = 'prev' | 'next';
 /**
  * DatePicker.tsx
  *
- * 날짜 선택기 컴포넌트
- * 사용자가 날짜를 선택할 수 있는 UI를 제공합니다.
- * 선택된 날짜는 외부에서 관리할 수 있으며, 확인/취소 버튼을 통해 선택을 완료하거나 취소할 수 있습니다.
+ * 날짜 선택기 컴포넌트 (달력 UI: Header + Body)
+ * 선택된 날짜는 onChange로 외부에 전달됩니다.
+ * 푸터(취소/확인)는 상위 컴포넌트에서 렌더링합니다.
  */
 
-const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: DatePickerProps) => {
+const DatePicker = ({ onChange, initialSelectedDate }: DatePickerProps) => {
   const today = new Date();
   const todayAtMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -56,13 +55,6 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
     setActiveStartDate(new Date(activeStartDate.getFullYear(), activeStartDate.getMonth() + 1, 1));
   };
 
-  const handleConfirm = () => {
-    onConfirm?.(selected);
-  };
-  const handleCancel = () => {
-    onCancel?.();
-  };
-
   return (
     <div className="inline-block w-[19.875rem] bg-primary-white overflow-hidden pt-1 pb-2 px-0">
       <DatePickerHeader current={activeStartDate} onPrev={prev} onNext={next} />
@@ -72,7 +64,6 @@ const DatePicker = ({ onChange, onConfirm, onCancel, initialSelectedDate }: Date
         selectedDates={selected ?? []}
         onChange={toggleDate}
       />
-      <PickerFooter onConfirm={handleConfirm} onCancel={handleCancel} />
     </div>
   );
 };

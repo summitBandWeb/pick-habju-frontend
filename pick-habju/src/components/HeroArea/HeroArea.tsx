@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import PersonCountInput from './Input/Person/PersonCountInput';
-import DateTimeInput from './Input/Date/DateTimeInput';
+import DateTimeInputDropdown from './Input/Date/DateTimeInputDropdown';
 import BackGroundImage from '../../assets/images/background.jpg';
 import type { HeroAreaProps } from './HeroArea.types';
-import DatePicker from '../DatePicker/DatePicker';
-import TimePicker from '../TimePicker/TimePicker';
 import GuestCounterModal from '../GuestCounterModal/GuestCounterModal';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
 import { showToastByKey } from '../../utils/showToastByKey';
@@ -24,8 +22,6 @@ import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormT
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
@@ -48,50 +44,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
 
-  const openDatePicker = useCallback(() => {
-    setIsDatePickerOpen(true);
-  }, []);
-
   const openGuestCounter = useCallback(() => {
     setIsGuestModalOpen(true);
-  }, []);
-
-  const handleDateConfirm = useCallback(
-    (dates: Date[]) => {
-      actions.setDate(dates);
-      setIsDatePickerOpen(false);
-      // 타임피커 초기 포커스를 HeroArea의 현재 값으로 동기화
-      try {
-        const slots = hourSlots && hourSlots.length > 0 ? hourSlots : dateTime.hour_slots;
-        if (Array.isArray(slots) && slots.length > 0) {
-          const parseHour = (hhmm: string): number => {
-            const h = parseInt(hhmm.split(':')[0], 10);
-            return isNaN(h) ? 9 : h;
-          };
-          const start24 = parseHour(slots[0]);
-          const end24 = (start24 + slots.length) % 24;
-          const to12 = (h24: number): { hour: number; period: TimePeriod } => {
-            if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
-            if (h24 < 12) return { hour: h24, period: TimePeriod.AM };
-            if (h24 === 12) return { hour: 12, period: TimePeriod.PM };
-            return { hour: h24 - 12, period: TimePeriod.PM };
-          };
-          const s12 = to12(start24);
-          const e12 = to12(end24 === 0 ? 24 % 24 : end24);
-          setDraftTime({ startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period });
-        }
-      } catch {
-        // 파싱 실패 시 무시하고 기본값 사용
-      }
-      setIsTimePickerOpen(true);
-      setLastWarningKey(null);
-      // 날짜 확정 시 기존 시간 임시값 유지 (변경 없음)
-    },
-    [actions, hourSlots, dateTime.hour_slots]
-  );
-
-  const handleDateCancel = useCallback(() => {
-    setIsDatePickerOpen(false);
   }, []);
 
   {
@@ -102,6 +56,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   }
   const validateTime = useCallback(
     (
+      date: Date | null,
       startHour: number,
       startPeriod: TimePeriod,
       endHour: number,
@@ -110,40 +65,29 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       const start24 = convertTo24Hour(startHour, startPeriod);
       const end24 = convertTo24Hour(endHour, endPeriod);
 
-      // 기본 계산
       const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
-      const duration = adjustedEnd - start24; // 시간 단위
+      const duration = adjustedEnd - start24;
 
-      // 후보 판단
       const candidates: ReservationToastKey[] = [];
 
-      // 형식 오류: 시작과 종료가 완전히 동일
       if (start24 === end24 && startPeriod === endPeriod) {
         candidates.push(ReservationToastKey.INVALID_TYPE);
       }
-
-      // 5시간 초과
       if (duration > 5) {
         candidates.push(ReservationToastKey.TOO_LONG);
       }
-
-      // 1시간 선택 (경고)
       if (duration === 1) {
         candidates.push(ReservationToastKey.TOO_SHORT);
       }
-
-      // 과거 시간 (당일 시작 시간이 현재 이전)
-      if (selectedDate) {
+      if (date) {
         const now = new Date();
         const isSameDay =
-          selectedDate.getFullYear() === now.getFullYear() &&
-          selectedDate.getMonth() === now.getMonth() &&
-          selectedDate.getDate() === now.getDate();
+          date.getFullYear() === now.getFullYear() &&
+          date.getMonth() === now.getMonth() &&
+          date.getDate() === now.getDate();
         if (isSameDay) {
-          // 정확한 시간 비교를 위해 Date 객체 생성 (분 단위까지 고려)
-          const selectedDateTime = new Date(selectedDate);
-          selectedDateTime.setHours(start24, 0, 0, 0); // 선택한 시간으로 설정
-
+          const selectedDateTime = new Date(date);
+          selectedDateTime.setHours(start24, 0, 0, 0);
           if (now.getTime() > selectedDateTime.getTime()) {
             return ReservationToastKey.PAST_TIME;
           }
@@ -152,114 +96,118 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
       if (candidates.length === 0) return null;
 
-      // 우선순위: 에러 우선, 그 다음 경고. 에러 내부 우선순위 지정.
       const errorPriority: ReservationToastKey[] = [
         ReservationToastKey.INVALID_TYPE,
         ReservationToastKey.PAST_TIME,
         ReservationToastKey.TOO_LONG,
       ];
       const warningPriority: ReservationToastKey[] = [ReservationToastKey.TOO_SHORT];
-
       const error = errorPriority.find((k) => candidates.includes(k));
       if (error) return error;
       const warning = warningPriority.find((k) => candidates.includes(k));
       return warning ?? null;
     },
-    [selectedDate]
+    []
   );
 
-  // TODO: 이것도 중복되는 코드가 너무 많음 유틸성에도 있고. 따로 분리하고 관련흐름정리 한번 필요함
-  const handleTimeConfirm = useCallback(
-    (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
-      const key = validateTime(sh, sp, eh, ep);
+  const handleDateTimeConfirm = useCallback(
+    (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
+      const key = validateTime(date, sh, sp, eh, ep);
       if (key) {
         const severity = ReservationToastSeverity[key];
         showToastByKey(key);
-        if (severity === 'error') return;
-        // warning인 경우: 첫 확인에서는 토스트만 띄우고 유지, 같은 선택으로 다시 확인 시 진행
-        const dateKey = selectedDate ? selectedDate.toDateString() : 'no-date';
+        if (severity === 'error') return false;
+        const dateKey = date.toDateString();
         const start24 = convertTo24Hour(sh, sp);
         const end24 = convertTo24Hour(eh, ep);
         const selectionKey = `${dateKey}|${start24}-${end24}`;
         if (lastWarningKey !== selectionKey) {
           setLastWarningKey(selectionKey);
-          return; // 첫 경고: 모달 유지
+          return false;
         }
-        // 동일 선택 재확인: 진행
       }
+      actions.setDate([date]);
       actions.setHourSlots(sh, sp, eh, ep);
-      setIsTimePickerOpen(false);
+      setLastWarningKey(null);
 
-      if (selectedDate) {
-        const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
-          selectedDate.getDate()
-        ).padStart(2, '0')}`;
-        const start24 = convertTo24Hour(sh, sp);
-        const end24 = convertTo24Hour(eh, ep);
-        const slots = generateHourSlots(start24, end24);
-        setDateTimeText(formatReservationLabel(dateIso, slots));
-      }
+      const dateIso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const start24 = convertTo24Hour(sh, sp);
+      const end24 = convertTo24Hour(eh, ep);
+      const slots = generateHourSlots(start24, end24);
+      setDateTimeText(formatReservationLabel(dateIso, slots));
 
-      // 날짜/시간 변경 여부를 직전 검색 조건과 비교하여 실제 변경 시에만 콜백 호출
       try {
         const last = useSearchStore.getState().lastQuery;
-        if (selectedDate) {
-          const dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
-            selectedDate.getDate()
-          ).padStart(2, '0')}`;
-          const start24 = convertTo24Hour(sh, sp);
-          const end24 = convertTo24Hour(eh, ep);
-          const nextSlots = generateHourSlots(start24, end24);
-
-          const isSameDate = last?.date === dateIso;
-          const isSameSlots =
-            Array.isArray(last?.hour_slots) &&
-            last!.hour_slots.length === nextSlots.length &&
-            last!.hour_slots.every((v, i) => v === nextSlots[i]);
-
-          if (!(isSameDate && isSameSlots)) {
-            onDateTimeChange?.();
-          }
+        const nextSlots = generateHourSlots(start24, end24);
+        const isSameDate = last?.date === dateIso;
+        const isSameSlots =
+          Array.isArray(last?.hour_slots) &&
+          last!.hour_slots.length === nextSlots.length &&
+          last!.hour_slots.every((v, i) => v === nextSlots[i]);
+        if (!(isSameDate && isSameSlots)) {
+          onDateTimeChange?.();
         }
       } catch {
-        // 비교 실패 시 콜백 생략
+        /* 비교 실패 시 콜백 생략 */
       }
+      return true;
     },
-    [actions, validateTime, selectedDate, lastWarningKey, onDateTimeChange]
+    [actions, validateTime, lastWarningKey, onDateTimeChange]
   );
 
-  const handleTimeCancel = useCallback(() => {
-    // 뒤로가기: TimePicker를 닫고 DatePicker로 복귀, 기존 날짜 유지
-    setIsTimePickerOpen(false);
-    setIsDatePickerOpen(true);
-  }, []);
+  const initialTimeFromSlots = useMemo(() => {
+    try {
+      const slots = hourSlots && hourSlots.length > 0 ? hourSlots : dateTime.hour_slots;
+      if (Array.isArray(slots) && slots.length > 0) {
+        const parseHour = (hhmm: string): number => {
+          const h = parseInt(hhmm.split(':')[0], 10);
+          return isNaN(h) ? 9 : h;
+        };
+        const start24 = parseHour(slots[0]);
+        const end24 = (start24 + slots.length) % 24;
+        const to12 = (h24: number): { hour: number; period: TimePeriod } => {
+          if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
+          if (h24 < 12) return { hour: h24, period: TimePeriod.AM };
+          if (h24 === 12) return { hour: 12, period: TimePeriod.PM };
+          return { hour: h24 - 12, period: TimePeriod.PM };
+        };
+        const s12 = to12(start24);
+        const e12 = to12(end24 === 0 ? 24 % 24 : end24);
+        return { startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period };
+      }
+    } catch {
+      /* 파싱 실패 */
+    }
+    return {
+      startHour: 9,
+      startPeriod: TimePeriod.AM,
+      endHour: 5,
+      endPeriod: TimePeriod.PM,
+    };
+  }, [hourSlots, dateTime.hour_slots]);
 
   // 오버레이 바깥 클릭으로 모달 닫기
   const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return;
-    setIsDatePickerOpen(false);
-    setIsTimePickerOpen(false);
     setIsGuestModalOpen(false);
   }, []);
 
   // ESC 키로 모달 닫기
   useEffect(() => {
-    if (!(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen)) return;
+    if (!isGuestModalOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        setIsDatePickerOpen(false);
-        setIsTimePickerOpen(false);
         setIsGuestModalOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isDatePickerOpen, isTimePickerOpen, isGuestModalOpen]);
+  }, [isGuestModalOpen]);
 
   // 모달 열렸을 때 배경 스크롤 잠금
   useEffect(() => {
-    const anyOpen = isDatePickerOpen || isTimePickerOpen || isGuestModalOpen;
+    const anyOpen = isGuestModalOpen;
     const originalOverflow = document.body.style.overflow;
     const originalTouchAction = (document.body.style as unknown as { touchAction?: string }).touchAction;
     if (anyOpen) {
@@ -274,7 +222,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         (document.body.style as unknown as { touchAction?: string }).touchAction = '';
       }
     };
-  }, [isDatePickerOpen, isTimePickerOpen, isGuestModalOpen]);
+  }, [isGuestModalOpen]);
 
   return (
     <div
@@ -295,7 +243,19 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
         <div className="flex flex-col items-center">
           <div className="flex flex-col gap-3 mb-8">
-            <DateTimeInput dateTime={dateTimeText} onChangeClick={openDatePicker} />
+            <DateTimeInputDropdown
+              dateTime={dateTimeText}
+              initialSelectedDate={selectedDate ?? undefined}
+              onConfirm={handleDateTimeConfirm}
+              disabled={isToastVisible}
+              onDraftChange={(sh, sp, eh, ep) =>
+                setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep })
+              }
+              initialStartHour={draftTime?.startHour ?? initialTimeFromSlots.startHour}
+              initialStartPeriod={draftTime?.startPeriod ?? initialTimeFromSlots.startPeriod}
+              initialEndHour={draftTime?.endHour ?? initialTimeFromSlots.endHour}
+              initialEndPeriod={draftTime?.endPeriod ?? initialTimeFromSlots.endPeriod}
+            />
             <PersonCountInput count={peopleCountText} onChangeClick={openGuestCounter} />
           </div>
           <div>
@@ -358,33 +318,10 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         </div>
       </div>
 
-      {(isDatePickerOpen || isTimePickerOpen || isGuestModalOpen) && (
+      {isGuestModalOpen && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80" onClick={handleOverlayClick}>
-          {/* wrapper 기준 폭으로 중앙 정렬 */}
           <div className="relative w-full max-w-[25.9375rem] flex flex-col items-center">
-            {isDatePickerOpen && (
-              <DatePicker
-                onConfirm={handleDateConfirm}
-                onCancel={handleDateCancel}
-                initialSelectedDate={selectedDate ?? undefined}
-              />
-            )}
-            {isTimePickerOpen && (
-              <TimePicker
-                onConfirm={handleTimeConfirm}
-                onCancel={handleTimeCancel}
-                disabled={isToastVisible}
-                onDraftChange={(sh, sp, eh, ep) =>
-                  setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep })
-                }
-                initialStartHour={draftTime?.startHour}
-                initialStartPeriod={draftTime?.startPeriod}
-                initialEndHour={draftTime?.endHour}
-                initialEndPeriod={draftTime?.endPeriod}
-              />
-            )}
-            {isGuestModalOpen && (
-              <GuestCounterModal
+            <GuestCounterModal
                 open
                 onClose={() => setIsGuestModalOpen(false)}
                 onConfirm={(val) => {
@@ -400,15 +337,15 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                   }
                 }}
                 initialCount={peopleCountText}
-              />
-            )}
-            {/* 모달 아래 토스트 (모달 위치 고정, 토스트는 절대 배치) */}
-            <div className="absolute top-full mt-3 left-0 w-full flex justify-center">
-              <ToastMessage />
-            </div>
+            />
           </div>
         </div>
       )}
+
+      {/* 토스트 (드롭다운/모달 검증용, 항상 마운트) */}
+      <div className="fixed top-24 left-0 right-0 z-40 flex justify-center pointer-events-none">
+        <ToastMessage />
+      </div>
     </div>
   );
 };
