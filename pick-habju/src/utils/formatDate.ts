@@ -10,6 +10,14 @@ export const convertTo24Hour = (hour: number, period: TimePeriod): number => {
   return hour;
 };
 
+/** 24h(0-23) → 12h hour(1-12) + period (convertTo24Hour의 역함수) */
+export const to12h = (h24: number): { hour: number; period: TimePeriod } => {
+  if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
+  if (h24 < 12) return { hour: h24, period: TimePeriod.AM };
+  if (h24 === 12) return { hour: 12, period: TimePeriod.PM };
+  return { hour: h24 - 12, period: TimePeriod.PM };
+};
+
 export const formatDate = (date: Date | null): string => {
   if (!date) return '날짜를 선택해 주세요.';
   const year = date.getFullYear();

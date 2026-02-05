@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import ScrollPicker from '../ScrollPicker/ScrollPicker';
+import { TimePickerInlineInput } from '../TimePickerInlineInput/TimePickerInlineInput';
 import type { TimePickerBodyProps } from './TimePickerBody.types';
 import type { TimePeriod } from '../TimePickerEnums';
 
@@ -13,6 +15,35 @@ export const TimePickerBody = ({
   onChange,
   disabled = false,
 }: TimePickerBodyProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const handleNumberAreaClick = () => {
+    if (disabled) return;
+    setIsEditMode(true);
+  };
+
+  const handleInlineInputBlur = () => {
+    setIsEditMode(false);
+  };
+
+  if (isEditMode) {
+    return (
+      <div className="relative inline-flex items-center justify-center w-84 h-62 bg-primary-white rounded-xl overflow-hidden">
+        <div className="absolute left-0 right-0 top-1/2 h-[50px] -translate-y-1/2 bg-gray-200 rounded-lg" />
+        <div className="relative flex items-center justify-center px-6 py-2 font-modal-timepicker">
+          <TimePickerInlineInput
+            startHour={startHour}
+            startPeriod={startPeriod}
+            endHour={endHour}
+            endPeriod={endPeriod}
+            onChange={onChange}
+            onBlur={handleInlineInputBlur}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative inline-flex items-center justify-center w-84 h-62 bg-primary-white rounded-xl overflow-hidden">
       <div className="absolute left-0 right-0 top-1/2 h-[50px] -translate-y-1/2 bg-gray-200 rounded-lg" />
@@ -26,6 +57,7 @@ export const TimePickerBody = ({
               onChange={(newStartHour) => onChange(newStartHour, startPeriod, endHour, endPeriod)}
               itemHeight={50}
               disabled={disabled}
+              onSelectedItemClick={handleNumberAreaClick}
             />
           </div>
           <div className="w-[2.6ch] flex justify-center">
@@ -35,6 +67,7 @@ export const TimePickerBody = ({
               onChange={(newStartPeriod) => onChange(startHour, newStartPeriod as TimePeriod, endHour, endPeriod)}
               itemHeight={50}
               disabled={disabled}
+              onSelectedItemClick={handleNumberAreaClick}
             />
           </div>
         </div>
@@ -48,6 +81,7 @@ export const TimePickerBody = ({
               onChange={(newEndHour) => onChange(startHour, startPeriod, newEndHour, endPeriod)}
               itemHeight={50}
               disabled={disabled}
+              onSelectedItemClick={handleNumberAreaClick}
             />
           </div>
           <div className="w-[2.6ch] flex justify-center">
@@ -57,6 +91,7 @@ export const TimePickerBody = ({
               onChange={(newEndPeriod) => onChange(startHour, startPeriod, endHour, newEndPeriod as TimePeriod)}
               itemHeight={50}
               disabled={disabled}
+              onSelectedItemClick={handleNumberAreaClick}
             />
           </div>
         </div>
