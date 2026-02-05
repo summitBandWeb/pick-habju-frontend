@@ -112,8 +112,6 @@ export const TimePickerInlineInput = ({
   }, []);
 
   const digitCount = rawDigits.length;
-  const isStartActive = digitCount < 2;
-  const isEndActive = digitCount >= 2;
 
   const startH24 =
     digitCount >= 1 ? Math.min(23, parseInt(rawDigits.slice(0, 2).padStart(2, '0'), 10)) : 0;
@@ -136,7 +134,7 @@ export const TimePickerInlineInput = ({
       tabIndex={-1}
       onClick={handleContainerClick}
       onKeyDown={() => {}}
-      className="flex items-center space-x-[0.375rem] px-6 py-2 rounded-lg bg-gray-200 font-modal-timepicker cursor-text"
+      className="flex items-center justify-center space-x-[0.375rem] px-6 py-2 w-[16.75rem] h-[2.75rem] rounded-lg bg-gray-100 shadow-filter font-modal-timepicker cursor-text"
     >
       <input
         ref={inputRef}
@@ -154,27 +152,15 @@ export const TimePickerInlineInput = ({
       />
       {/* Start: [숫자] AM - TimePickerBody와 동일 레이아웃 */}
       <div className="flex items-center space-x-1">
-        <div
-          className={`w-[1.8ch] flex justify-center font-semibold transition-colors duration-150 ${
-            isStartActive ? 'bg-primary-white/80 rounded' : ''
-          }`}
-        >
+        <div className="w-[1.8ch] flex justify-center font-semibold">
           {startHourDisplay}
         </div>
         <div className="w-[2.6ch] flex justify-center font-semibold">{startPeriodDisplay}</div>
       </div>
       <span className="text-2xl text-black w-[1.4ch] text-center">~</span>
       {/* End: [숫자] AM - TimePickerBody와 동일 레이아웃 */}
-      <div
-        className={`flex items-center space-x-1 transition-colors duration-150 ${
-          !isEndActive ? 'opacity-60' : ''
-        }`}
-      >
-        <div
-          className={`w-[1.8ch] flex justify-center font-semibold transition-colors duration-150 ${
-            isEndActive ? 'bg-primary-white/80 rounded' : ''
-          }`}
-        >
+      <div className="flex items-center space-x-1">
+        <div className="w-[1.8ch] flex justify-center font-semibold">
           {endHourDisplay}
         </div>
         <div className="w-[2.6ch] flex justify-center font-semibold">{endPeriodDisplay}</div>
