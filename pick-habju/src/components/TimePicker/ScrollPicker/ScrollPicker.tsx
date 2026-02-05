@@ -7,8 +7,6 @@ interface ScrollPickerProps<T extends string | number> {
   itemHeight?: number;
   visibleCount?: number;
   disabled?: boolean;
-  /** 선택된 항목(중앙) 클릭 시 호출 */
-  onSelectedItemClick?: () => void;
 }
 
 const ScrollPicker = <T extends string | number>({
@@ -18,7 +16,6 @@ const ScrollPicker = <T extends string | number>({
   itemHeight = 50,
   visibleCount = 5,
   disabled = false,
-  onSelectedItemClick,
 }: ScrollPickerProps<T>) => {
   const pad = Math.floor(visibleCount / 2);
   const padded = [...Array(pad).fill('' as T), ...list, ...Array(pad).fill('' as T)];
@@ -123,16 +120,12 @@ const ScrollPicker = <T extends string | number>({
     endDrag();
   };
 
-  // 아이템 클릭 시 해당 아이템을 중앙으로 스냅하며 선택 (선택된 항목 클릭 시 onSelectedItemClick 호출)
-  const handleItemClick = (i: number) => {
+  // 클릭한 아이템을 중앙으로 스크롤
+  const scrollItemToCenter = (i: number) => {
     if (disabled) return;
     if (didDrag.current) return; // 드래그 후 발생한 클릭은 무시
     const val = padded[i];
     if (val === '' || !list.includes(val as T)) return;
-    if (i === selectedIdx && onSelectedItemClick) {
-      onSelectedItemClick();
-      return;
-    }
     const li = ref.current!.children[i] as HTMLElement;
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   };
@@ -189,7 +182,7 @@ const ScrollPicker = <T extends string | number>({
         return (
           <li
             key={i}
-            onClick={() => handleItemClick(i)}
+            onClick={() => scrollItemToCenter(i)}
             style={{
               height: `${itemHeight}px`,
               display: 'flex',
