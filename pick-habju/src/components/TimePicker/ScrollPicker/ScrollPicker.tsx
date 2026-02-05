@@ -30,6 +30,7 @@ const ScrollPicker = <T extends string | number>({
   const didDrag = useRef(false);
   const wheelAccum = useRef(0);
   const lastWheelTs = useRef(0);
+  const isInitialMount = useRef(true);
 
   // 물리적 이동 대비 스크롤 이동 저항(값이 클수록 더 많이 움직여야 한 칸 이동)
   const DRAG_RESISTANCE = 1;
@@ -51,8 +52,9 @@ const ScrollPicker = <T extends string | number>({
   useEffect(() => {
     if (!ref.current) return;
     const li = ref.current.children[selectedIdx] as HTMLElement;
-    // scrollIntoView 로 block:'center' 하면 중앙 스냅 보장
-    li.scrollIntoView({ block: 'center', behavior: 'auto' });
+    const behavior = isInitialMount.current ? 'auto' : 'smooth';
+    if (isInitialMount.current) isInitialMount.current = false;
+    li.scrollIntoView({ block: 'center', behavior });
   }, [selectedIdx]);
 
   // 스크롤이 멈춘 뒤 처리 (debounce)

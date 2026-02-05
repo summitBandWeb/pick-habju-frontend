@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ScrollPicker from '../ScrollPicker/ScrollPicker';
-import { TimePickerInlineInput } from '../TimePickerInlineInput/TimePickerInlineInput';
+import { useTimePickerInlineInput } from '../TimePickerInlineInput/useTimePickerInlineInput';
 import type { TimePickerBodyProps } from './TimePickerBody.types';
 import type { TimePeriod } from '../TimePickerEnums';
 
@@ -26,18 +26,87 @@ export const TimePickerBody = ({
     setIsEditMode(false);
   };
 
+  const inlineInput = useTimePickerInlineInput({
+    startHour,
+    startPeriod,
+    endHour,
+    endPeriod,
+    onChange,
+    onBlur: handleInlineInputBlur,
+  });
+
   if (isEditMode) {
     return (
       <div className="relative inline-flex items-center justify-center w-[19.875rem] h-[15.5rem] bg-primary-white overflow-hidden">
-        <div className="relative flex items-center justify-center px-6 py-2 font-modal-timepicker">
-          <TimePickerInlineInput
-            startHour={startHour}
-            startPeriod={startPeriod}
-            endHour={endHour}
-            endPeriod={endPeriod}
-            onChange={onChange}
-            onBlur={handleInlineInputBlur}
-          />
+        <div
+          role="button"
+          tabIndex={-1}
+          onClick={() => inlineInput.inputRef.current?.focus()}
+          onKeyDown={() => {}}
+          className="absolute inset-0 z-10 cursor-text"
+          aria-hidden
+        />
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[16.75rem] h-[2.75rem] rounded-[0.5rem] bg-[var(--Gray-100,#F1F1F1)] shadow-[0_2px_4px_0_rgba(0,0,0,0.12)]"
+        />
+        <input
+          ref={inlineInput.inputRef}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          maxLength={4}
+          value={inlineInput.rawDigits}
+          readOnly
+          autoFocus
+          onKeyDown={inlineInput.handleKeyDown}
+          onBlur={inlineInput.handleBlur}
+          className="absolute w-0 h-0 opacity-0 pointer-events-none"
+          aria-label="시간 입력 (4자리)"
+        />
+        <div className="relative flex items-center space-x-[0.375rem] px-6 py-2 font-modal-timepicker">
+          {/* Start - ScrollPicker로 위/아래 숫자 표시 */}
+          <div className="flex items-center space-x-1">
+            <div className="w-[1.8ch] flex justify-center">
+              <ScrollPicker
+                list={hours}
+                value={inlineInput.displayStartHour}
+                onChange={() => {}}
+                itemHeight={44}
+                disabled
+              />
+            </div>
+            <div className="w-[2.6ch] flex justify-center">
+              <ScrollPicker
+                list={periods}
+                value={inlineInput.displayStartPeriod}
+                onChange={() => {}}
+                itemHeight={44}
+                disabled
+              />
+            </div>
+          </div>
+          <span className="text-2xl text-black w-[1.4ch] text-center">~</span>
+          {/* End */}
+          <div className="flex items-center space-x-1">
+            <div className="w-[1.8ch] flex justify-center">
+              <ScrollPicker
+                list={hours}
+                value={inlineInput.displayEndHour}
+                onChange={() => {}}
+                itemHeight={44}
+                disabled
+              />
+            </div>
+            <div className="w-[2.6ch] flex justify-center">
+              <ScrollPicker
+                list={periods}
+                value={inlineInput.displayEndPeriod}
+                onChange={() => {}}
+                itemHeight={44}
+                disabled
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
