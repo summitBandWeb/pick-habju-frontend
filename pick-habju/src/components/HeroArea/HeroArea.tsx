@@ -140,8 +140,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         if (!(isSameDate && isSameSlots)) {
           onDateTimeChange?.();
         }
-      } catch {
-        /* 비교 실패 시 콜백 생략 */
+      } catch (error) {
+        console.debug('비교 실패:', error);
       }
       return true;
     },
@@ -168,8 +168,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
         const e12 = to12(end24 === 0 ? 24 % 24 : end24);
         return { startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period };
       }
-    } catch {
-      /* 파싱 실패 */
+    } catch (error) {
+      console.debug('파싱 실패:', error);
     }
     return {
       startHour: 9,
@@ -322,8 +322,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
                     if (typeof last?.peopleCount === 'number' && last.peopleCount !== val) {
                       onPersonCountChange?.();
                     }
-                  } catch {
-                    // 비교 실패 시 콜백 생략
+                  } catch (error) {
+                    console.debug('비교 실패:', error);
                   }
                 }}
                 initialCount={peopleCountText}
