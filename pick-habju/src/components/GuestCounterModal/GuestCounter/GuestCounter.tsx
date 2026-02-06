@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import type { GuestCounterProps } from './GuestCounter.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useToastStore } from '../../../store/toast/toastStore';
@@ -100,7 +100,7 @@ const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps)
       <button
         onClick={handleDecrement}
         disabled={value <= min}
-        className={clsx(
+        className={classNames(
           'flex items-center justify-center w-12 h-full transition-colors',
           'hover:bg-gray-200 disabled:bg-gray-200 disabled:cursor-not-allowed',
           'border-r border-gray-400'
@@ -125,7 +125,7 @@ const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps)
       <button
         onClick={handleIncrement}
         disabled={value >= max}
-        className={clsx(
+        className={classNames(
           'flex items-center justify-center w-12 h-full transition-colors',
           'hover:bg-gray-200 disabled:bg-gray-200 disabled:cursor-not-allowed',
           'border-l border-gray-400'
