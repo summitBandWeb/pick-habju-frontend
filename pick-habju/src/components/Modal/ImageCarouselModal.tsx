@@ -87,8 +87,8 @@ const ImageCarouselModal = ({
             {/* 하단 그라데이션 */}
             <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
 
-            {/* 컨트롤 오버레이 - Chevron을 이미지 영역 내 세로 중앙에 배치 */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-center items-stretch">
+            {/* 컨트롤 오버레이 - Chevron을 이미지 영역 내 세로 중앙에 배치 (top-12: mt-12 여백 제외) */}
+            <div className="pointer-events-none absolute top-12 left-0 right-0 bottom-0 flex flex-col justify-center items-stretch">
               {total > 1 && (
                 <div className="pointer-events-auto flex justify-between items-center self-stretch px-0">
                   <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
