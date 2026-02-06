@@ -1,6 +1,12 @@
 import type { PickerFooterProps } from './PickerFooter.types';
 
-const PickerFooter = ({ onConfirm, onCancel, disabled = false, cancelText = '취소' }: PickerFooterProps) => (
+const PickerFooter = ({
+  onConfirm,
+  onCancel,
+  disabled = false,
+  cancelText = '취소',
+  confirmText = '확인',
+}: PickerFooterProps) => (
   <div className="flex justify-end pt-2 pb-3 px-3 bg-primary-white gap-2 rounded-b-lg">
     <button
       onClick={onCancel}
@@ -15,7 +21,7 @@ const PickerFooter = ({ onConfirm, onCancel, disabled = false, cancelText = '취
       // w, h 아닌 padding 으로 구역 확보
       className={`py-[14.5px] px-3 font-button rounded-lg transition ${disabled ? 'text-gray-300 cursor-not-allowed' : 'text-yellow-900 hover:bg-yellow-900 hover:text-primary-white'}`}
     >
-      확인
+      {confirmText}
     </button>
   </div>
 );

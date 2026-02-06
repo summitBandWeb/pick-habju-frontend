@@ -27,6 +27,7 @@ const ScrollPicker = <T extends string | number>({
   const didDrag = useRef(false);
   const wheelAccum = useRef(0);
   const lastWheelTs = useRef(0);
+  const isInitialMount = useRef(true);
 
   // 물리적 이동 대비 스크롤 이동 저항(값이 클수록 더 많이 움직여야 한 칸 이동)
   const DRAG_RESISTANCE = 1;
@@ -48,8 +49,9 @@ const ScrollPicker = <T extends string | number>({
   useEffect(() => {
     if (!ref.current) return;
     const li = ref.current.children[selectedIdx] as HTMLElement;
-    // scrollIntoView 로 block:'center' 하면 중앙 스냅 보장
-    li.scrollIntoView({ block: 'center', behavior: 'auto' });
+    const behavior = isInitialMount.current ? 'auto' : 'smooth';
+    if (isInitialMount.current) isInitialMount.current = false;
+    li.scrollIntoView({ block: 'center', behavior });
   }, [selectedIdx]);
 
   // 스크롤이 멈춘 뒤 처리 (debounce)
@@ -118,8 +120,8 @@ const ScrollPicker = <T extends string | number>({
     endDrag();
   };
 
-  // 아이템 클릭 시 해당 아이템을 중앙으로 스냅하며 선택
-  const handleItemClick = (i: number) => {
+  // 클릭한 아이템을 중앙으로 스크롤
+  const scrollItemToCenter = (i: number) => {
     if (disabled) return;
     if (didDrag.current) return; // 드래그 후 발생한 클릭은 무시
     const val = padded[i];
@@ -180,7 +182,7 @@ const ScrollPicker = <T extends string | number>({
         return (
           <li
             key={i}
-            onClick={() => handleItemClick(i)}
+            onClick={() => scrollItemToCenter(i)}
             style={{
               height: `${itemHeight}px`,
               display: 'flex',

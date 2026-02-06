@@ -3,4 +3,5 @@ export interface PickerFooterProps {
   onCancel: () => void;
   disabled?: boolean;
   cancelText?: string;
+  confirmText?: string;
 }

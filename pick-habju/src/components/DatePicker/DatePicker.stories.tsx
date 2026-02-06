@@ -34,8 +34,6 @@ const InteractiveWrapper = (args: DatePickerProps) => {
           setSelected(dates);
           console.log('onChange:', dates);
         }}
-        onConfirm={(dates) => console.log('onConfirm:', dates)}
-        onCancel={() => console.log('onCancel')}
       />
       {/* 선택 상태 확인용 */}
       <pre style={{ color: 'white', marginTop: 12 }}>

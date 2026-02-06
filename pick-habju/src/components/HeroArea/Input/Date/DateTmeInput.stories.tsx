@@ -22,7 +22,11 @@ export default {
   tags: ['autodocs'],
 } as Meta<typeof DateTimeInput>;
 
-const Template: StoryFn<typeof DateTimeInput> = (args) => <DateTimeInput {...args} />;
+const Template: StoryFn<typeof DateTimeInput> = (args) => (
+  <div className="w-[19.875rem] rounded-lg border-2 border-gray-200 overflow-hidden">
+    <DateTimeInput {...args} />
+  </div>
+);
 
 export const Default = Template.bind({});
 Default.args = {
