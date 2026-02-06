@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import Chevron from '../../components/Chevron/Chevron';
-import PaginationDots from '../../components/PaginationDot/PaginationDot';
 import { ChevronVariant } from '../../components/Chevron/ChevronEnums';
 import ModalOverlay from './ModalOverlay';
 
@@ -94,13 +93,6 @@ const ImageCarouselModal = ({
               {total > 1 && (
                 <div className="flex pt-[6.25rem] justify-between items-center self-stretch px-0">
                   <Chevron variant={variant} onPrev={prev} onNext={next} containerClassName="w-full" />
-                </div>
-              )}
-
-              {/* Pagination - 이미지가 2개 이상일 때만 표시 */}
-              {total > 1 && (
-                <div className="w-full flex justify-center pb-3">
-                  <PaginationDots total={total} current={current} />
                 </div>
               )}
             </div>
