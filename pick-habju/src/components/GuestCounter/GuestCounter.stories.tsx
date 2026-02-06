@@ -3,7 +3,7 @@ import { useState } from 'react';
 import GuestCounter from './GuestCounter';
 
 const meta = {
-  title: 'Components/GuestCounterModal/GuestCounter',
+  title: 'Components/GuestCounter',
   component: GuestCounter,
   tags: ['autodocs'],
 } satisfies Meta<typeof GuestCounter>;
@@ -31,5 +31,3 @@ export const AtMaxValue: Story = {
 export const CustomRange: Story = {
   render: () => <ControlledTemplate value={5} min={3} max={13} />,
 };
-
-// TODO : Hover 기능 추가
