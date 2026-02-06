@@ -27,9 +27,10 @@ const GuestCounter = ({ value, onChange, min = 1, max = 30 }: GuestCounterProps)
     return () => {
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
+        hideToast();
       }
     };
-  }, []);
+  }, [hideToast]);
 
   useEffect(() => {
     setInputValue(String(value));
