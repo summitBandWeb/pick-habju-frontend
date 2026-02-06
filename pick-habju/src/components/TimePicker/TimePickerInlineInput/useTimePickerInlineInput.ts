@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { to2Digit24h, to12h } from '../../../utils/formatDate';
 import { processDigitInput } from '../../../utils/timeInputUtils';
 import type { TimePeriod } from '../TimePickerEnums';
@@ -26,6 +26,13 @@ export function useTimePickerInlineInput({
     const end = to2Digit24h(endHour, endPeriod);
     return start + end;
   });
+
+  /** props 변경 시 rawDigits 동기화 (스크롤 피커로 시간 변경 후 편집 모드 진입 시 올바른 값 표시) */
+  useEffect(() => {
+    const start = to2Digit24h(startHour, startPeriod);
+    const end = to2Digit24h(endHour, endPeriod);
+    setRawDigits(start + end);
+  }, [startHour, startPeriod, endHour, endPeriod]);
 
   /** 입력된 숫자 문자열(rawDigits)를 파싱해서 24h 숫자로 변환하고 to12h로 12h로 바꿔서 onChange에 넘김 */
   const parseAndNotify = useCallback(
