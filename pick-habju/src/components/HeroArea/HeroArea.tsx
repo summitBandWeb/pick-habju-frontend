@@ -12,6 +12,7 @@ import { ReservationToastKey, ReservationToastSeverity } from '../ToastMessage/T
 import ToastMessage from '../ToastMessage/ToastMessage';
 import { useReservationActions, useReservationState } from '../../hook/useReservationStore';
 import { convertTo24Hour } from '../../utils/formatDate';
+import { validateReservationTime } from '../../utils/timeValidation';
 import { useToastStore } from '../../store/toast/toastStore';
 import { formatReservationLabel } from '../../utils/formatReservationLabel';
 import { generateHourSlots } from '../../utils/formatTime';
@@ -41,73 +42,11 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     setIsGuestModalOpen(true);
   }, []);
 
-  {
-    /*
-    이거 굳이 heroArea에 있을 필요없어서 따로 분리해도 될듯
-    SRP에 맞지않음. 따로 분리해서 사용하는게 좋을듯
-    */
-  }
-  const validateTime = useCallback(
-    (
-      date: Date | null,
-      startHour: number,
-      startPeriod: TimePeriod,
-      endHour: number,
-      endPeriod: TimePeriod
-    ): ReservationToastKey | null => {
-      const start24 = convertTo24Hour(startHour, startPeriod);
-      const end24 = convertTo24Hour(endHour, endPeriod);
-
-      const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
-      const duration = adjustedEnd - start24;
-
-      const candidates: ReservationToastKey[] = [];
-
-      if (start24 === end24 && startPeriod === endPeriod) {
-        candidates.push(ReservationToastKey.INVALID_TYPE);
-      }
-      if (duration > 5) {
-        candidates.push(ReservationToastKey.TOO_LONG);
-      }
-      if (duration === 1) {
-        candidates.push(ReservationToastKey.TOO_SHORT);
-      }
-      if (date) {
-        const now = new Date();
-        const isSameDay =
-          date.getFullYear() === now.getFullYear() &&
-          date.getMonth() === now.getMonth() &&
-          date.getDate() === now.getDate();
-        if (isSameDay) {
-          const selectedDateTime = new Date(date);
-          selectedDateTime.setHours(start24, 0, 0, 0);
-          if (now.getTime() > selectedDateTime.getTime()) {
-            return ReservationToastKey.PAST_TIME;
-          }
-        }
-      }
-
-      if (candidates.length === 0) return null;
-
-      const errorPriority: ReservationToastKey[] = [
-        ReservationToastKey.INVALID_TYPE,
-        ReservationToastKey.PAST_TIME,
-        ReservationToastKey.TOO_LONG,
-      ];
-      const warningPriority: ReservationToastKey[] = [ReservationToastKey.TOO_SHORT];
-      const error = errorPriority.find((k) => candidates.includes(k));
-      if (error) return error;
-      const warning = warningPriority.find((k) => candidates.includes(k));
-      return warning ?? null;
-    },
-    []
-  );
-
   const handleDateTimeConfirm = useCallback(
     (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
-      const key = validateTime(date, sh, sp, eh, ep);
+      const key = validateReservationTime(date, sh, sp, eh, ep);
       if (key) {
-        const severity = ReservationToastSeverity[key];
+        const severity = ReservationToastSeverity[key as ReservationToastKey];
         showToastByKey(key);
         if (severity === 'error') return false;
         const dateKey = date.toDateString();
@@ -145,7 +84,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
       }
       return true;
     },
-    [actions, validateTime, lastWarningKey, onDateTimeChange]
+    [actions, lastWarningKey, onDateTimeChange]
   );
 
   const initialTimeFromSlots = useMemo(() => {
