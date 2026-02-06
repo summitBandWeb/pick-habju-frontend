@@ -40,37 +40,49 @@ const DateTimeInputDropdown = ({
   disabled = false,
 }: DateTimeInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<'DATE' | 'TIME'>('DATE');
-  const [selectedDates, setSelectedDates] = useState<Date[]>(() =>
-    initialSelectedDate ? [initialSelectedDate] : [new Date()]
-  );
-  const [tempDate, setTempDate] = useState<Date | null>(null);
-  const [draftTime, setDraftTime] = useState({
-    startHour: initialStartHour,
-    startPeriod: initialStartPeriod,
-    endHour: initialEndHour,
-    endPeriod: initialEndPeriod,
+  const [pickerState, setPickerState] = useState<{
+    step: 'DATE' | 'TIME';
+    selectedDates: Date[];
+    tempDate: Date | null;
+    time: {
+      startHour: number;
+      startPeriod: TimePeriod;
+      endHour: number;
+      endPeriod: TimePeriod;
+    };
+  }>({
+    step: 'DATE',
+    selectedDates: initialSelectedDate ? [initialSelectedDate] : [new Date()],
+    tempDate: null,
+    time: {
+      startHour: initialStartHour,
+      startPeriod: initialStartPeriod,
+      endHour: initialEndHour,
+      endPeriod: initialEndPeriod,
+    },
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
     setIsOpen((prev) => {
-      if (!prev) setStep('DATE');
+      if (!prev) {
+        setPickerState((s) => ({ ...s, step: 'DATE' }));
+      }
       return !prev;
     });
   }, []);
 
   const handleDateChange = useCallback((dates: Date[]) => {
-    setSelectedDates(dates);
+    setPickerState((s) => ({ ...s, selectedDates: dates }));
   }, []);
 
   const handleDateStepConfirm = useCallback(() => {
-    const date = selectedDates[0];
-    if (date) {
-      setTempDate(date);
-      setStep('TIME');
-    }
-  }, [selectedDates]);
+    setPickerState((s) => {
+      const date = s.selectedDates[0];
+      if (date) return { ...s, tempDate: date, step: 'TIME' };
+      return s;
+    });
+  }, []);
 
   const handleDateStepCancel = useCallback(() => {
     onClose?.();
@@ -79,44 +91,50 @@ const DateTimeInputDropdown = ({
 
   const handleTimeDraftChange = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
-      setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep });
+      setPickerState((s) => ({
+        ...s,
+        time: { startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep },
+      }));
     },
     []
   );
 
   const handleTimeConfirm = useCallback(() => {
-    const date = tempDate ?? selectedDates[0];
+    const date = pickerState.tempDate ?? pickerState.selectedDates[0];
     if (!date) return;
-    const { startHour, startPeriod, endHour, endPeriod } = draftTime;
+    const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
     const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod);
     if (shouldClose !== false) {
       setIsOpen(false);
-      setStep('DATE');
+      setPickerState((s) => ({ ...s, step: 'DATE' }));
     }
-  }, [tempDate, selectedDates, draftTime, onConfirm]);
+  }, [pickerState, onConfirm]);
 
   const handleTimeCancel = useCallback(() => {
-    setStep('DATE');
+    setPickerState((s) => ({ ...s, step: 'DATE' }));
   }, []);
 
   // initialSelectedDate가 바뀌면 selectedDates 동기화
   useEffect(() => {
     if (initialSelectedDate) {
-      setSelectedDates([initialSelectedDate]);
+      setPickerState((s) => ({ ...s, selectedDates: [initialSelectedDate] }));
     }
   }, [initialSelectedDate]);
 
-  // 부모의 initial 값이 바뀌면 draftTime 동기화 (확정 후 스토어 업데이트 시에만 변경됨)
+  // 부모의 initial 값이 바뀌면 time 동기화 (확정 후 스토어 업데이트 시에만 변경됨)
   useEffect(() => {
-    setDraftTime({
-      startHour: initialStartHour,
-      startPeriod: initialStartPeriod,
-      endHour: initialEndHour,
-      endPeriod: initialEndPeriod,
-    });
+    setPickerState((s) => ({
+      ...s,
+      time: {
+        startHour: initialStartHour,
+        startPeriod: initialStartPeriod,
+        endHour: initialEndHour,
+        endPeriod: initialEndPeriod,
+      },
+    }));
   }, [initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
 
-  // 바깥 클릭으로 닫기
+  // 바깥 클릭 + ESC로 닫기
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -124,26 +142,23 @@ const DateTimeInputDropdown = ({
         handleDateStepCancel();
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, handleDateStepCancel]);
-
-  // ESC로 닫기
-  useEffect(() => {
-    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        if (step === 'TIME') {
-          setStep('DATE');
+        if (pickerState.step === 'TIME') {
+          setPickerState((s) => ({ ...s, step: 'DATE' }));
         } else {
           handleDateStepCancel();
         }
       }
     };
+    document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, step, handleDateStepCancel]);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, pickerState.step, handleDateStepCancel]);
 
   return (
     <div
@@ -154,10 +169,10 @@ const DateTimeInputDropdown = ({
 
       {isOpen && (
         <div className="flex flex-col bg-primary-white">
-          {step === 'DATE' ? (
+          {pickerState.step === 'DATE' ? (
             <>
               <DatePicker
-                initialSelectedDate={selectedDates[0] ?? initialSelectedDate}
+                initialSelectedDate={pickerState.selectedDates[0] ?? initialSelectedDate}
                 onChange={handleDateChange}
               />
               <PickerFooter
@@ -168,14 +183,14 @@ const DateTimeInputDropdown = ({
             </>
           ) : (
             <>
-                <TimePickerBody
-                  startHour={draftTime.startHour}
-                  startPeriod={draftTime.startPeriod}
-                  endHour={draftTime.endHour}
-                  endPeriod={draftTime.endPeriod}
-                  onChange={handleTimeDraftChange}
-                  disabled={disabled}
-                />
+              <TimePickerBody
+                startHour={pickerState.time.startHour}
+                startPeriod={pickerState.time.startPeriod}
+                endHour={pickerState.time.endHour}
+                endPeriod={pickerState.time.endPeriod}
+                onChange={handleTimeDraftChange}
+                disabled={disabled}
+              />
               <PickerFooter
                 onConfirm={handleTimeConfirm}
                 onCancel={handleTimeCancel}
