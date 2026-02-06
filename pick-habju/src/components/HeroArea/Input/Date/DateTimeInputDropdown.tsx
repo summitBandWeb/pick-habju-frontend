@@ -26,12 +26,6 @@ export interface DateTimeInputDropdownProps {
   ) => boolean | void;
   onClose?: () => void;
   disabled?: boolean;
-  onDraftChange?: (
-    startHour: number,
-    startPeriod: TimePeriod,
-    endHour: number,
-    endPeriod: TimePeriod
-  ) => void;
 }
 
 const DateTimeInputDropdown = ({
@@ -44,7 +38,6 @@ const DateTimeInputDropdown = ({
   onConfirm,
   onClose,
   disabled = false,
-  onDraftChange,
 }: DateTimeInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'DATE' | 'TIME'>('DATE');
@@ -87,9 +80,8 @@ const DateTimeInputDropdown = ({
   const handleTimeDraftChange = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
       setDraftTime({ startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep });
-      onDraftChange?.(sh, sp, eh, ep);
     },
-    [onDraftChange]
+    []
   );
 
   const handleTimeConfirm = useCallback(() => {
@@ -114,17 +106,15 @@ const DateTimeInputDropdown = ({
     }
   }, [initialSelectedDate]);
 
-  // TIME 단계 진입 시 draftTime 초기화
+  // 부모의 initial 값이 바뀌면 draftTime 동기화 (확정 후 스토어 업데이트 시에만 변경됨)
   useEffect(() => {
-    if (step === 'TIME') {
-      setDraftTime({
-        startHour: initialStartHour,
-        startPeriod: initialStartPeriod,
-        endHour: initialEndHour,
-        endPeriod: initialEndPeriod,
-      });
-    }
-  }, [step, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
+    setDraftTime({
+      startHour: initialStartHour,
+      startPeriod: initialStartPeriod,
+      endHour: initialEndHour,
+      endPeriod: initialEndPeriod,
+    });
+  }, [initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
 
   // 바깥 클릭으로 닫기
   useEffect(() => {
@@ -176,10 +166,10 @@ const DateTimeInputDropdown = ({
           ) : (
             <>
               <TimePicker
-                initialStartHour={initialStartHour}
-                initialStartPeriod={initialStartPeriod}
-                initialEndHour={initialEndHour}
-                initialEndPeriod={initialEndPeriod}
+                initialStartHour={draftTime.startHour}
+                initialStartPeriod={draftTime.startPeriod}
+                initialEndHour={draftTime.endHour}
+                initialEndPeriod={draftTime.endPeriod}
                 disabled={disabled}
                 onDraftChange={handleTimeDraftChange}
               />
