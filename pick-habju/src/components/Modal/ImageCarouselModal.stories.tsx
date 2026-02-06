@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import ImageCarouselModal from './ImageCarouselModal';
-import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import image1 from '../../assets/images/1.png';
 import image2 from '../../assets/images/2.png';
 import image3 from '../../assets/images/3.png';
@@ -30,7 +29,6 @@ const meta = {
     images: { control: false, description: '이미지 URL 배열' },
     initialIndex: { control: 'number', description: '초기 표시 이미지 인덱스' },
     onClose: { action: 'onClose', description: '닫기 버튼 클릭' },
-    closeIconSrc: { control: 'text', description: '닫기 아이콘 이미지 경로 (없으면 × 텍스트)' },
   },
 } satisfies Meta<typeof ImageCarouselModal>;
 
@@ -43,7 +41,6 @@ export const Default: Story = {
     open: true,
     images: [image1, image2, image3],
     onClose: action('onClose'),
-    closeIconSrc: TurnOffIcon,
   },
 };
 
@@ -53,7 +50,6 @@ export const OneImage: Story = {
     open: true,
     images: [image1],
     onClose: action('onClose'),
-    closeIconSrc: TurnOffIcon,
   },
 };
 
@@ -64,6 +60,5 @@ export const InitialIndex: Story = {
     images: [image1, image2, image3],
     initialIndex: 2,
     onClose: action('onClose'),
-    closeIconSrc: TurnOffIcon,
   },
 };

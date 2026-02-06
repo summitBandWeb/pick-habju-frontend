@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Chevron from '../../components/Chevron/Chevron';
 import { ChevronVariant } from '../../components/Chevron/ChevronEnums';
+import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import ModalOverlay from './ModalOverlay';
 
 type ImageCarouselModalProps = {
@@ -8,7 +9,6 @@ type ImageCarouselModalProps = {
   images: string[];
   initialIndex?: number;
   onClose: () => void;
-  closeIconSrc?: string; // 아이콘 경로 제공 시 사용. 없으면 텍스트 버튼 사용
 };
 
 const ImageCarouselModal = ({
@@ -16,7 +16,6 @@ const ImageCarouselModal = ({
   images,
   initialIndex = 0,
   onClose,
-  closeIconSrc,
 }: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
 
@@ -57,28 +56,28 @@ const ImageCarouselModal = ({
               }}
             >
               {images.map((image, index) => (
-                <div key={index} className="w-[23.125rem] min-w-[23.125rem] flex-shrink-0">
-                  {index === current && (
-                    <div className="w-full flex justify-end">
+                <div key={index} className="w-[23.125rem] min-w-[23.125rem] flex-shrink-0 flex flex-col">
+                  {/* 이미지 높이에 따라 위치가 결정되는 기준점(Relative) */}
+                  <div className="relative w-full mt-12">
+                    {/* mt-12: 버튼이 들어갈 위쪽 여백 확보 */}
+                    {/* 닫기 버튼: 이미지 박스 위쪽 바깥으로 배치 */}
+                    <div className="absolute bottom-full right-0 z-10">
                       <button
                         type="button"
                         onClick={onClose}
-                        className="flex p-3 flex-col items-start gap-[0.625rem]"
-                        aria-label="닫기"
+                        className="flex p-3 items-center justify-center aria-label='닫기'"
                       >
-                        {closeIconSrc ? (
-                          <img src={closeIconSrc} alt="close" />
-                        ) : (
-                          <span className="text-primary-white text-xl">×</span>
-                        )}
+                        <img src={TurnOffIcon} alt="close" />
                       </button>
                     </div>
-                  )}
-                  <img
-                    src={image}
-                    alt={`확대 이미지 ${index + 1}`}
-                    className="w-full h-auto block"
-                  />
+
+                    {/* 이미지: 이 이미지의 상단 라인이 버튼의 기준점이 됩니다 */}
+                    <img
+                      src={image}
+                      alt={`확대 이미지 ${index + 1}`}
+                      className="w-full h-auto block"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
