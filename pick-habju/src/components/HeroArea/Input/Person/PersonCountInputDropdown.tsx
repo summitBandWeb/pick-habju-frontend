@@ -10,7 +10,6 @@ export interface PersonCountInputDropdownProps {
   count: number;
   /** 인원 확정 시 호출. true 반환 시 드롭다운 닫힘, false 시 유지 */
   onConfirm: (count: number) => boolean | void;
-  onClose?: () => void;
   disabled?: boolean;
   min?: number;
   max?: number;
@@ -19,7 +18,6 @@ export interface PersonCountInputDropdownProps {
 const PersonCountInputDropdown = ({
   count,
   onConfirm,
-  onClose,
   disabled = false,
   min = 1,
   max = 30,
@@ -43,9 +41,8 @@ const PersonCountInputDropdown = ({
   }, [guestCount, onConfirm]);
 
   const handleCancel = useCallback(() => {
-    onClose?.();
     setIsOpen(false);
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) setGuestCount(count);

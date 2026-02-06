@@ -33,7 +33,6 @@ const InteractiveWrapper = () => {
           setCount(val);
           return true;
         }}
-        onClose={() => console.log('드롭다운 닫힘')}
       />
     </div>
   );
@@ -46,7 +45,6 @@ export const Default: Story = {
       console.log('인원 확정:', val);
       return true;
     },
-    onClose: () => console.log('취소 클릭'),
   },
 };
 
