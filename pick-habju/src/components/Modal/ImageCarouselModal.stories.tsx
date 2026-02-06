@@ -25,7 +25,6 @@ const meta = {
     },
   },
   argTypes: {
-    open: { control: 'boolean', description: '모달 열림 여부' },
     images: { control: false, description: '이미지 URL 배열' },
     initialIndex: { control: 'number', description: '초기 표시 이미지 인덱스' },
     onClose: { action: 'onClose', description: '닫기 버튼 클릭' },
@@ -38,7 +37,6 @@ type Story = StoryObj<typeof ImageCarouselModal>;
 export const Default: Story = {
   name: '기본',
   args: {
-    open: true,
     images: [image1, image2, image3],
     onClose: action('onClose'),
   },
@@ -47,7 +45,6 @@ export const Default: Story = {
 export const OneImage: Story = {
   name: '이미지 1장',
   args: {
-    open: true,
     images: [image1],
     onClose: action('onClose'),
   },
@@ -56,7 +53,6 @@ export const OneImage: Story = {
 export const InitialIndex: Story = {
   name: '특정 인덱스부터 시작',
   args: {
-    open: true,
     images: [image1, image2, image3],
     initialIndex: 2,
     onClose: action('onClose'),

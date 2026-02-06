@@ -5,14 +5,12 @@ import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import ModalOverlay from './ModalOverlay';
 
 type ImageCarouselModalProps = {
-  open?: boolean;
   images: string[];
   initialIndex?: number;
   onClose: () => void;
 };
 
 const ImageCarouselModal = ({
-  open = true,
   images,
   initialIndex = 0,
   onClose,
@@ -31,7 +29,7 @@ const ImageCarouselModal = ({
     current === 0 ? ChevronVariant.First : current === total - 1 ? ChevronVariant.Last : ChevronVariant.Middle;
 
   return (
-    <ModalOverlay open={open} onClose={onClose} dimmedClassName="bg-black/80">
+    <ModalOverlay onClose={onClose} dimmedClassName="bg-black/80">
       {/* 1. 최상위 컨테이너: 너비를 고정하고 내부 그림자를 위해 overflow-visible 상태 유지 */}
       <div className="w-[25.125rem] relative">
         
