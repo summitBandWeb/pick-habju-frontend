@@ -80,8 +80,7 @@ const PersonCountInputDropdown = ({
       <PersonCountInput count={count} onChangeClick={handleToggle} isOpen={isOpen} />
 
       {isOpen && (
-        <div className="flex flex-col bg-primary-white gap-10 py-7 px-15 items-center">
-          <div className="font-modal-default text-primary-black">합주실 이용 인원을 입력해주세요</div>
+        <div className="flex flex-col bg-primary-white gap-4 py-4 px-3.5 items-center">
           <GuestCounter value={guestCount} onChange={setGuestCount} min={min} max={max} />
           <Button
             label="확인"
