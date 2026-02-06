@@ -4,14 +4,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import DatePicker from '../../../DatePicker/DatePicker';
 import PickerFooter from '../../../PickerFooter/PickerFooter';
-import TimePicker from '../../../TimePicker/TimePicker';
+import { TimePickerBody } from '../../../TimePicker/TimPickerBody/TimePickerBody';
 import { TimePeriod } from '../../../TimePicker/TimePickerEnums';
 import DateTimeInput from './DateTimeInput';
 
 export interface DateTimeInputDropdownProps {
   dateTime: string;
   initialSelectedDate?: Date;
-  /** TimePicker 초기값 */
+  /** TimePickerBody 초기값 */
   initialStartHour?: number;
   initialStartPeriod?: TimePeriod;
   initialEndHour?: number;
@@ -165,14 +165,14 @@ const DateTimeInputDropdown = ({
             </>
           ) : (
             <>
-              <TimePicker
-                initialStartHour={draftTime.startHour}
-                initialStartPeriod={draftTime.startPeriod}
-                initialEndHour={draftTime.endHour}
-                initialEndPeriod={draftTime.endPeriod}
-                disabled={disabled}
-                onDraftChange={handleTimeDraftChange}
-              />
+                <TimePickerBody
+                  startHour={draftTime.startHour}
+                  startPeriod={draftTime.startPeriod}
+                  endHour={draftTime.endHour}
+                  endPeriod={draftTime.endPeriod}
+                  onChange={handleTimeDraftChange}
+                  disabled={disabled}
+                />
               <PickerFooter
                 onConfirm={handleTimeConfirm}
                 onCancel={handleTimeCancel}
