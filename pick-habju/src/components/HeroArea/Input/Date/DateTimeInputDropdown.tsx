@@ -147,7 +147,7 @@ const DateTimeInputDropdown = ({
 
   return (
     <div ref={containerRef} className="relative">
-      <DateTimeInput dateTime={dateTime} onChangeClick={handleToggle} />
+      <DateTimeInput dateTime={dateTime} onChangeClick={handleToggle} isOpen={isOpen} />
 
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 z-50 flex flex-col bg-primary-white shadow-lg">

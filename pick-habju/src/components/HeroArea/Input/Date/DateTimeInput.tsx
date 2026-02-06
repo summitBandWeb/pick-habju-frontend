@@ -2,7 +2,7 @@ import CalendarIcon from '../../../../assets/svg/calendarIcon.svg';
 import type { KeyboardEvent } from 'react';
 import type { DateTimeInputProps } from './DateTimeInput.types';
 
-const DateTimeInput = ({ dateTime, onChangeClick }: DateTimeInputProps) => {
+const DateTimeInput = ({ dateTime, onChangeClick, isOpen = false }: DateTimeInputProps) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -22,7 +22,11 @@ const DateTimeInput = ({ dateTime, onChangeClick }: DateTimeInputProps) => {
         <img src={CalendarIcon} alt="Calendar Icon" />
         <p>{dateTime}</p>
       </div>
-      <span className="text-blue-500 px-3 py-4 font-hero-edit underline underline-offset-2">변경</span>
+      <span
+        className={`px-3 py-4 font-hero-edit underline underline-offset-2 ${isOpen ? 'text-blue-300' : 'text-blue-500'}`}
+      >
+        변경
+      </span>
     </div>
   );
 };
