@@ -146,11 +146,14 @@ const DateTimeInputDropdown = ({
   }, [isOpen, step, handleDateStepCancel]);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div
+      ref={containerRef}
+      className={`flex flex-col w-[19.875rem] min-w-[14.375rem] rounded-lg border-2 border-gray-200 overflow-hidden shadow-search`}
+    >
       <DateTimeInput dateTime={dateTime} onChangeClick={handleToggle} isOpen={isOpen} />
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50 flex flex-col bg-primary-white shadow-lg">
+        <div className="flex flex-col bg-primary-white">
           {step === 'DATE' ? (
             <>
               <DatePicker

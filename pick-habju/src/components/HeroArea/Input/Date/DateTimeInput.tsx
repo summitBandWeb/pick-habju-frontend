@@ -11,7 +11,7 @@ const DateTimeInput = ({ dateTime, onChangeClick, isOpen = false }: DateTimeInpu
   };
   return (
     <div
-      className="w-70 h-14 rounded-lg bg-primary-white flex items-center justify-between px-3.5 cursor-pointer select-none"
+      className="h-14 w-full flex items-center justify-between py-1 px-3.5 cursor-pointer select-none bg-primary-white"
       role="button"
       tabIndex={0}
       aria-label="날짜/시간 변경"
