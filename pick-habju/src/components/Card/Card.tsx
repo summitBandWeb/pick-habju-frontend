@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import Button from '../Button/Button';
 import People from '../../assets/svg/people.svg';
 import ImageCarouselModal from '../Modal/ImageCarouselModal';
-import TurnOffIcon from '../../assets/svg/turnOff.svg';
 import FaveOff from '../../assets/svg/FaveOff.svg';
 import FaveOn from '../../assets/svg/FaveOn.svg';
 import ImgIcon from '../../assets/svg/ImgIcon.svg';
@@ -287,7 +286,6 @@ const Card = ({
         <ImageCarouselModal
           images={images}
           onClose={() => setIsModalOpen(false)}
-          closeIconSrc={TurnOffIcon}
         />
       )}
     </div>
