@@ -35,8 +35,13 @@ export function useTimePickerInlineInput({
         return;
       }
       const startH24 = parseInt(digits.slice(0, 2).padStart(2, '0'), 10);
-      const endH24 = digits.length >= 3 ? parseInt(digits.slice(2, 4).padStart(2, '0'), 10) : 0;
       const start12 = to12h(Math.min(23, startH24));
+      // 0~2자리: 시작 시간만 입력 중 → 끝 시간은 props 유지 (0으로 파싱하면 to12h(0)=12가 되어 잘못 덮어씀)
+      if (digits.length < 3) {
+        onChange(start12.hour, start12.period, endHour, endPeriod);
+        return;
+      }
+      const endH24 = parseInt(digits.slice(2, 4).padStart(2, '0'), 10);
       const end12 = to12h(Math.min(23, endH24));
       onChange(start12.hour, start12.period, end12.hour, end12.period);
     },
