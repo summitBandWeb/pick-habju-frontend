@@ -11,13 +11,24 @@ export interface LocationOption {
   subwayLine: string;
 }
 
-/** "4호선·7호선" 형태의 문자열에서 노선 번호 배열 추출 */
-function parseSubwayLineNumbers(subwayLine: string): number[] {
-  const matches = subwayLine.match(/\d+/g);
-  return matches ? matches.map(Number) : [];
+/** 노선 식별자: 숫자(1~9) 또는 문자(A=공항철도, K=경의중앙선) */
+type SubwayLineId = number | 'A' | 'K';
+
+/** "4호선·7호선·공항철도·경의중앙선" 형태의 문자열에서 노선 배열 추출 (순서 유지) */
+function parseSubwayLines(subwayLine: string): SubwayLineId[] {
+  const parts = subwayLine.split(/[·\s]+/).filter(Boolean);
+  return parts
+    .map((part): SubwayLineId | null => {
+      const numMatch = part.match(/\d+/);
+      if (numMatch) return Number(numMatch[0]);
+      if (part.includes('공항철도')) return 'A';
+      if (part.includes('경의중앙선')) return 'K';
+      return null;
+    })
+    .filter((v): v is SubwayLineId => v !== null);
 }
 
-const SUBWAY_LINE_BG_CLASSES: Record<number, string> = {
+const SUBWAY_LINE_BG_CLASSES: Record<SubwayLineId, string> = {
   1: 'bg-subway-line-1',
   2: 'bg-subway-line-2',
   3: 'bg-subway-line-3',
@@ -27,6 +38,8 @@ const SUBWAY_LINE_BG_CLASSES: Record<number, string> = {
   7: 'bg-subway-line-7',
   8: 'bg-subway-line-8',
   9: 'bg-subway-line-9',
+  A: 'bg-subway-line-a',
+  K: 'bg-subway-line-k',
 };
 
 export interface LocationInputDropdownProps {
@@ -98,6 +111,7 @@ const LocationInputDropdown = ({
   // --- Input 영역 렌더 (DateTimeInput과 동일 스타일) ---
   const renderInputArea = () => {
     const handleInputKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+      //화살표 키 네비게이션. 드롭다운이 열린 상태에서 화살표 키로 이동 하고 enter 키로 선택.
       if (isOpen) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
@@ -154,7 +168,7 @@ const LocationInputDropdown = ({
           const isLast = index === options.length - 1;
           const isSelected = location === opt.label;
           const isHighlighted = index === highlightedIndex;
-          const lineNumbers = opt.subwayLine ? parseSubwayLineNumbers(opt.subwayLine) : [];
+          const lineIds = opt.subwayLine ? parseSubwayLines(opt.subwayLine) : [];
           return (
             <li
               key={opt.value}
@@ -182,14 +196,14 @@ const LocationInputDropdown = ({
               >
                 {opt.label}
               </span>
-              {lineNumbers.length > 0 && (
+              {lineIds.length > 0 && (
                 <div className="flex items-center gap-1">
-                  {lineNumbers.map((num) => (
+                  {lineIds.map((id, idx) => (
                     <span
-                      key={num}
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[12px] font-bold leading-none text-white ${SUBWAY_LINE_BG_CLASSES[num] ?? 'bg-gray-400'}`}
+                      key={`${id}-${idx}`}
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[12px] font-bold leading-none text-white ${SUBWAY_LINE_BG_CLASSES[id] ?? 'bg-gray-400'}`}
                     >
-                      {num}
+                      {id}
                     </span>
                   ))}
                 </div>
