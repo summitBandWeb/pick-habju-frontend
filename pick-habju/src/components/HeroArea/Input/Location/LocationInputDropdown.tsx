@@ -7,8 +7,8 @@ import LocationIcon from '../../../../assets/svg/location.svg';
 export interface LocationOption {
   value: string;
   label: string;
-  /** 역에 연결된 노선 정보 (예: "4호선·7호선"). "전체" 등 노선이 없는 경우 생략 가능 */
-  subwayLine?: string;
+  /** 역에 연결된 노선 정보 (예: "4호선·7호선"). */
+  subwayLine: string;
 }
 
 /** "4호선·7호선" 형태의 문자열에서 노선 번호 배열 추출 */
@@ -36,7 +36,6 @@ export interface LocationInputDropdownProps {
   options: LocationOption[];
   /** 지역 선택 시 호출. true 반환 시 드롭다운 닫힘 */
   onSelect: (value: string) => boolean | void;
-  onClose?: () => void;
   disabled?: boolean;
 }
 
@@ -44,7 +43,6 @@ const LocationInputDropdown = ({
   location,
   options,
   onSelect,
-  onClose,
   disabled = false,
 }: LocationInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,9 +64,8 @@ const LocationInputDropdown = ({
   );
 
   const handleClose = useCallback(() => {
-    onClose?.();
     setIsOpen(false);
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
