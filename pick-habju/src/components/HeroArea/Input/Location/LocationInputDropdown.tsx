@@ -11,6 +11,24 @@ export interface LocationOption {
   subwayLine?: string;
 }
 
+/** "4호선·7호선" 형태의 문자열에서 노선 번호 배열 추출 */
+function parseSubwayLineNumbers(subwayLine: string): number[] {
+  const matches = subwayLine.match(/\d+/g);
+  return matches ? matches.map(Number) : [];
+}
+
+const SUBWAY_LINE_BG_CLASSES: Record<number, string> = {
+  1: 'bg-subway-line-1',
+  2: 'bg-subway-line-2',
+  3: 'bg-subway-line-3',
+  4: 'bg-subway-line-4',
+  5: 'bg-subway-line-5',
+  6: 'bg-subway-line-6',
+  7: 'bg-subway-line-7',
+  8: 'bg-subway-line-8',
+  9: 'bg-subway-line-9',
+};
+
 export interface LocationInputDropdownProps {
   /** 현재 선택된 지역 표시 텍스트 */
   location: string;
@@ -105,29 +123,51 @@ const LocationInputDropdown = ({
     );
   };
 
-  // --- Dropdown 영역 렌더 ---
+  // --- Dropdown 영역 렌더 (피그마: default / hover / clicked 스타일) ---
   const renderDropdownArea = () => (
     <div className="flex flex-col bg-primary-white">
       <ul role="listbox" aria-label="지역 선택" className="flex flex-col">
         {options.map((opt, index) => {
           const isLast = index === options.length - 1;
+          const lineNumbers = opt.subwayLine ? parseSubwayLineNumbers(opt.subwayLine) : [];
           return (
             <li
               key={opt.value}
               role="option"
               className={`
-                px-3.5 py-3 cursor-pointer font-hero-info text-primary-black
-                transition-colors hover:bg-gray-100
-                ${isLast ? 'rounded-b-[8px]' : ''}
+                group min-h-[48px] px-10.5 py-4 cursor-pointer
+                flex items-center gap-2.5
+                bg-primary-white
+                border-t border-b border-gray-200
+                transition-colors duration-150
+                hover:bg-gray-200
+                active:bg-gray-200
+                ${isLast ? 'rounded-b-[8px] border-b-0' : ''}
               `}
               onClick={() => handleSelect(opt.value)}
             >
-              <div className="flex flex-col gap-0.5">
-                <span>{opt.label}</span>
-                {opt.subwayLine && (
-                  <span className="text-sm font-medium text-gray-400">{opt.subwayLine}</span>
-                )}
-              </div>
+              <span
+                className={`
+                  font-modal-default text-gray-500
+                  transition-all duration-150
+                  group-hover:!text-[17px]
+                  group-active:text-primary-black group-active:!text-[17px]
+                `}
+              >
+                {opt.label}
+              </span>
+              {lineNumbers.length > 0 && (
+                <div className="flex items-center gap-1">
+                  {lineNumbers.map((num) => (
+                    <span
+                      key={num}
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[12px] font-bold leading-none text-white ${SUBWAY_LINE_BG_CLASSES[num] ?? 'bg-gray-400'}`}
+                    >
+                      {num}
+                    </span>
+                  ))}
+                </div>
+              )}
             </li>
           );
         })}
