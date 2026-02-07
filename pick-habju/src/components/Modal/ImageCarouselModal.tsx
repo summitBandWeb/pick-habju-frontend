@@ -41,6 +41,7 @@ const ImageCarouselModal = ({
       open={open}
       onClose={onClose}
       dimmedClassName="bg-black/80" // 기존 디자인(더 어두운 배경) 유지
+      animateFromBottom={false}
     >
       {/* 내부 컨텐츠: 중앙 정렬 등 레이아웃은 ModalOverlay가 처리하므로 내용물만 배치 */}
       {/* 컨테이너: wrapper 폭 기준 중앙 */}
