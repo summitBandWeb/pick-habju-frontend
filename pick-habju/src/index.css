@@ -64,6 +64,19 @@
 
     --color-green: #2bbf53;
 
+    /* Subway line colors (지역선택시 사용될 노선별 색상) */
+    --color-subway-line-1: #00498b;
+    --color-subway-line-2: #009246;
+    --color-subway-line-3: #f36630;
+    --color-subway-line-4: #00a2d1;
+    --color-subway-line-5: #a064a3;
+    --color-subway-line-6: #9e4510;
+    --color-subway-line-7: #5d6519;
+    --color-subway-line-8: #d6406a;
+    --color-subway-line-9: #8e764b;
+    --color-subway-line-a: #006d9d;
+    --color-subway-line-k: #2abfd0;
+
     --color-text-black: #121212;
     --color-text-gray: #636363;
     --color-text-light-gray: #9c9c9c;
