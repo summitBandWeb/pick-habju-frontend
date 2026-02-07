@@ -190,11 +190,6 @@
     --line-height-footer-email: normal;
     --letter-spacing-footer-email: 0.03em;
 
-    --font-hero-info-weight: 600;
-    --font-hero-info-size: 16px;
-    --line-height-hero-info: normal;
-    --letter-spacing-hero-info: 0.03em;
-
     --box-shadow-card: 4px 4px 10px 0px rgba(0, 0, 0, 0.25);
     --box-shadow-search: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
     --box-shadow-filter: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
