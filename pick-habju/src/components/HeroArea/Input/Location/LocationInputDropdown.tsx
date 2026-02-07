@@ -7,6 +7,8 @@ import LocationIcon from '../../../../assets/svg/location.svg';
 export interface LocationOption {
   value: string;
   label: string;
+  /** 역에 연결된 노선 정보 (예: "4호선·7호선"). "전체" 등 노선이 없는 경우 생략 가능 */
+  subwayLine?: string;
 }
 
 export interface LocationInputDropdownProps {
@@ -105,21 +107,30 @@ const LocationInputDropdown = ({
 
   // --- Dropdown 영역 렌더 ---
   const renderDropdownArea = () => (
-    <div className="flex flex-col bg-primary-white max-h-60 overflow-y-auto">
-      <ul role="listbox" aria-label="지역 선택" className="py-2">
-        {options.map((opt) => (
-          <li
-            key={opt.value}
-            role="option"
-            aria-selected={opt.value === location}
-            className={`px-3.5 py-3 cursor-pointer font-hero-info text-primary-black hover:bg-gray-100 ${
-              opt.value === location ? 'bg-blue-50 text-blue-600' : ''
-            }`}
-            onClick={() => handleSelect(opt.value)}
-          >
-            {opt.label}
-          </li>
-        ))}
+    <div className="flex flex-col bg-primary-white">
+      <ul role="listbox" aria-label="지역 선택" className="flex flex-col">
+        {options.map((opt, index) => {
+          const isLast = index === options.length - 1;
+          return (
+            <li
+              key={opt.value}
+              role="option"
+              className={`
+                px-3.5 py-3 cursor-pointer font-hero-info text-primary-black
+                transition-colors hover:bg-gray-100
+                ${isLast ? 'rounded-b-[8px]' : ''}
+              `}
+              onClick={() => handleSelect(opt.value)}
+            >
+              <div className="flex flex-col gap-0.5">
+                <span>{opt.label}</span>
+                {opt.subwayLine && (
+                  <span className="text-sm font-medium text-gray-400">{opt.subwayLine}</span>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
