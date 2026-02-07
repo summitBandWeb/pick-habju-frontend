@@ -3,7 +3,6 @@ import { useState } from 'react';
 import LocationInputDropdown, { type LocationOption } from './LocationInputDropdown';
 
 const LOCATION_OPTIONS: LocationOption[] = [
-  { value: 'all', label: '전체' },
   { value: 'isuyeok', label: '이수역', subwayLine: '4호선·7호선' },
   { value: 'sangdo', label: '상도역', subwayLine: '7호선' },
   { value: 'sadang', label: '사당역', subwayLine: '2호선·4호선' },
@@ -31,7 +30,7 @@ export default meta;
 type Story = StoryObj<typeof LocationInputDropdown>;
 
 const InteractiveWrapper = () => {
-  const [location, setLocation] = useState('전체');
+  const [location, setLocation] = useState('이수역');
 
   return (
     <div className="p-8 min-w-80">
@@ -43,7 +42,6 @@ const InteractiveWrapper = () => {
           setLocation(opt?.label ?? value);
           return true;
         }}
-        onClose={() => console.log('드롭다운 닫힘')}
       />
     </div>
   );
@@ -51,13 +49,12 @@ const InteractiveWrapper = () => {
 
 export const Default: Story = {
   args: {
-    location: '전체',
+    location: '이수역',
     options: LOCATION_OPTIONS,
     onSelect: (value) => {
       console.log('지역 선택:', value);
       return true;
     },
-    onClose: () => console.log('드롭다운 닫힘'),
   },
 };
 
