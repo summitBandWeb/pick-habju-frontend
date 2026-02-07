@@ -62,12 +62,3 @@ export const Interactive: Story = {
   name: 'Interactive (지역 선택 후 표시 업데이트)',
   render: () => <InteractiveWrapper />,
 };
-
-export const Disabled: Story = {
-  args: {
-    location: '이수역',
-    options: LOCATION_OPTIONS,
-    onSelect: () => true,
-    disabled: true,
-  },
-};
