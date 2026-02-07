@@ -36,22 +36,19 @@ export interface LocationInputDropdownProps {
   options: LocationOption[];
   /** 지역 선택 시 호출. true 반환 시 드롭다운 닫힘 */
   onSelect: (value: string) => boolean | void;
-  disabled?: boolean;
 }
 
 const LocationInputDropdown = ({
   location,
   options,
   onSelect,
-  disabled = false,
 }: LocationInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
-    if (disabled) return;
     setIsOpen((prev) => !prev);
-  }, [disabled]);
+  }, []);
 
   const handleSelect = useCallback(
     (value: string) => {
