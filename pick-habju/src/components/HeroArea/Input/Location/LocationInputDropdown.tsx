@@ -44,6 +44,7 @@ const LocationInputDropdown = ({
   onSelect,
 }: LocationInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
@@ -85,9 +86,37 @@ const LocationInputDropdown = ({
     };
   }, [isOpen, handleClose]);
 
+  useEffect(() => {
+    if (isOpen && options.length > 0) {
+      const idx = options.findIndex((opt) => opt.label === location);
+      setHighlightedIndex(idx >= 0 ? idx : 0);
+    } else {
+      setHighlightedIndex(-1);
+    }
+  }, [isOpen, options, location]);
+
   // --- Input 영역 렌더 (DateTimeInput과 동일 스타일) ---
   const renderInputArea = () => {
     const handleInputKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+      if (isOpen) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev < options.length - 1 ? prev + 1 : 0));
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
+          return;
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (highlightedIndex >= 0 && options[highlightedIndex]) {
+            handleSelect(options[highlightedIndex].value);
+          }
+          return;
+        }
+      }
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleToggle();
@@ -123,19 +152,22 @@ const LocationInputDropdown = ({
       <ul role="listbox" aria-label="지역 선택" className="flex flex-col">
         {options.map((opt, index) => {
           const isLast = index === options.length - 1;
+          const isSelected = location === opt.label;
+          const isHighlighted = index === highlightedIndex;
           const lineNumbers = opt.subwayLine ? parseSubwayLineNumbers(opt.subwayLine) : [];
           return (
             <li
               key={opt.value}
               role="option"
+              aria-selected={isSelected}
               className={`
                 group min-h-[48px] px-10.5 py-4 cursor-pointer
                 flex items-center gap-2.5
-                bg-primary-white
                 border-t border-b border-gray-200
                 transition-colors duration-150
                 hover:bg-gray-200
                 active:bg-gray-200
+                ${isHighlighted ? 'bg-gray-200' : 'bg-primary-white'}
                 ${isLast ? 'rounded-b-[8px] border-b-0' : ''}
               `}
               onClick={() => handleSelect(opt.value)}
