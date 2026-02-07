@@ -7,6 +7,8 @@ const LOCATION_OPTIONS: LocationOption[] = [
   { value: 'sangdo', label: '상도역', subwayLine: '7호선' },
   { value: 'sadang', label: '사당역', subwayLine: '2호선·4호선' },
   { value: 'heukseok', label: '흑석역', subwayLine: '9호선' },
+  { value: 'gimpo', label: '김포공항역', subwayLine: '공항철도·5호선·9호선' },
+  { value: 'digital', label: '디지털미디어시티역', subwayLine: '6호선·경의중앙선·공항철도' },
 ];
 
 const meta: Meta<typeof LocationInputDropdown> = {
