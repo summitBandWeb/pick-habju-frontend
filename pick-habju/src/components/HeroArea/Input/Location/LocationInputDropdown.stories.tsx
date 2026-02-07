@@ -4,10 +4,10 @@ import LocationInputDropdown, { type LocationOption } from './LocationInputDropd
 
 const LOCATION_OPTIONS: LocationOption[] = [
   { value: 'all', label: '전체' },
-  { value: 'isuyeok', label: '이수역' },
-  { value: 'sangdo', label: '상도역' },
-  { value: 'sadang', label: '사당역' },
-  { value: 'heukseok', label: '흑석역' },
+  { value: 'isuyeok', label: '이수역', subwayLine: '4호선·7호선' },
+  { value: 'sangdo', label: '상도역', subwayLine: '7호선' },
+  { value: 'sadang', label: '사당역', subwayLine: '2호선·4호선' },
+  { value: 'heukseok', label: '흑석역', subwayLine: '9호선' },
 ];
 
 const meta: Meta<typeof LocationInputDropdown> = {
