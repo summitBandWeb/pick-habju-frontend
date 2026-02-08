@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FilterSection from './FilterSection';
-import { SortType } from './FilterSection.constants';
 
 const meta = {
   title: 'Components/FilterSection',
@@ -17,7 +16,15 @@ type Story = StoryObj<typeof meta>;
 // 기본 스토리
 export const Default: Story = {
   args: {
-    sortValue: SortType.PRICE_LOW,
-    onSortChange: (sortType) => console.log('Sort changed:', sortType),
+    isFavoriteFilterActive: false,
+    onFavoriteFilterToggle: (isActive) => console.log('Favorite filter toggled:', isActive),
+  },
+};
+
+// 찜한 합주실 필터 활성화 상태
+export const FavoriteFilterActive: Story = {
+  args: {
+    isFavoriteFilterActive: true,
+    onFavoriteFilterToggle: (isActive) => console.log('Favorite filter toggled:', isActive),
   },
 };
