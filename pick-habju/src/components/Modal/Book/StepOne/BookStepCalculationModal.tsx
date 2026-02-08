@@ -15,13 +15,13 @@ const BookStepCalculationModal = ({
   return (
     <div className="w-90 h-85 px-8 py-7 rounded-lg bg-primary-white flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <p className="text-primary-black font-modal-default">최종 금액을 확인해주세요</p>
-            <p className="text-gray-300 font-button">1 of 3</p>
-          </div>
+        <div className="flex justify-between items-center">
+          <p className="text-primary-black font-modal-default">최종 금액을 확인해주세요</p>
+          <p className="text-gray-300 font-button">1 of 3</p>
+        </div>
 
-          {/* 디바이더 */}
-          <div className="w-full h-px bg-gray-100" />
+        {/* 디바이더 */}
+        <div className="w-full h-px bg-gray-100" />
 
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
