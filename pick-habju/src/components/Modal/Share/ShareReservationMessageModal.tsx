@@ -36,14 +36,14 @@ const ShareReservationMessageModal = ({
               label="공유하고 바로 예약하기"
               variant={ButtonVariant.Main}
               size={BtnSizeVariant.LG}
-              onClick={() => onShare?.()}
+              onClick={onShare}
               className="w-full text-primary-white hover:text-primary-white"
             />
             <Button
               label="건너뛰고 예약하기"
               variant={ButtonVariant.Ghost}
               size={BtnSizeVariant.LG}
-              onClick={() => onSkip?.()}
+              onClick={onSkip}
               className="w-full"
             />
           </div>
