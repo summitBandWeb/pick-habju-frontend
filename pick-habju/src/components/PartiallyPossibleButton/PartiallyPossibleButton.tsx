@@ -1,5 +1,4 @@
-import GrayCheckIcon from '../../assets/svg/GrayCheck.svg';
-import BlueCheckIcon from '../../assets/svg/BlueCheck.svg';
+import TimeIcon from '../../assets/svg/Time.svg?react';
 import { useSearchStore } from '../../store/search/searchStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 import { pushGtmEvent } from '../../utils/gtm';
@@ -14,7 +13,11 @@ const PartiallyPossibleButton = () => {
 
   return (
     <button
-      className="w-[9.25rem] h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-2.5 items-center outline-none bg-primary-white hover:bg-gray-100"
+      className={`h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-1.25 items-center outline-none border border-transparent transition-colors ${
+        isActive
+          ? 'bg-gray-600 text-primary-white [&_path]:fill-primary-white'
+          : 'bg-primary-white text-gray-300 hover:bg-gray-200 [&_path]:fill-gray-300'
+      }`}
       onClick={() => {
         const next = !includePartiallyPossible;
         setIncludePartiallyPossible(next);
@@ -22,8 +25,8 @@ const PartiallyPossibleButton = () => {
         pushGtmEvent('fs_partially_possible_click', { cycle_id: cycleId, next_value: next });
       }}
     >
-      <span className={`font-modal-call ${isActive ? 'text-blue-500' : 'text-gray-300'}`}>일부시간 가능만</span>
-      <img src={isActive ? BlueCheckIcon : GrayCheckIcon} alt="check icon" />
+      <TimeIcon className="w-3 h-3 shrink-0" />
+      <span className="font-modal-call whitespace-nowrap">일부시간만 가능</span>
     </button>
   );
 };
