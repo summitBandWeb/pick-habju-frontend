@@ -36,7 +36,7 @@ const HomePage = () => {
   const { defaultDateIso, defaultSlots, defaultDateTimeLabel, defaultPeopleCount } = useDefaultDateTime();
 
   // 4. Custom Hooks: 필터 로직 (검색어, 정렬, 필터링 결과 처리)
-  const { searchText, setSearchText, sortType, setSortType, resetFilters } = useHomePageFilter();
+  const { searchText, setSearchText, resetFilters } = useHomePageFilter();
 
   // 5. Custom Hooks: 검색 비즈니스 로직 (API 호출, 에러 핸들링)
   const { handleSearch: executeSearch } = useHomePageSearch({
@@ -90,7 +90,7 @@ const HomePage = () => {
               <SearchBar value={searchText} onSearchChange={setSearchText} />
             </div>
             <div className="mx-auto">
-              <FilterSection sortValue={sortType} onSortChange={setSortType} />
+              <FilterSection isFavoriteFilterActive={false} onFavoriteFilterToggle={() => {}} />
             </div>
           </>
         )}
