@@ -12,12 +12,15 @@ const BookStepInfoCheck = ({ date, time, location, peopleCount, amount, onConfir
   ];
 
   return (
-    <div className="w-88 h-83 px-8 py-7 rounded-lg bg-primary-white flex flex-col justify-between">
-      <div className="flex flex-col space-y-6">
+    <div className="w-90 h-85 px-8 py-7 rounded-lg bg-primary-white flex flex-col gap-10">
+      <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <p className="text-primary-black font-modal-default">이대로 예약을 진행할까요?</p>
-          <p className="text-gray-300 font-button">2 of 2</p>
+          <p className="text-gray-300 font-button">2 of 3</p>
         </div>
+
+        {/* 디바이더 */}
+        <div className="w-full h-px bg-gray-100" />
 
         <div className="flex flex-col gap-2 text-gray-400 font-modal-description">
           {infoList.map(({ label, value }) => (
