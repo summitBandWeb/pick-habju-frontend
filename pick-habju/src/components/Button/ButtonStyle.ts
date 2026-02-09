@@ -14,7 +14,20 @@ export const sizeStyles: Record<NonNullable<ButtonProps['size']>, string> = {
 export const baseStyle = 'transition duration-200 flex items-center justify-center font-button rounded-[10px]';
 
 export const variantStyles: Record<ButtonVariant, string[]> = {
-  [ButtonVariant.Main]: ['bg-yellow-900', 'text-primary-black', 'hover:bg-yellow-700'],
-  [ButtonVariant.Sub]: ['bg-gray-200', 'text-primary-black', 'hover:bg-gray-100'],
-  [ButtonVariant.Text]: ['bg-primary-black', 'text-yellow-900'],
+  [ButtonVariant.Main]: ['bg-yellow-900', 'text-primary-black', 'hover:bg-yellow-500'],
+  [ButtonVariant.Ghost]: [
+    'border border-yellow-900',
+    'bg-primary-white text-yellow-900',
+    'hover:bg-yellow-700 hover:text-primary-white',
+  ],
+  [ButtonVariant.GrayText]: [
+    'bg-transparent',
+    'text-gray-300 underline',
+    'hover:text-primary-white',
+  ],
+  [ButtonVariant.YellowText]: [
+    'bg-transparent',
+    'text-yellow-900',
+    'hover:text-yellow-500',
+  ],
 };

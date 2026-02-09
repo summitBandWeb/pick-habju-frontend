@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
 type ModalOverlayProps = {
   open?: boolean;
@@ -8,6 +9,8 @@ type ModalOverlayProps = {
   dimmedClassName?: string;
   /** 클릭 시 닫힘 방지 옵션 (강제 선택이 필요한 경우 true) */
   lockBackground?: boolean;
+  /** 아래→위 슬라이드 애니메이션 (false: ImageCarousel 등 즉시 표시) */
+  animateFromBottom?: boolean;
 };
 
 const ModalOverlay = ({
@@ -16,6 +19,7 @@ const ModalOverlay = ({
   children,
   dimmedClassName = 'bg-black/60',
   lockBackground = false,
+  animateFromBottom = true,
 }: ModalOverlayProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -42,13 +46,23 @@ const ModalOverlay = ({
   return (
     <div
       ref={overlayRef}
-      className={`fixed inset-0 z-50 flex items-center justify-center ${dimmedClassName} backdrop-blur-[2px]`} // backdrop-blur 등 스타일 토큰 활용 가능
+      className={`fixed inset-0 z-50 flex items-center justify-center ${dimmedClassName} backdrop-blur-[2px]`}
       onClick={(e) => {
-        // 배경 클릭 시 닫기 (lockBackground가 false일 때만)
         if (!lockBackground && e.target === overlayRef.current) onClose();
       }}
     >
-      <div onClick={(e) => e.stopPropagation()}>{children}</div>
+      {animateFromBottom ? (
+        <motion.div
+          initial={{ y: 60, opacity: 0.4 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </motion.div>
+      ) : (
+        <div onClick={(e) => e.stopPropagation()}>{children}</div>
+      )}
     </div>
   );
 };

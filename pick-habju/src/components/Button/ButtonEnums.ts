@@ -1,8 +1,9 @@
 // 버튼 관련
 export enum ButtonVariant {
   Main = 'main',
-  Sub = 'sub',
-  Text = 'text',
+  Ghost = 'ghost',
+  GrayText = 'grayText',
+  YellowText = 'yellowText',
 }
 
 // 버튼 Size
