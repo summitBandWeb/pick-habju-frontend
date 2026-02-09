@@ -1,4 +1,4 @@
-name: deploy
+name: ㅇeploy
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install dependencies
-        run: apk add ruby && gem install mustache
+        run: apk add --no-cache ruby git && gem install mustache
 
       - name: Give build.sh execute permission
         run: chmod +x ./pick-habju/build.sh
