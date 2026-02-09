@@ -24,7 +24,6 @@ export interface DateTimeInputDropdownProps {
     endHour: number,
     endPeriod: TimePeriod
   ) => boolean | void;
-  onClose?: () => void;
   disabled?: boolean;
 }
 
@@ -36,7 +35,6 @@ const DateTimeInputDropdown = ({
   initialEndHour = 5,
   initialEndPeriod = TimePeriod.PM,
   onConfirm,
-  onClose,
   disabled = false,
 }: DateTimeInputDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -85,9 +83,8 @@ const DateTimeInputDropdown = ({
   }, []);
 
   const handleDateStepCancel = useCallback(() => {
-    onClose?.();
     setIsOpen(false);
-  }, [onClose]);
+  }, []);
 
   const handleTimeDraftChange = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {

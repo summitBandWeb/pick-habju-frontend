@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
-import PersonCountInput from './Input/Person/PersonCountInput';
+import PersonCountInputDropdown from './Input/Person/PersonCountInputDropdown';
 import DateTimeInputDropdown from './Input/Date/DateTimeInputDropdown';
 import BackGroundImage from '../../assets/images/background.jpg';
 import type { HeroAreaProps } from './HeroArea.types';
-import GuestCounterModal from '../GuestCounterModal/GuestCounterModal';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
 import { showToastByKey } from '../../utils/showToastByKey';
 import { ReservationToastKey, ReservationToastSeverity } from '../ToastMessage/ToastMessageEnums';
@@ -23,7 +22,6 @@ import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormT
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
-  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
@@ -38,9 +36,21 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
 
-  const openGuestCounter = useCallback(() => {
-    setIsGuestModalOpen(true);
-  }, []);
+  const handlePersonCountConfirm = useCallback(
+    (val: number) => {
+      setPeopleCountText(val);
+      try {
+        const last = useSearchStore.getState().lastQuery;
+        if (typeof last?.peopleCount === 'number' && last.peopleCount !== val) {
+          onPersonCountChange?.();
+        }
+      } catch (error) {
+        console.debug('비교 실패:', error);
+      }
+      return true;
+    },
+    [onPersonCountChange]
+  );
 
   const handleDateTimeConfirm = useCallback(
     (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
@@ -118,44 +128,6 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     };
   }, [hourSlots, dateTime.hour_slots]);
 
-  // 오버레이 바깥 클릭으로 모달 닫기
-  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget) return;
-    setIsGuestModalOpen(false);
-  }, []);
-
-  // ESC 키로 모달 닫기
-  useEffect(() => {
-    if (!isGuestModalOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setIsGuestModalOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isGuestModalOpen]);
-
-  // 모달 열렸을 때 배경 스크롤 잠금
-  useEffect(() => {
-    const anyOpen = isGuestModalOpen;
-    const originalOverflow = document.body.style.overflow;
-    const originalTouchAction = (document.body.style as unknown as { touchAction?: string }).touchAction;
-    if (anyOpen) {
-      document.body.style.overflow = 'hidden';
-      (document.body.style as unknown as { touchAction?: string }).touchAction = 'none';
-    }
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      if (originalTouchAction !== undefined) {
-        (document.body.style as unknown as { touchAction?: string }).touchAction = originalTouchAction;
-      } else {
-        (document.body.style as unknown as { touchAction?: string }).touchAction = '';
-      }
-    };
-  }, [isGuestModalOpen]);
-
   return (
     <div
       className="relative w-full h-97.5 flex flex-col items-center"
@@ -185,7 +157,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               initialEndHour={initialTimeFromSlots.endHour}
               initialEndPeriod={initialTimeFromSlots.endPeriod}
             />
-            <PersonCountInput count={peopleCountText} onChangeClick={openGuestCounter} />
+            <PersonCountInputDropdown count={peopleCountText} onConfirm={handlePersonCountConfirm} />
           </div>
           <div>
             <Button
@@ -246,30 +218,6 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           </div>
         </div>
       </div>
-
-      {isGuestModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80" onClick={handleOverlayClick}>
-          <div className="relative w-full max-w-[25.9375rem] flex flex-col items-center">
-            <GuestCounterModal
-                open
-                onClose={() => setIsGuestModalOpen(false)}
-                onConfirm={(val) => {
-                  setPeopleCountText(val);
-                  setIsGuestModalOpen(false);
-                  try {
-                    const last = useSearchStore.getState().lastQuery;
-                    if (typeof last?.peopleCount === 'number' && last.peopleCount !== val) {
-                      onPersonCountChange?.();
-                    }
-                  } catch (error) {
-                    console.debug('비교 실패:', error);
-                  }
-                }}
-                initialCount={peopleCountText}
-            />
-          </div>
-        </div>
-      )}
 
       {/* 토스트 (드롭다운/모달 검증용, 항상 마운트) */}
       <div className="fixed top-24 left-0 right-0 z-40 flex justify-center pointer-events-none">

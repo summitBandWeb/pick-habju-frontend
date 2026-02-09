@@ -37,7 +37,6 @@ const InteractiveWrapper = () => {
           );
           return true;
         }}
-        onClose={() => console.log('드롭다운 닫힘')}
       />
     </div>
   );
@@ -51,7 +50,6 @@ export const Default: Story = {
       console.log('날짜·시간 확정:', { date, sh, sp, eh, ep });
       return true;
     },
-    onClose: () => console.log('취소 클릭'),
   },
 };
 

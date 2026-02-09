@@ -10,7 +10,7 @@ const CallReservationNoticeModal = ({
   return (
     <ModalOverlay open={open} onClose={onClose}>
       <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
-        <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-end gap-3 py-[3.5rem] px-[1.75rem]">
+        <div className="w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-end gap-4 py-[3.5rem] px-[1.75rem]">
           {/* 1. 안내 문구 */}
           <div className="w-full text-center font-modal-default text-primary-black">
             해당 합주실의 당일 예약은 <br></br>

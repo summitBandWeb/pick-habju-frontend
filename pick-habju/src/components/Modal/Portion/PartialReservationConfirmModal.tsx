@@ -1,3 +1,5 @@
+import Button from '../../Button/Button';
+import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
 import ModalOverlay from '../ModalOverlay';
 import type { PartialReservationConfirmModalProps } from './PartialReservationConfirmModal.types';
 
@@ -29,22 +31,20 @@ const PartialReservationConfirmModal = ({
 
           {/* 버튼 영역 */}
           <div className="flex w-full max-w-[18.375rem] justify-center items-center gap-3">
-            {/* 다시 고를게요 */}
-            <button
-              type="button"
+            <Button
+              label="다시 고를게요"
+              variant={ButtonVariant.Ghost}
+              size={BtnSizeVariant.XSM}
               onClick={onClose}
-              className="flex w-[8.8125rem] h-[2.6875rem] p-[0.625rem] justify-center items-center gap-[0.75rem] flex-shrink-0 rounded-[0.625rem] border border-yellow-900 bg-primary-white text-yellow-900 hover:bg-yellow-900 hover:text-primary-white font-button transition"
-            >
-              다시 고를게요
-            </button>
-            {/* 예약할게요 */}
-            <button
-              type="button"
+              className="flex-1 min-w-0"
+            />
+            <Button
+              label="확인해볼래요"
+              variant={ButtonVariant.Main}
+              size={BtnSizeVariant.XSM}
               onClick={() => onConfirm?.()}
-              className="flex w-[8.8125rem] h-[2.6875rem] px-[1.75rem] py-[0.75rem] justify-center items-center gap-[1.5rem] flex-shrink-0 rounded-[0.625rem] bg-yellow-900 text-primary-white hover:bg-yellow-700 font-button transition"
-            >
-              확인해볼래요
-            </button>
+              className="flex-1 min-w-0 text-primary-white hover:text-primary-white"
+            />
           </div>
         </div>
       </div>

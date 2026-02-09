@@ -33,14 +33,62 @@ export const MainDisabled: Story = {
   args: { label: '검색하기', variant: ButtonVariant.Main, disabled: true },
 };
 
-export const SubDefault: Story = {
-  name: 'Sub Default & Hover',
-  args: { label: '검색하기', variant: ButtonVariant.Sub, disabled: false },
+export const GhostDefault: Story = {
+  name: 'Ghost Default & Hover',
+  args: { label: '다시 고를게요', variant: ButtonVariant.Ghost, disabled: false },
 };
-export const SubDisabled: Story = {
-  args: { label: '검색하기', variant: ButtonVariant.Sub, disabled: true },
+export const GhostDisabled: Story = {
+  args: { label: '다시 고를게요', variant: ButtonVariant.Ghost, disabled: true },
 };
 
-export const TextDefault: Story = {
-  args: { label: '검색하기', variant: ButtonVariant.Text, disabled: false },
+export const GrayTextDefault: Story = {
+  name: 'GrayText Default & Hover',
+  args: { label: '검색하기', variant: ButtonVariant.GrayText, disabled: false },
+  parameters: {
+    backgrounds: {
+      default: 'dark',
+      values: [
+        { name: 'dark', value: '#000000' },
+        { name: 'light', value: '#ffffff' },
+      ],
+    },
+  },
+};
+export const GrayTextDisabled: Story = {
+  args: { label: '검색하기', variant: ButtonVariant.GrayText, disabled: true },
+  parameters: {
+    backgrounds: {
+      default: 'dark',
+      values: [
+        { name: 'dark', value: '#000000' },
+        { name: 'light', value: '#ffffff' },
+      ],
+    },
+  },
+};
+
+export const YellowTextDefault: Story = {
+  name: 'YellowText Default & Hover',
+  args: { label: '검색하기', variant: ButtonVariant.YellowText, disabled: false },
+  parameters: {
+    backgrounds: {
+      default: 'dark',
+      values: [
+        { name: 'dark', value: '#000000' },
+        { name: 'light', value: '#ffffff' },
+      ],
+    },
+  },
+};
+export const YellowTextDisabled: Story = {
+  args: { label: '검색하기', variant: ButtonVariant.YellowText, disabled: true },
+  parameters: {
+    backgrounds: {
+      default: 'dark',
+      values: [
+        { name: 'dark', value: '#000000' },
+        { name: 'light', value: '#ffffff' },
+      ],
+    },
+  },
 };
