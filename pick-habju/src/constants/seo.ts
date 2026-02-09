@@ -28,3 +28,5 @@ export const SEO_METADATA: Record<string, Omit<SEOProps, 'url'>> = {
   //   keywords: '픽합주, 소개',
   // },
 } as const;
+
+ // dev branch 시도 주석
