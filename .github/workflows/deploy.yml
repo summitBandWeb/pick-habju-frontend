@@ -11,11 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Print github ref info
-        run: |
-          echo "ref_name=${{ github.ref_name }}"
-          echo "ref=${{ github.ref }}"
-
       - name: Install mustache (to update the date)
         run: apk add ruby && gem install mustache
 
