@@ -2,16 +2,17 @@ name: deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container: pandoc/latex
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install mustache (to update the date)
+      - name: Install dependencies
         run: apk add ruby && gem install mustache
 
       - name: Give build.sh execute permission
@@ -20,8 +21,7 @@ jobs:
       - name: Run build script
         run: ./pick-habju/build.sh
 
-      - name: Pushes to another repository
-        id: push_directory
+      - name: Push to personal repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
@@ -30,7 +30,6 @@ jobs:
           destination-github-username: S-Gihun
           destination-repository-name: pick-habju-frontend
           user-email: ${{ secrets.EMAIL }}
-          commit-message: ${{ github.event.commits[0].message }}
-          target-branch: main
-      - name: Test get variable exported by push-to-another-repository
-        run: echo $DESTINATION_CLONED_DIRECTORY
+          commit-message: ${{ github.event.head_commit.message }}
+          target-branch: ${{ github.ref_name }}
+          create-target-branch-if-needed: true
