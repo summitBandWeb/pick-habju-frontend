@@ -15,7 +15,7 @@ const SearchHereButton = ({ onClick }: SearchHereButtonProps) => {
         hover:bg-yellow-300
       "
     >
-      <SyncIcon className="w-4 h-4 shrink-0 text-yellow-900" />
+      <SyncIcon className="w-4 h-4 shrink-0" />
       <span className="font-modal-call whitespace-nowrap">이 위치에서 검색</span>
     </button>
   );
