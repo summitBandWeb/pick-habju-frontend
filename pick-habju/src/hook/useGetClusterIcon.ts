@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-
+// TODO: @types/navermaps 설치 후 NaverMapsLike 인터페이스를 제거하고,
+// useGetClusterIcon 파라미터 타입을 typeof naver.maps 로 변경할 것.
 /** useNavermaps() 훅이 반환하는 navermaps 객체에서 실제 사용하는 부분만 정의 */
 interface NaverMapsLike {
   Size: new (width: number, height: number) => unknown;
@@ -49,29 +49,25 @@ const createClusterContent = (
 };
 
 export const useGetClusterIcon = (navermaps: NaverMapsLike) => {
-  const icons = useMemo(() => {
-    const { small, medium, large } = CLUSTER_STYLES;
+  const { small, medium, large } = CLUSTER_STYLES;
 
-    const htmlMarker1 = {
-      content: createClusterContent(small.size, small.background),
-      size: new navermaps.Size(small.size, small.size),
-      anchor: new navermaps.Point(small.size / 2, small.size / 2),
-    };
+  const htmlMarker1 = {
+    content: createClusterContent(small.size, small.background),
+    size: new navermaps.Size(small.size, small.size),
+    anchor: new navermaps.Point(small.size / 2, small.size / 2),
+  };
 
-    const htmlMarker2 = {
-      content: createClusterContent(medium.size, medium.background, medium.opacity),
-      size: new navermaps.Size(medium.size, medium.size),
-      anchor: new navermaps.Point(medium.size / 2, medium.size / 2),
-    };
+  const htmlMarker2 = {
+    content: createClusterContent(medium.size, medium.background, medium.opacity),
+    size: new navermaps.Size(medium.size, medium.size),
+    anchor: new navermaps.Point(medium.size / 2, medium.size / 2),
+  };
 
-    const htmlMarker3 = {
-      content: createClusterContent(large.size, large.background, large.opacity),
-      size: new navermaps.Size(large.size, large.size),
-      anchor: new navermaps.Point(large.size / 2, large.size / 2),
-    };
+  const htmlMarker3 = {
+    content: createClusterContent(large.size, large.background, large.opacity),
+    size: new navermaps.Size(large.size, large.size),
+    anchor: new navermaps.Point(large.size / 2, large.size / 2),
+  };
 
-    return { htmlMarker1, htmlMarker2, htmlMarker3 };
-  }, [navermaps]);
-
-  return icons;
+  return { htmlMarker1, htmlMarker2, htmlMarker3 };
 };
