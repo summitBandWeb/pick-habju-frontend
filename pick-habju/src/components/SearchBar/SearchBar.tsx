@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SearchIcon from '../../assets/svg/search.svg';
 import SearchCloseIcon from '../../assets/svg/SearchClose.svg?react';
 import SearchLocationIcon from '../../assets/svg/searchLocation.svg';
@@ -17,6 +17,12 @@ const SearchBar = ({
   // 디바운싱된 검색어 (500ms 지연)
   const debouncedSearchText = useDebounce(searchText, 500);
 
+  // onSearchChange를 ref로 관리하여 불필요한 effect 재실행 방지
+  const onSearchChangeRef = useRef(onSearchChange);
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange;
+  }, [onSearchChange]);
+
   // 외부에서 value가 변경되면 내부 상태도 업데이트
   useEffect(() => {
     setSearchText(value);
@@ -24,8 +30,8 @@ const SearchBar = ({
 
   // 디바운싱된 검색어가 변경되면 부모 컴포넌트에 알림
   useEffect(() => {
-    onSearchChange(debouncedSearchText);
-  }, [debouncedSearchText, onSearchChange]);
+    onSearchChangeRef.current(debouncedSearchText);
+  }, [debouncedSearchText]);
 
   const handleClearText = () => {
     setSearchText('');
