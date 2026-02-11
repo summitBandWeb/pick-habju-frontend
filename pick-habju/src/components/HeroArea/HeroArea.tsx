@@ -188,7 +188,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
   return (
     <div
-      className="relative w-full h-97.5 flex flex-col items-center"
+      className="relative w-full h-[625px] flex flex-col items-center"
       style={{
         backgroundImage: `url(${BackGroundImage})`,
         backgroundSize: 'cover',
@@ -201,10 +201,10 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
       {/* 실제 콘텐츠 */}
       <div className="relative z-10 flex flex-col items-center w-full">
-        <h1 className="text-primary-white font-hero-headline mt-15.5 mb-8">합주실 예약 현황을 한눈에</h1>
+        <h1 className="text-primary-white font-hero-headline mt-[142.5px] mb-8">합주실 예약 현황을 한눈에</h1>
 
         <div className="flex flex-col items-center">
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-4 mb-8">
             <LocationInputDropdown
               location={selectedLocation.name}
               options={LOCATION_OPTIONS}

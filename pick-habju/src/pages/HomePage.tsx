@@ -96,6 +96,11 @@ const HomePage = () => {
         {phase === SearchPhase.Default && (
           <>
             <div className="mt-3 mb-2">
+              {/* TODO: 지도 페이지 전환 시 아래 값들을 실제 검색에 사용된 값으로 교체 필요
+                - peopleCount: 사용자가 선택한 인원수 (현재 초기 기본값 defaultPeopleCount)
+                - dateTime: 사용자가 선택한 날짜/시간 라벨 (현재 초기 기본값 defaultDateTimeLabel)
+                - onConditionClick: 지도 페이지에서 첫 화면(검색 조건 선택)으로 복귀하는 로직 확인 필요
+              */}
               <SearchBar 
                 value={searchText} 
                 onSearchChange={setSearchText}
