@@ -1,3 +1,5 @@
+export type ActiveDropdown = 'dateTime' | 'person' | 'location' | null;
+
 export interface HeroAreaProps {
   dateTime: {
     label: string; // UI 표기를 위한 라벨

@@ -5,7 +5,7 @@ import PersonCountInputDropdown from './Input/Person/PersonCountInputDropdown';
 import DateTimeInputDropdown from './Input/Date/DateTimeInputDropdown';
 import LocationInputDropdown, { type LocationOption } from './Input/Location/LocationInputDropdown';
 import BackGroundImage from '../../assets/images/background.jpg';
-import type { HeroAreaProps } from './HeroArea.types';
+import type { ActiveDropdown, HeroAreaProps } from './HeroArea.types';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
 import { showToastByKey } from '../../utils/showToastByKey';
 import { ReservationToastKey, ReservationToastSeverity } from '../ToastMessage/ToastMessageEnums';
@@ -21,8 +21,6 @@ import { SearchPhase } from '../../store/search/searchStore.types';
 import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
-
-type ActiveDropdown = 'dateTime' | 'person' | 'location' | null;
 
 // 지역 옵션 데이터
 const LOCATION_OPTIONS: LocationOption[] = [
@@ -58,10 +56,17 @@ const LOCATION_OPTIONS: LocationOption[] = [
   },
 ];
 
+// 기본 지역 ID (초기 선택값)
+const DEFAULT_LOCATION_ID = 'sadang';
+
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
-  const [selectedLocation, setSelectedLocation] = useState<LocationOption>(LOCATION_OPTIONS[0]);
+  
+  // 초기 지역 선택: 상수 ID로 안전하게 찾고, 없으면 배열 첫번째로 폴백
+  const [selectedLocation, setSelectedLocation] = useState<LocationOption>(
+    LOCATION_OPTIONS.find(loc => loc.id === DEFAULT_LOCATION_ID) ?? LOCATION_OPTIONS[0]
+  );
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
   
