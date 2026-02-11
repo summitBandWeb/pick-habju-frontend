@@ -3,8 +3,9 @@ import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import PersonCountInputDropdown from './Input/Person/PersonCountInputDropdown';
 import DateTimeInputDropdown from './Input/Date/DateTimeInputDropdown';
+import LocationInputDropdown, { type LocationOption } from './Input/Location/LocationInputDropdown';
 import BackGroundImage from '../../assets/images/background.jpg';
-import type { HeroAreaProps } from './HeroArea.types';
+import type { ActiveDropdown, HeroAreaProps } from './HeroArea.types';
 import { TimePeriod } from '../TimePicker/TimePickerEnums';
 import { showToastByKey } from '../../utils/showToastByKey';
 import { ReservationToastKey, ReservationToastSeverity } from '../ToastMessage/ToastMessageEnums';
@@ -21,10 +22,54 @@ import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 
+// 지역 옵션 데이터
+const LOCATION_OPTIONS: LocationOption[] = [
+  { 
+    id: 'sadang', 
+    name: '사당', 
+    subwayLine: '2호선·4호선',
+    coordinates: { lat: 37.4762, lng: 126.9812 }
+  },
+  { 
+    id: 'gangnam', 
+    name: '강남', 
+    subwayLine: '2호선',
+    coordinates: { lat: 37.4979, lng: 127.0276 }
+  },
+  { 
+    id: 'hongdae', 
+    name: '홍대입구', 
+    subwayLine: '2호선·공항철도·경의중앙선',
+    coordinates: { lat: 37.5572, lng: 126.9239 }
+  },
+  { 
+    id: 'sinchon', 
+    name: '신촌', 
+    subwayLine: '2호선',
+    coordinates: { lat: 37.5559, lng: 126.9362 }
+  },
+  { 
+    id: 'jamsil', 
+    name: '잠실', 
+    subwayLine: '2호선·8호선',
+    coordinates: { lat: 37.5133, lng: 127.1000 }
+  },
+];
+
+// 기본 지역 ID (초기 선택값)
+const DEFAULT_LOCATION_ID = 'sadang';
+
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
+  
+  // 초기 지역 선택: 상수 ID로 안전하게 찾고, 없으면 배열 첫번째로 폴백
+  const [selectedLocation, setSelectedLocation] = useState<LocationOption>(
+    LOCATION_OPTIONS.find(loc => loc.id === DEFAULT_LOCATION_ID) ?? LOCATION_OPTIONS[0]
+  );
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
+  const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
+  
   const phase = useSearchStore((s) => s.phase);
   const isLoading = phase === SearchPhase.Loading;
 
@@ -35,6 +80,19 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
   const { selectedDate, hourSlots } = useReservationState();
   const actions = useReservationActions();
   const isToastVisible = useToastStore((s) => s.isVisible);
+
+  // 각 필드의 열기/닫기 요청 핸들러
+  const handleDateTimeOpenChange = useCallback((open: boolean) => {
+    setActiveDropdown(open ? 'dateTime' : null);
+  }, []);
+
+  const handleLocationOpenChange = useCallback((open: boolean) => {
+    setActiveDropdown(open ? 'location' : null);
+  }, []);
+
+  const handlePersonOpenChange = useCallback((open: boolean) => {
+    setActiveDropdown(open ? 'person' : null);
+  }, []);
 
   const handlePersonCountConfirm = useCallback(
     (val: number) => {
@@ -51,6 +109,11 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     },
     [onPersonCountChange]
   );
+
+  const handleLocationSelect = useCallback((location: LocationOption) => {
+    setSelectedLocation(location);
+    return true;
+  }, []);
 
   const handleDateTimeConfirm = useCallback(
     (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
@@ -130,7 +193,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
   return (
     <div
-      className="relative w-full h-97.5 flex flex-col items-center"
+      className="relative w-full h-[625px] flex flex-col items-center"
       style={{
         backgroundImage: `url(${BackGroundImage})`,
         backgroundSize: 'cover',
@@ -143,10 +206,17 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
       {/* 실제 콘텐츠 */}
       <div className="relative z-10 flex flex-col items-center w-full">
-        <h1 className="text-primary-white font-hero-headline mt-15.5 mb-8">합주실 예약 현황을 한눈에</h1>
+        <h1 className="text-primary-white font-hero-headline mt-[142.5px] mb-8">합주실 예약 현황을 한눈에</h1>
 
         <div className="flex flex-col items-center">
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-4 mb-8">
+            <LocationInputDropdown
+              location={selectedLocation.name}
+              options={LOCATION_OPTIONS}
+              onSelect={handleLocationSelect}
+              isOpen={activeDropdown === 'location'}
+              onOpenChange={handleLocationOpenChange}
+            />
             <DateTimeInputDropdown
               dateTime={dateTimeText}
               initialSelectedDate={selectedDate ?? undefined}
@@ -156,8 +226,15 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               initialStartPeriod={initialTimeFromSlots.startPeriod}
               initialEndHour={initialTimeFromSlots.endHour}
               initialEndPeriod={initialTimeFromSlots.endPeriod}
+              isOpen={activeDropdown === 'dateTime'}
+              onOpenChange={handleDateTimeOpenChange}
             />
-            <PersonCountInputDropdown count={peopleCountText} onConfirm={handlePersonCountConfirm} />
+            <PersonCountInputDropdown
+              count={peopleCountText}
+              onConfirm={handlePersonCountConfirm}
+              isOpen={activeDropdown === 'person'}
+              onOpenChange={handlePersonOpenChange}
+            />
           </div>
           <div>
             <Button
@@ -209,7 +286,14 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
                 // UI 라벨 업데이트 보정
                 setDateTimeText(formatReservationLabel(dateIso, slots));
-                onSearch({ date: dateIso, hour_slots: slots, peopleCount: peopleCountText });
+                onSearch({ 
+                  location: selectedLocation.name,
+                  locationId: selectedLocation.id,
+                  coordinates: selectedLocation.coordinates,
+                  date: dateIso, 
+                  hour_slots: slots, 
+                  peopleCount: peopleCountText 
+                });
               }}
               variant={ButtonVariant.Main}
               size={BtnSizeVariant.MD}

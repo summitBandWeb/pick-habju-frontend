@@ -23,11 +23,11 @@ export const useHomePageSearch = ({ onReset }: UseHomePageSearchProps) => {
 
   // 3. 핵심 검색 함수
   const handleSearch = async (params: SearchParams) => {
-    const { date, hour_slots, peopleCount } = params;
+    const { location, locationId, coordinates, date, hour_slots, peopleCount } = params;
     const searchStartTime = Date.now();
 
     // 상태 초기화
-    setLastQuery({ date, hour_slots, peopleCount });
+    setLastQuery({ location, locationId, coordinates, date, hour_slots, peopleCount });
     setPhase(SearchPhase.Loading);
 
     // [Business Logic] 인원수 필터링

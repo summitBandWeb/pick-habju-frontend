@@ -5,14 +5,24 @@ import type { KeyboardEvent } from 'react';
 import LocationIcon from '../../../../assets/svg/location.svg';
 
 export interface LocationOption {
-  value: string;
-  label: string;
+  id: string;
+  name: string;
   /** 역에 연결된 노선 정보 (예: "4호선·7호선"). */
   subwayLine: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
 }
 
 /** 노선 식별자: 숫자(1~9) 또는 문자(A=공항철도, K=경의중앙선) */
 type SubwayLineId = number | 'A' | 'K';
+
+/** 특수 노선 이름 → 노선 ID 매핑 */
+const SPECIAL_LINE_MAP: Record<string, SubwayLineId> = {
+  '공항철도': 'A',
+  '경의중앙선': 'K',
+};
 
 /** "4호선·7호선·공항철도·경의중앙선" 형태의 문자열에서 노선 배열 추출 (순서 유지) */
 function parseSubwayLines(subwayLine: string): SubwayLineId[] {
@@ -21,8 +31,11 @@ function parseSubwayLines(subwayLine: string): SubwayLineId[] {
     .map((part): SubwayLineId | null => {
       const numMatch = part.match(/\d+/);
       if (numMatch) return Number(numMatch[0]);
-      if (part.includes('공항철도')) return 'A';
-      if (part.includes('경의중앙선')) return 'K';
+
+      // 특수 노선 체크
+      for (const [key, value] of Object.entries(SPECIAL_LINE_MAP)) {
+        if (part.includes(key)) return value;
+      }
       return null;
     })
     .filter((v): v is SubwayLineId => v !== null);
@@ -47,36 +60,41 @@ export interface LocationInputDropdownProps {
   location: string;
   /** 지역 옵션 목록 */
   options: LocationOption[];
-  /** 지역 선택 시 호출. true 반환 시 드롭다운 닫힘 */
-  onSelect: (value: string) => boolean | void;
+  /** 지역 선택 시 호출. 선택된 LocationOption 객체 전달. true 반환 시 드롭다운 닫힘 */
+  onSelect: (location: LocationOption) => boolean | void;
+  /** 드롭다운 열림 상태 (부모에서 제어) */
+  isOpen: boolean;
+  /** 드롭다운 열림/닫힘 요청 */
+  onOpenChange: (open: boolean) => void;
 }
 
 const LocationInputDropdown = ({
   location,
   options,
   onSelect,
+  isOpen,
+  onOpenChange,
 }: LocationInputDropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
+    onOpenChange(!isOpen);
+  }, [isOpen, onOpenChange]);
 
   const handleSelect = useCallback(
-    (value: string) => {
-      const shouldClose = onSelect(value);
+    (location: LocationOption) => {
+      const shouldClose = onSelect(location);
       if (shouldClose !== false) {
-        setIsOpen(false);
+        onOpenChange(false);
       }
     },
-    [onSelect]
+    [onSelect, onOpenChange]
   );
 
   const handleClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -101,7 +119,7 @@ const LocationInputDropdown = ({
 
   useEffect(() => {
     if (isOpen && options.length > 0) {
-      const idx = options.findIndex((opt) => opt.label === location);
+      const idx = options.findIndex((opt) => opt.name === location);
       setHighlightedIndex(idx >= 0 ? idx : 0);
     } else {
       setHighlightedIndex(-1);
@@ -126,7 +144,7 @@ const LocationInputDropdown = ({
         if (e.key === 'Enter') {
           e.preventDefault();
           if (highlightedIndex >= 0 && options[highlightedIndex]) {
-            handleSelect(options[highlightedIndex].value);
+            handleSelect(options[highlightedIndex]);
           }
           return;
         }
@@ -166,12 +184,12 @@ const LocationInputDropdown = ({
       <ul role="listbox" aria-label="지역 선택" className="flex flex-col">
         {options.map((opt, index) => {
           const isLast = index === options.length - 1;
-          const isSelected = location === opt.label;
+          const isSelected = location === opt.name;
           const isHighlighted = index === highlightedIndex;
           const lineIds = opt.subwayLine ? parseSubwayLines(opt.subwayLine) : [];
           return (
             <li
-              key={opt.value}
+              key={opt.id}
               role="option"
               aria-selected={isSelected}
               className={`
@@ -184,7 +202,7 @@ const LocationInputDropdown = ({
                 ${isHighlighted ? 'bg-gray-200' : 'bg-primary-white'}
                 ${isLast ? 'rounded-b-[8px] border-b-0' : ''}
               `}
-              onClick={() => handleSelect(opt.value)}
+              onClick={() => handleSelect(opt)}
             >
               <span
                 className={`
@@ -194,7 +212,7 @@ const LocationInputDropdown = ({
                   group-active:text-primary-black group-active:!text-[17px]
                 `}
               >
-                {opt.label}
+                {opt.name}
               </span>
               {lineIds.length > 0 && (
                 <div className="flex items-center gap-1">

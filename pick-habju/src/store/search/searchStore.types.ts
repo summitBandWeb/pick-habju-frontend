@@ -1,4 +1,7 @@
 export interface SearchParams {
+  location: string; // 지역 이름 (화면 표시용)
+  locationId: string; // 지역 ID (내부 식별자)
+  coordinates: { lat: number; lng: number }; // 지역 위도/경도 (필수)
   date: string;
   hour_slots: string[];
   peopleCount: number;
@@ -23,13 +26,16 @@ export type SearchState = {
   setIncludePartiallyPossible: (include: boolean) => void;
   // 마지막 검색 조건 (가격 계산 등에 사용)
   lastQuery?: {
+    location: string;
+    locationId: string;
+    coordinates: { lat: number; lng: number };
     date: string;
     hour_slots: string[];
     peopleCount: number;
   };
   // 응답 → Default 카드 구성 액션
   setDefaultFromResponse: (args: { response: AvailabilityResponse; peopleCount: number }) => void;
-  setLastQuery: (q: { date: string; hour_slots: string[]; peopleCount: number }) => void;
+  setLastQuery: (q: { location: string; locationId: string; coordinates: { lat: number; lng: number }; date: string; hour_slots: string[]; peopleCount: number }) => void;
   // 필터링된 카드 설정 액션
   setFilteredCards: (cards: SearchCardItem[]) => void;
 };

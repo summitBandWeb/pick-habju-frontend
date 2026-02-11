@@ -23,6 +23,9 @@ import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 import { useHomePageFilter } from '../hook/useHomePageFilter';
 import { useHomePageSearch } from '../hook/useHomePageSearch';
 
+// Utils
+import { formatReservationLabel } from '../utils/formatReservationLabel';
+
 const HomePage = () => {
   // 1. UI 상태 관리 (HeroArea 강제 리렌더링용)
   const [heroResetCounter, setHeroResetCounter] = useState(0);
@@ -30,6 +33,7 @@ const HomePage = () => {
   // 2. Global Stores (UI 렌더링 제어용)
   const phase = useSearchStore((s) => s.phase);
   const setPhase = useSearchStore((s) => s.setPhase);
+  const lastQuery = useSearchStore((s) => s.lastQuery); // 실제 검색 조건
   const { showToast } = useGoogleFormToastStore();
 
   // 3. 초기 데이터 (Default Values)
@@ -44,7 +48,14 @@ const HomePage = () => {
   });
 
   // 6. Event Handler: 검색 시작 (필터 초기화 후 API 호출)
-  const onSearch = (params: { date: string; hour_slots: string[]; peopleCount: number }) => {
+  const onSearch = (params: { 
+    location: string; 
+    locationId: string;
+    coordinates: { lat: number; lng: number }; 
+    date: string; 
+    hour_slots: string[]; 
+    peopleCount: number 
+  }) => {
     resetFilters(); // 새로운 검색 시 기존 필터(검색어, 정렬) 초기화
     executeSearch(params);
   };
@@ -87,19 +98,15 @@ const HomePage = () => {
         {phase === SearchPhase.Default && (
           <>
             <div className="mt-3 mb-2">
-              {/* TODO: 지도 페이지 전환 시 아래 값들을 실제 검색에 사용된 값으로 교체 필요
-                - location: 사용자가 선택한 지역명 (현재 임시값 '장소')
-                - peopleCount: 사용자가 선택한 인원수 (현재 초기 기본값 defaultPeopleCount)
-                - dateTime: 사용자가 선택한 날짜/시간 라벨 (현재 초기 기본값 defaultDateTimeLabel)
-                - onConditionClick: 지도 페이지에서 첫 화면(검색 조건 선택)으로 복귀하는 로직 확인 필요
-              */}
               <SearchBar 
                 value={searchText} 
                 onSearchChange={setSearchText}
                 searchCondition={{
-                  location: '장소',
-                  peopleCount: defaultPeopleCount,
-                  dateTime: defaultDateTimeLabel,
+                  location: lastQuery?.location ?? '사당',
+                  peopleCount: lastQuery?.peopleCount ?? defaultPeopleCount,
+                  dateTime: lastQuery 
+                    ? formatReservationLabel(lastQuery.date, lastQuery.hour_slots) 
+                    : defaultDateTimeLabel,
                 }}
                 onConditionClick={() => {
                   setPhase(SearchPhase.BeforeSearch);
