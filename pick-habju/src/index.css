@@ -458,4 +458,42 @@
   .scrollbar-stable {
     scrollbar-gutter: stable;
   }
+
+  /* Cluster Icon Styles (for Naver Maps Marker Clustering) */
+  .cluster-icon {
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* ── small (1~5 markers) ── */
+  .cluster-icon--small {
+    background: radial-gradient(circle, rgba(255, 205, 56, 1) 50%, rgba(255, 205, 56, 0.9) 100%);
+    box-shadow: 0 0 8px 0 rgba(226, 171, 8, 0.25);
+  }
+  .cluster-icon--small:hover {
+    transform: scale(1.2);
+    background: radial-gradient(circle, rgba(255, 205, 56, 1) 50%, rgba(255, 205, 56, 0.8) 100%);
+    box-shadow: 0 0 8.734px 0 rgba(226, 171, 8, 0.25);
+  }
+
+  /* ── medium (6~14 markers) ── */
+  .cluster-icon--medium {
+    background: radial-gradient(circle, rgba(255, 195, 0, 1) 0%, rgba(255, 191, 0, 0.9) 100%);
+    box-shadow: 0 0 8px 0 rgba(226, 171, 8, 0.25);
+  }
+  .cluster-icon--medium:hover {
+    transform: scale(1.143);
+    background: radial-gradient(circle, rgba(255, 195, 0, 1) 50%, rgba(255, 191, 0, 0.8) 100%);
+    box-shadow: 0 0 8.734px 0 rgba(226, 171, 8, 0.25);
+  }
+
+  /* ── large (15+ markers) ── */
+  .cluster-icon--large {
+    background: radial-gradient(circle, rgba(255, 195, 0, 1) 0%, rgba(255, 191, 0, 0.9) 100%);
+    box-shadow: 0 0 8px 0 rgba(226, 171, 8, 0.25);
+  }
+  .cluster-icon--large:hover {
+    transform: scale(1.125);
+    background: radial-gradient(circle, rgba(255, 195, 0, 1) 50%, rgba(255, 191, 0, 0.8) 100%);
+    box-shadow: 0 0 8.734px 0 rgba(226, 171, 8, 0.25);
+  }
 }
