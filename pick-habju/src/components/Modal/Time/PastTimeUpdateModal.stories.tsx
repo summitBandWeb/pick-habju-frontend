@@ -52,7 +52,14 @@ const Setup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const dateIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const slot = `${String(hour).padStart(2, '0')}:00`;
 
-    setLastQuery({ date: dateIso, hour_slots: [slot], peopleCount: 12 });
+    setLastQuery({
+      location: '이수역',
+      locationId: 'isuyeok',
+      coordinates: { lat: 37.4865, lng: 126.9818 },
+      date: dateIso,
+      hour_slots: [slot],
+      peopleCount: 12,
+    });
     setPhase(SearchPhase.Default);
   }, []);
   return <>{children}</>;

@@ -24,11 +24,14 @@ type Story = StoryObj<typeof PersonCountInputDropdown>;
 
 const InteractiveWrapper = () => {
   const [count, setCount] = useState(12);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="p-8 min-w-80">
       <PersonCountInputDropdown
         count={count}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
         onConfirm={(val) => {
           setCount(val);
           return true;
@@ -41,6 +44,8 @@ const InteractiveWrapper = () => {
 export const Default: Story = {
   args: {
     count: 12,
+    isOpen: true,
+    onOpenChange: (open: boolean) => console.log('Open changed:', open),
     onConfirm: (val) => {
       console.log('인원 확정:', val);
       return true;
