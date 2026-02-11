@@ -18,6 +18,12 @@ export interface LocationOption {
 /** 노선 식별자: 숫자(1~9) 또는 문자(A=공항철도, K=경의중앙선) */
 type SubwayLineId = number | 'A' | 'K';
 
+/** 특수 노선 이름 → 노선 ID 매핑 */
+const SPECIAL_LINE_MAP: Record<string, SubwayLineId> = {
+  '공항철도': 'A',
+  '경의중앙선': 'K',
+};
+
 /** "4호선·7호선·공항철도·경의중앙선" 형태의 문자열에서 노선 배열 추출 (순서 유지) */
 function parseSubwayLines(subwayLine: string): SubwayLineId[] {
   const parts = subwayLine.split(/[·\s]+/).filter(Boolean);
@@ -25,8 +31,11 @@ function parseSubwayLines(subwayLine: string): SubwayLineId[] {
     .map((part): SubwayLineId | null => {
       const numMatch = part.match(/\d+/);
       if (numMatch) return Number(numMatch[0]);
-      if (part.includes('공항철도')) return 'A';
-      if (part.includes('경의중앙선')) return 'K';
+
+      // 특수 노선 체크
+      for (const [key, value] of Object.entries(SPECIAL_LINE_MAP)) {
+        if (part.includes(key)) return value;
+      }
       return null;
     })
     .filter((v): v is SubwayLineId => v !== null);
