@@ -7,5 +7,12 @@ export interface HeroAreaProps {
   peopleCount: number;
   onDateTimeChange: () => void;
   onPersonCountChange: () => void;
-  onSearch: (params: { date: string; hour_slots: string[]; peopleCount: number }) => void;
+  onSearch: (params: { 
+    location: string; 
+    locationId: string;
+    coordinates: { lat: number; lng: number }; 
+    date: string; 
+    hour_slots: string[]; 
+    peopleCount: number 
+  }) => void;
 }

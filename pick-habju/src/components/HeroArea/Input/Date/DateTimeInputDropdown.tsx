@@ -25,6 +25,10 @@ export interface DateTimeInputDropdownProps {
     endPeriod: TimePeriod
   ) => boolean | void;
   disabled?: boolean;
+  /** 드롭다운 열림 상태 (부모에서 제어) */
+  isOpen: boolean;
+  /** 드롭다운 열림/닫힘 요청 */
+  onOpenChange: (open: boolean) => void;
 }
 
 const DateTimeInputDropdown = ({
@@ -36,8 +40,9 @@ const DateTimeInputDropdown = ({
   initialEndPeriod = TimePeriod.PM,
   onConfirm,
   disabled = false,
+  isOpen,
+  onOpenChange,
 }: DateTimeInputDropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [pickerState, setPickerState] = useState<{
     step: 'DATE' | 'TIME';
     selectedDates: Date[];
@@ -62,13 +67,11 @@ const DateTimeInputDropdown = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
-    setIsOpen((prev) => {
-      if (!prev) {
-        setPickerState((s) => ({ ...s, step: 'DATE' }));
-      }
-      return !prev;
-    });
-  }, []);
+    if (!isOpen) {
+      setPickerState((s) => ({ ...s, step: 'DATE' }));
+    }
+    onOpenChange(!isOpen);
+  }, [isOpen, onOpenChange]);
 
   const handleDateChange = useCallback((dates: Date[]) => {
     setPickerState((s) => ({ ...s, selectedDates: dates }));
@@ -83,8 +86,8 @@ const DateTimeInputDropdown = ({
   }, []);
 
   const handleDateStepCancel = useCallback(() => {
-    setIsOpen(false);
-  }, []);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   const handleTimeDraftChange = useCallback(
     (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
@@ -102,10 +105,10 @@ const DateTimeInputDropdown = ({
     const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
     const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod);
     if (shouldClose !== false) {
-      setIsOpen(false);
+      onOpenChange(false);
       setPickerState((s) => ({ ...s, step: 'DATE' }));
     }
-  }, [pickerState, onConfirm]);
+  }, [pickerState, onConfirm, onOpenChange]);
 
   const handleTimeCancel = useCallback(() => {
     setPickerState((s) => ({ ...s, step: 'DATE' }));

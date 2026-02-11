@@ -13,6 +13,10 @@ export interface PersonCountInputDropdownProps {
   disabled?: boolean;
   min?: number;
   max?: number;
+  /** 드롭다운 열림 상태 (부모에서 제어) */
+  isOpen: boolean;
+  /** 드롭다운 열림/닫힘 요청 */
+  onOpenChange: (open: boolean) => void;
 }
 
 const PersonCountInputDropdown = ({
@@ -21,28 +25,29 @@ const PersonCountInputDropdown = ({
   disabled = false,
   min = 1,
   max = 30,
+  isOpen,
+  onOpenChange,
 }: PersonCountInputDropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [guestCount, setGuestCount] = useState(count);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
-    setIsOpen((prev) => {
-      if (!prev) setGuestCount(count);
-      return !prev;
-    });
-  }, [count]);
+    if (!isOpen) {
+      setGuestCount(count);
+    }
+    onOpenChange(!isOpen);
+  }, [isOpen, onOpenChange, count]);
 
   const handleConfirm = useCallback(() => {
     const shouldClose = onConfirm(guestCount);
     if (shouldClose !== false) {
-      setIsOpen(false);
+      onOpenChange(false);
     }
-  }, [guestCount, onConfirm]);
+  }, [guestCount, onConfirm, onOpenChange]);
 
   const handleCancel = useCallback(() => {
-    setIsOpen(false);
-  }, []);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   useEffect(() => {
     if (isOpen) setGuestCount(count);
