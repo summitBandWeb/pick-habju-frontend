@@ -27,29 +27,15 @@ const kyInstance = ky.create({
           }
         };
 
-        // 한 번만 파싱
-        const { body, rawText } = await parseErrorBody();
-
-        // HTTP 상태 코드 에러 체크
+        // HTTP 상태 코드 에러만 파싱
         if (!response.ok) {
+          const { body, rawText } = await parseErrorBody();
           throw new ApiError({
             status: response.status,
             message: body?.message ?? response.statusText,
             code: body?.code,
             body,
             rawText,
-            url: response.url,
-            method: request.method,
-          });
-        }
-
-        // 백엔드 isSuccess 필드 체크
-        if (body && body.isSuccess === false) {
-          throw new ApiError({
-            status: response.status,
-            message: body.message,
-            code: body.code,
-            body,
             url: response.url,
             method: request.method,
           });
