@@ -397,6 +397,16 @@
     letter-spacing: var(--letter-spacing-hero-info);
   }
 
+  /* Button GrayText underline style */
+  .underline-gray-text {
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 10%; /* 1.6px */
+    text-underline-offset: 25%; /* 4px */
+    text-underline-position: from-font;
+  }
+
   /* Box Shadows */
   .shadow-card {
     box-shadow: var(--box-shadow-card);
