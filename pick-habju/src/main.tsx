@@ -9,7 +9,18 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === 'true') {
   import('./mocks/browser').then(({ startMockWorker }) => startMockWorker());
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
