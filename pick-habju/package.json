@@ -12,10 +12,12 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "immer": "^10.1.1",
+    "ky": "^1.14.3",
     "lucide-react": "^0.510.0",
     "react": "^19.1.2",
     "react-dom": "^19.1.2",
@@ -34,6 +36,7 @@
     "@storybook/react-vite": "^8.6.12",
     "@storybook/test": "^8.6.12",
     "@tailwindcss/vite": "^4.1.6",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
