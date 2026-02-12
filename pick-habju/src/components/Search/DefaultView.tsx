@@ -69,6 +69,16 @@ const DefaultView = () => {
         }
 
         if (c.kind === CardKind.PARTIAL) {
+          // availableSlots에서 시간 범위 계산
+          const availableTime = c.availableSlots 
+            ? formatAvailableTimeRange(c.availableSlots) 
+            : '';
+          
+          // "15:00~17:00" → "15-17시만 가능" 형식으로 변환
+          const timeRangeText = availableTime
+            ? `${availableTime.split('~')[0].split(':')[0]}-${availableTime.split('~')[1].split(':')[0]}시만 가능`
+            : '';
+
           return (
             <Card
               key={`${c.kind}-${room.bizItemId}-${i}`}
@@ -78,6 +88,7 @@ const DefaultView = () => {
               price={price}
               capacity={capacity}
               partialAvailable
+              availableTimeRange={timeRangeText}
               onBookClick={() => {
                 if (!lastQuery || !c.availableSlots) return;
                 const availableTime = formatAvailableTimeRange(c.availableSlots);
