@@ -81,7 +81,7 @@ export const logApiError = (err: unknown, meta?: Meta) => {
 /**
  * 에러 코드에 해당하는 한글 메시지를 가져오기
  */
-const getErrorMessage = (code: string): string => {
+export const getErrorMessage = (code: string): string => {
   return ERROR_MESSAGES[code] ?? ERROR_MESSAGES['GENERIC-000'];
 };
 
