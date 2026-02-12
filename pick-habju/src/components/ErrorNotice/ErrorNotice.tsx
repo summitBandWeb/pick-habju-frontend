@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ErrorNoticeProps } from './ErrorNotice.types';
+import Button from '../Button/Button';
+import { ButtonVariant } from '../Button/ButtonEnums';
 import WarningIcon from '../../assets/svg/warningIcon.svg';
 import LoadingSpinner from '../../assets/svg/loadingSpinner.svg';
 import NoLocationIcon from '../../assets/svg/NoLocation.svg';
@@ -30,17 +32,17 @@ const ErrorNotice = ({
   const getIcon = () => {
     switch (type) {
       case 'noResults':
-        return <img src={WarningIcon} alt="warning" className="w-[84px] h-[84px]" />;
+        return <img src={WarningIcon} alt="warning" className="w-17 h-17 p-2" />;
       case 'loading':
         return (
           <img
             src={LoadingSpinner}
             alt="loading"
-            className="w-[68px] h-[68px] animate-spin"
+            className="w-17 h-17 animate-spin"
           />
         );
       case 'noMatch':
-        return <img src={NoLocationIcon} alt="no location" className="w-[68px] h-[77px]" />;
+        return <img src={NoLocationIcon} alt="no location" className="w-17 h-19.25" />;
       default:
         return null;
     }
@@ -77,25 +79,22 @@ const ErrorNotice = ({
 
   return (
     <div className="backdrop-blur-[3px] bg-[rgba(9,9,9,0.7)] flex flex-col items-center justify-center w-full h-full">
-      <div className="flex flex-col items-center justify-center gap-[16px] flex-1 w-full">
+      <div className="flex flex-col items-center justify-center gap-4 flex-1 w-full">
         {/* 아이콘 */}
         <div className="shrink-0">{getIcon()}</div>
 
         {/* 메시지 */}
-        <div className="flex flex-col items-center justify-between h-[46px] w-full text-[#e6e6e6] text-[16px] font-semibold text-center leading-normal whitespace-pre-wrap">
+        <div className="flex flex-col items-center justify-between h-11.5 w-full text-gray-200 font-modal-default text-center whitespace-pre-wrap">
           {getMessage()}
         </div>
 
         {/* 돌아가기 버튼 (noResults 타입에서만 표시) */}
         {type === 'noResults' && onClose && (
-          <button
+          <Button
+            label="돌아가기"
+            variant={ButtonVariant.GrayText}
             onClick={onClose}
-            className="flex items-center justify-center px-[10px] py-[10px] h-[48px] w-[182.5px] rounded-[10px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.2)] mt-[4px]"
-          >
-            <p className="text-[#afafaf] text-[16px] font-semibold underline decoration-solid">
-              검색하기
-            </p>
-          </button>
+          />
         )}
       </div>
     </div>
