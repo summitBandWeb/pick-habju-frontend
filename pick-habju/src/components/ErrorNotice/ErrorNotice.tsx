@@ -76,7 +76,7 @@ const ErrorNotice = ({
   };
 
   return (
-    <div className="backdrop-blur-[3px] bg-[rgba(9,9,9,0.7)] flex flex-col items-center justify-center w-[402px] h-[774px]">
+    <div className="backdrop-blur-[3px] bg-[rgba(9,9,9,0.7)] flex flex-col items-center justify-center w-full h-full">
       <div className="flex flex-col items-center justify-center gap-[16px] flex-1 w-full">
         {/* 아이콘 */}
         <div className="shrink-0">{getIcon()}</div>
