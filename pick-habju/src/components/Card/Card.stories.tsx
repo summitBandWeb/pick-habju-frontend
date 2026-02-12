@@ -99,13 +99,6 @@ export const PartialAvailable: Story = {
     ...baseArgs,
     images: [image1, image2, image3],
     partialAvailable: true,
-  },
-  render: (args) => {
-    // partialAvailable이 true이고 availableTimeRange가 없으면 기본값 설정
-    const propsWithDefault = {
-      ...args,
-      availableTimeRange: args.availableTimeRange || (args.partialAvailable ? '14-15시만 가능' : undefined),
-    };
-    return <Card {...propsWithDefault} />;
+    availableTimeRange: '14-15시만 가능',
   },
 };
