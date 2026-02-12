@@ -2,26 +2,26 @@
  * 공통 에러 객체 클래스
  *
  * 모든 API 호출에서 에러를 통일된 형태로 다루기 위한 클래스
- * 백엔드에서 반환하는 에러 응답 형식 (timestamp, status, errorCode, message)을 처리합니다.
+ * 백엔드에서 반환하는 에러 응답 형식 (isSuccess, code, message, result)을 처리합니다.
  */
 
 /**
  * API 에러 응답 본문 구조
- * 
+ *
  * @example
  * {
- *   "timestamp": "2024-01-20T01:23:45",
- *   "status": 422,
- *   "errorCode": "Date-001",
- *   "message": "날짜 형식이 맞지 않습니다."
+ *   "isSuccess": false,
+ *   "code": "Date-001",
+ *   "message": "날짜 형식이 맞지 않습니다.",
+ *   "result": null
  * }
  */
 
 export interface ApiErrorBody {
-  timestamp?: string;
-  status: number;
-  errorCode: string;
+  isSuccess: boolean;
+  code: string;
   message: string;
+  result: unknown | null;
 }
 
 export class ApiError<T extends ApiErrorBody = ApiErrorBody> extends Error {
@@ -42,9 +42,9 @@ export class ApiError<T extends ApiErrorBody = ApiErrorBody> extends Error {
     method?: string;
   }) {
     super(opts.message);
-    
+
     Object.setPrototypeOf(this, new.target.prototype);
-    
+
     this.name = 'ApiError';
     this.status = opts.status;
     this.code = opts.code;
