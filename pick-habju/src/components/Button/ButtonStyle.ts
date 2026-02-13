@@ -22,8 +22,8 @@ export const variantStyles: Record<ButtonVariant, string[]> = {
   ],
   [ButtonVariant.GrayText]: [
     'bg-transparent',
-    'text-gray-300 underline',
-    'hover:text-primary-white',
+    'text-gray-300 underline-gray-text',
+    'hover:text-gray-200',
   ],
   [ButtonVariant.YellowText]: [
     'bg-transparent',
