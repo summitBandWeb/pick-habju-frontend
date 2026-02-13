@@ -7,6 +7,6 @@ export interface ErrorNoticeProps {
   onClose?: () => void;
   /** 자동 숨김 시간 (ms) - noMatch 타입에서 기본 3000ms */
   autoHideAfter?: number;
-  /** 자동 숨김 시 콜백 함수 (noMatch 타입에서 사용) */
+  /** 자동 숨김 시 콜백 함수. 부모 컴포넌트에서 필터 버튼 비활성화 (noMatch 타입에서 사용) */
   onAutoHide?: () => void;
 }

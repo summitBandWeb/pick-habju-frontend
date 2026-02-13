@@ -10,7 +10,7 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <div className="relative w-[402px] h-[874px] bg-yellow-300">
+      <div className="relative w-[402px] h-[774px] bg-yellow-300">
         {/* 지도 배경 목업 */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-400">
           <div className="absolute top-[100px] left-[50%] -translate-x-1/2 w-[380px] h-[58px] bg-white rounded-[15px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.2)] flex items-center px-[15px]">
