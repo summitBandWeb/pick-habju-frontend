@@ -22,11 +22,15 @@ import { SEO_METADATA, DEFAULT_SEO } from '../constants/seo';
 import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 import { useHomePageFilter } from '../hook/useHomePageFilter';
 import { useHomePageSearch } from '../hook/useHomePageSearch';
+import { usePingQuery } from '../api/coldStart/usePingQueries';
 
 // Utils
 import { formatReservationLabel } from '../utils/formatReservationLabel';
 
 const HomePage = () => {
+  // Cold Start 방지 (서버 Warm-up)
+  usePingQuery();
+
   // 1. UI 상태 관리 (HeroArea 강제 리렌더링용)
   const [heroResetCounter, setHeroResetCounter] = useState(0);
 
@@ -48,13 +52,13 @@ const HomePage = () => {
   });
 
   // 6. Event Handler: 검색 시작 (필터 초기화 후 API 호출)
-  const onSearch = (params: { 
-    location: string; 
+  const onSearch = (params: {
+    location: string;
     locationId: string;
-    coordinates: { lat: number; lng: number }; 
-    date: string; 
-    hour_slots: string[]; 
-    peopleCount: number 
+    coordinates: { lat: number; lng: number };
+    date: string;
+    hour_slots: string[];
+    peopleCount: number;
   }) => {
     resetFilters(); // 새로운 검색 시 기존 필터(검색어, 정렬) 초기화
     executeSearch(params);
@@ -70,66 +74,66 @@ const HomePage = () => {
       <SEO {...SEO_METADATA.home} url={DEFAULT_SEO.siteUrl} />
       <div className="w-full flex flex-col items-center">
         <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
-        {/* Hero Area: 날짜, 시간, 인원 선택 */}
-        <HeroArea
-          key={heroResetCounter}
-          dateTime={{
-            label: defaultDateTimeLabel,
-            date: defaultDateIso,
-            hour_slots: defaultSlots,
-          }}
-          peopleCount={defaultPeopleCount}
-          onDateTimeChange={() => setPhase(SearchPhase.BeforeSearch)}
-          onPersonCountChange={() => setPhase(SearchPhase.BeforeSearch)}
-          onSearch={onSearch}
-        />
+          {/* Hero Area: 날짜, 시간, 인원 선택 */}
+          <HeroArea
+            key={heroResetCounter}
+            dateTime={{
+              label: defaultDateTimeLabel,
+              date: defaultDateIso,
+              hour_slots: defaultSlots,
+            }}
+            peopleCount={defaultPeopleCount}
+            onDateTimeChange={() => setPhase(SearchPhase.BeforeSearch)}
+            onPersonCountChange={() => setPhase(SearchPhase.BeforeSearch)}
+            onSearch={onSearch}
+          />
 
-        {/* Loading State: 스켈레톤 UI */}
-        {phase === SearchPhase.Loading && (
-          <>
-            <div className="mt-3 mb-2">
-              <SearchBarSkeleton />
-            </div>
-            <FilterSectionSkeleton />
-          </>
-        )}
+          {/* Loading State: 스켈레톤 UI */}
+          {phase === SearchPhase.Loading && (
+            <>
+              <div className="mt-3 mb-2">
+                <SearchBarSkeleton />
+              </div>
+              <FilterSectionSkeleton />
+            </>
+          )}
 
-        {/* Default State (Search Completed): 필터 및 검색바 */}
-        {phase === SearchPhase.Default && (
-          <>
-            <div className="mt-3 mb-2">
-              <SearchBar 
-                value={searchText} 
-                onSearchChange={setSearchText}
-                searchCondition={{
-                  location: lastQuery?.location ?? '사당',
-                  peopleCount: lastQuery?.peopleCount ?? defaultPeopleCount,
-                  dateTime: lastQuery 
-                    ? formatReservationLabel(lastQuery.date, lastQuery.hour_slots) 
-                    : defaultDateTimeLabel,
-                }}
-                onConditionClick={() => {
-                  setPhase(SearchPhase.BeforeSearch);
-                  resetFilters();
-                  setHeroResetCounter((c) => c + 1);
-                }}
-              />
-            </div>
-            <div className="mx-auto">
-              <FilterSection isFavoriteFilterActive={false} onFavoriteFilterToggle={() => {}} />
-            </div>
-          </>
-        )}
+          {/* Default State (Search Completed): 필터 및 검색바 */}
+          {phase === SearchPhase.Default && (
+            <>
+              <div className="mt-3 mb-2">
+                <SearchBar
+                  value={searchText}
+                  onSearchChange={setSearchText}
+                  searchCondition={{
+                    location: lastQuery?.location ?? '사당',
+                    peopleCount: lastQuery?.peopleCount ?? defaultPeopleCount,
+                    dateTime: lastQuery
+                      ? formatReservationLabel(lastQuery.date, lastQuery.hour_slots)
+                      : defaultDateTimeLabel,
+                  }}
+                  onConditionClick={() => {
+                    setPhase(SearchPhase.BeforeSearch);
+                    resetFilters();
+                    setHeroResetCounter((c) => c + 1);
+                  }}
+                />
+              </div>
+              <div className="mx-auto">
+                <FilterSection isFavoriteFilterActive={false} onFavoriteFilterToggle={() => {}} />
+              </div>
+            </>
+          )}
 
-        {/* Modal: 과거 시간 선택 시 갱신 유도 */}
-        <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />
+          {/* Modal: 과거 시간 선택 시 갱신 유도 */}
+          <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />
 
-        {/* Search Results: 결과 리스트 (내부에서 phase에 따라 렌더링) */}
-        <div className="w-full">
-          <SearchSection />
+          {/* Search Results: 결과 리스트 (내부에서 phase에 따라 렌더링) */}
+          <div className="w-full">
+            <SearchSection />
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
