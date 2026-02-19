@@ -74,6 +74,7 @@ const PriceLabel = ({
   const wonIconSizeClass = getWonIconSizeClass(favorite, isActive);
   const wonIconColorClass = getWonIconColorClass(isActive, baseTextColorClass);
   const faveIconColorClass = getFaveIconColorClass(state, isActive);
+  const activeChipClass = isActive ? 'w-[1.5625rem] h-[1.5625rem] [&_span]:text-[1.1875rem]' : '';
 
   return (
     <div className={`relative pt-2.5 ${className}`}>
@@ -98,7 +99,7 @@ const PriceLabel = ({
           </span>
         </button>
 
-        {hasRoomChip && <PriceChip count={extraRoomCount} isEmphasized={isActive} />}
+        {hasRoomChip && <PriceChip count={extraRoomCount} className={activeChipClass} />}
       </div>
 
       {hasFavorite && (
