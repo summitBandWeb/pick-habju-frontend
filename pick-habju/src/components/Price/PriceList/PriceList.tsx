@@ -1,10 +1,16 @@
-import { useMemo } from 'react';
+/**
+ * 가격 목록 컴포넌트
+ * 마커 클릭 시 노출되는 룸별 가격 목록을 표시합니다. 항목별 등장 애니메이션을 적용합니다.
+ */
 import type { CSSProperties } from 'react';
 import type { PriceListProps } from './PriceList.types';
 
+/** 항목당 애니메이션 시작 지연(ms) */
 const ANIMATION_STEP_MS = 110;
+/** 개별 항목 애니메이션 지속 시간(ms) */
 const ANIMATION_DURATION_MS = 220;
 
+/** 인덱스·총 개수·지연·지속시간으로 항목 등장 애니메이션 스타일 반환 */
 const getListItemAnimationStyle = (
   index: number,
   total: number,
@@ -29,7 +35,8 @@ const PriceList = ({
   className = '',
   onRoomClick,
 }: PriceListProps) => {
-  const normalizedRooms = useMemo(() => rooms.filter((room) => room.name && room.priceText), [rooms]);
+  /** 타입에서 보장된 룸 목록을 그대로 사용 */
+  const normalizedRooms = rooms;
 
   if (!isOpen || normalizedRooms.length === 0) {
     return null;

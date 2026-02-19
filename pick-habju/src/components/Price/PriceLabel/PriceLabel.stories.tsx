@@ -1,3 +1,4 @@
+/** PriceLabel 스토리: 기본·즐겨찾기·추가룸·부분·활성 등 변형 */
 import type { Meta, StoryObj } from '@storybook/react';
 import PriceLabel from './PriceLabel';
 
@@ -25,6 +26,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** 기본 가격 라벨 */
 export const Default: Story = {
   args: {
     priceText: '29,000',
@@ -33,6 +35,7 @@ export const Default: Story = {
   },
 };
 
+/** 즐겨찾기 켜진 가격 라벨 */
 export const Favorite: Story = {
   args: {
     priceText: '29,000',
@@ -41,6 +44,7 @@ export const Favorite: Story = {
   },
 };
 
+/** 추가 룸 개수 칩이 있는 가격 라벨 */
 export const ExtraRoom: Story = {
   args: {
     priceText: '39,000~',
@@ -49,6 +53,7 @@ export const ExtraRoom: Story = {
   },
 };
 
+/** 즐겨찾기 + 추가 룸 칩 */
 export const FavoriteWithExtraRoom: Story = {
   args: {
     priceText: '39,000~',
@@ -57,6 +62,7 @@ export const FavoriteWithExtraRoom: Story = {
   },
 };
 
+/** 부분(일부) 상태 */
 export const Partial: Story = {
   args: {
     priceText: '29,000',
@@ -66,6 +72,7 @@ export const Partial: Story = {
   },
 };
 
+/** 부분 + 즐겨찾기 */
 export const PartialFavorite: Story = {
   args: {
     priceText: '29,000',
@@ -75,6 +82,7 @@ export const PartialFavorite: Story = {
   },
 };
 
+/** 부분 + 추가 룸 칩 */
 export const PartialExtraRoom: Story = {
   args: {
     priceText: '39,000~',
@@ -84,6 +92,7 @@ export const PartialExtraRoom: Story = {
   },
 };
 
+/** 부분 + 즐겨찾기 + 추가 룸 칩 */
 export const PartialFavoriteWithExtraRoom: Story = {
   args: {
     priceText: '39,000~',
@@ -93,6 +102,7 @@ export const PartialFavoriteWithExtraRoom: Story = {
   },
 };
 
+/** 클릭 후 활성(선택) 상태 */
 export const ActiveSelected: Story = {
   args: {
     priceText: '29,000',
@@ -102,6 +112,7 @@ export const ActiveSelected: Story = {
   },
 };
 
+/** 활성 상태 + 추가 룸 칩 */
 export const ActiveSelectedWithExtraRoom: Story = {
   args: {
     priceText: '39,000~',

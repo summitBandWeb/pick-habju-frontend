@@ -1,13 +1,19 @@
+/**
+ * 가격 라벨 컴포넌트
+ * 지도 마커에서 가격을 표시하고, 즐겨찾기/추가 룸 개수 칩을 함께 렌더링합니다.
+ */
 import WonIcon from '../../../assets/svg/won.svg?react';
 import FaveChipDefaultIcon from '../../../assets/svg/FaveChipDefault.svg?react';
 import PriceChip from '../PriceChip/PriceChip';
 import type { FavoriteState, PriceLabelProps } from './PriceLabel.types';
 
+/** 즐겨찾기 상태별 마커 배경/모서리 클래스 */
 const MARKER_BG_CLASS_BY_FAVORITE: Record<FavoriteState, string> = {
   off: 'bg-primary-white rounded-[0.9375rem]',
   on: 'bg-yellow-700 rounded-tr-[0.9375rem] rounded-br-[0.9375rem] rounded-bl-[0.9375rem]',
 };
 
+/** 부분/즐겨찾기 상태에 따른 기본 텍스트 색상 클래스 반환 */
 const getBaseTextColorClass = (isPartial: boolean, favorite: FavoriteState) => {
   if (isPartial) {
     return favorite === 'on' ? 'text-gray-500' : 'text-gray-400';
@@ -15,15 +21,18 @@ const getBaseTextColorClass = (isPartial: boolean, favorite: FavoriteState) => {
   return 'text-gray-600';
 };
 
+/** 활성/즐겨찾기 상태에 따른 마커 호버/클릭 시 높이·테두리 클래스 반환 */
 const getMarkerInteractionClass = (isActive: boolean, favorite: FavoriteState) => {
   if (!isActive) return '';
   return favorite === 'off' ? 'h-[3.125rem] border-gray-600' : 'h-[3.125rem]';
 };
 
+/** 활성 시 텍스트 크기·색상 클래스 반환 */
 const getTextInteractionClass = (isActive: boolean) => {
   return isActive ? 'text-[1.1875rem] text-gray-600' : '';
 };
 
+/** 즐겨찾기·활성 상태에 따른 원화 아이콘 크기 클래스 반환 */
 const getWonIconSizeClass = (favorite: FavoriteState, isActive: boolean) => {
   if (favorite === 'off') {
     return `w-[0.8125rem] h-3 shrink-0 transition-all group-hover/price:w-5 group-hover/price:h-[1.0625rem] ${
@@ -34,12 +43,14 @@ const getWonIconSizeClass = (favorite: FavoriteState, isActive: boolean) => {
   return 'w-[0.8125rem] h-3 shrink-0';
 };
 
+/** 활성·기본 텍스트 색상에 따른 원화 아이콘 색상 클래스 반환 */
 const getWonIconColorClass = (isActive: boolean, baseTextColorClass: string) => {
   return `transition-colors group-hover/price:text-gray-600 ${baseTextColorClass} ${
     isActive ? 'text-gray-600' : ''
   }`;
 };
 
+/** 부분·활성 상태에 따른 즐겨찾기 아이콘 색상 클래스 반환 */
 const getFaveIconColorClass = (isPartial: boolean, isActive: boolean) => {
   if (isActive) return 'text-gray-600';
   return isPartial ? 'text-gray-500' : 'text-gray-600';
