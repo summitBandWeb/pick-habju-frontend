@@ -9,7 +9,7 @@ import PartialReservationConfirmModal from '../Modal/Portion/PartialReservationC
 import OneHourCallReservationNoticeModal from '../Modal/OneHour/OneHourCallReservationNoticeModal';
 import OneHourChatReservationNoticeModal from '../Modal/OneHour/OneHourChatReservationNoticeModal';
 import CallReservationNoticeModal from '../Modal/Call/CallReservationNoticeModal';
-import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots } from '../../utils/availableTimeFormatter';
+import { formatAvailableTimeRange, extractFirstConsecutiveTrueSlots, formatTimeRangeForCard } from '../../utils/availableTimeFormatter';
 import { decideBookModalFlow, decidePartialToNextModalFlow, type ModalType } from '../../utils/modalFlowLogic';
 import { getBookingUrl } from '../../utils/bookingUrl';
 import { CardKind } from '../../store/search/searchStore.types';
@@ -69,6 +69,14 @@ const DefaultView = () => {
         }
 
         if (c.kind === CardKind.PARTIAL) {
+          // availableSlots에서 시간 범위 계산 (한 번만)
+          const availableTime = c.availableSlots 
+            ? formatAvailableTimeRange(c.availableSlots) 
+            : '';
+          
+          // 카드 UI 표시용 텍스트로 변환
+          const timeRangeText = formatTimeRangeForCard(availableTime);
+
           return (
             <Card
               key={`${c.kind}-${room.bizItemId}-${i}`}
@@ -78,9 +86,9 @@ const DefaultView = () => {
               price={price}
               capacity={capacity}
               partialAvailable
+              availableTimeRange={timeRangeText}
               onBookClick={() => {
-                if (!lastQuery || !c.availableSlots) return;
-                const availableTime = formatAvailableTimeRange(c.availableSlots);
+                if (!lastQuery || !availableTime) return;
                 setCurrentModal({
                   type: 'partial',
                   cardIdx: i,

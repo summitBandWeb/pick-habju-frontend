@@ -92,3 +92,13 @@ export const Booked: Story = {
     booked: true,
   },
 };
+
+export const PartialAvailable: Story = {
+  name: '일부 시간만 가능',
+  args: {
+    ...baseArgs,
+    images: [image1, image2, image3],
+    partialAvailable: true,
+    availableTimeRange: '14-15시만 가능',
+  },
+};

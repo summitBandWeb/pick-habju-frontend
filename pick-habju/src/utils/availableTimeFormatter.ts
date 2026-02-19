@@ -60,3 +60,16 @@ export function extractFirstConsecutiveTrueSlots(
 
   return collected;
 }
+
+/**
+ * 시간 범위 문자열을 카드 UI 표시용 텍스트로 변환
+ * 예: "15:00~17:00" → "15-17시만 가능"
+ */
+export function formatTimeRangeForCard(timeRange: string): string {
+  if (!timeRange) return '';
+  
+  const match = timeRange.match(/^(\d{2}):\d{2}~(\d{2}):\d{2}$/);
+  if (!match) return '';
+  
+  return `${match[1]}-${match[2]}시만 가능`;
+}

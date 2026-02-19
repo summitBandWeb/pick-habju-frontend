@@ -12,6 +12,7 @@ import ImageCarouselModal from '../Modal/ImageCarouselModal';
 import FaveOff from '../../assets/svg/FaveOff.svg';
 import FaveOn from '../../assets/svg/FaveOn.svg';
 import ImgIcon from '../../assets/svg/ImgIcon.svg';
+import TimeIcon from '../../assets/svg/Time.svg?react';
 import type { CardProps } from './Card.types';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import { pushGtmEvent } from '../../utils/gtm';
@@ -27,6 +28,7 @@ const Card = ({
   capacity,
   booked = false,
   partialAvailable = false,
+  availableTimeRange,
   reOpenDaysFromNow = 90,
   btnsize,
   isLiked = false,
@@ -224,12 +226,15 @@ const Card = ({
           )}
         </div>
       ) : (
-        <div className="font-card-partial">선택하신 시간 중 일부만 가능합니다</div>
+        <div className="flex items-center space-x-2">
+          <span className="font-card-info text-gray-400">시간당</span>
+          <span className="font-card-price-num text-primary-black">{price.toLocaleString()}원</span>
+        </div>
       )}
 
-      <div className="bg-gray-200 w-46 h-0.25 mt-2 mb-2" />
+      <div className="bg-gray-200 w-full h-0.25 mt-2 mb-2" />
 
-      <div className="flex items-center text-gray-500 space-x-1.5">
+      <div className="flex items-center text-gray-500 space-x-1">
         <div
           className={classNames(
             'flex items-center space-x-1 font-card-info whitespace-nowrap',
@@ -239,6 +244,13 @@ const Card = ({
           <img src={People} alt="인원 아이콘" />
           <span>권장 인원 {booked ? 'N인' : capacity}</span>
         </div>
+        
+        {partialAvailable && availableTimeRange && (
+          <div className="flex items-center space-x-1 font-card-info whitespace-nowrap">
+            <TimeIcon className="w-3 h-3 text-blue-500" />
+            <span className="text-blue-500">{availableTimeRange}</span>
+          </div>
+        )}
       </div>
     </>
   );
