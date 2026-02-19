@@ -1,25 +1,15 @@
 import WonIcon from '../../../assets/svg/won.svg?react';
 import FaveChipDefaultIcon from '../../../assets/svg/FaveChipDefault.svg?react';
 import PriceChip from '../PriceChip/PriceChip';
-import type {
-  FavoriteState,
-  PriceLabelProps,
-  PriceLabelState,
-  RoomChipState,
-} from './PriceLabel.types';
+import type { FavoriteState, PriceLabelProps } from './PriceLabel.types';
 
 const MARKER_BG_CLASS_BY_FAVORITE: Record<FavoriteState, string> = {
   off: 'bg-primary-white rounded-[0.9375rem]',
   on: 'bg-yellow-700 rounded-tr-[0.9375rem] rounded-br-[0.9375rem] rounded-bl-[0.9375rem]',
 };
 
-const WRAPPER_CLASS_BY_ROOM_CHIP: Record<RoomChipState, string> = {
-  none: '',
-  extra: 'pr-[0.9375rem]',
-};
-
-const getBaseTextColorClass = (state: PriceLabelState, favorite: FavoriteState) => {
-  if (state === 'partial') {
+const getBaseTextColorClass = (isPartial: boolean, favorite: FavoriteState) => {
+  if (isPartial) {
     return favorite === 'on' ? 'text-gray-500' : 'text-gray-400';
   }
   return 'text-gray-600';
@@ -50,43 +40,38 @@ const getWonIconColorClass = (isActive: boolean, baseTextColorClass: string) => 
   }`;
 };
 
-const getFaveIconColorClass = (state: PriceLabelState, isActive: boolean) => {
+const getFaveIconColorClass = (isPartial: boolean, isActive: boolean) => {
   if (isActive) return 'text-gray-600';
-  return state === 'partial' ? 'text-gray-500' : 'text-gray-600';
+  return isPartial ? 'text-gray-500' : 'text-gray-600';
 };
 
 const PriceLabel = ({
   priceText,
-  state = 'default',
+  isPartial = false,
   favorite = 'off',
-  roomChip = 'none',
   extraRoomCount = 0,
   isActive = false,
   onClick,
-  disabled = false,
   className = '',
 }: PriceLabelProps) => {
   const hasFavorite = favorite === 'on';
-  const hasRoomChip = roomChip === 'extra';
-  const baseTextColorClass = getBaseTextColorClass(state, favorite);
+  const hasRoomChip = extraRoomCount > 0;
+  const baseTextColorClass = getBaseTextColorClass(isPartial, favorite);
   const markerInteractionClass = getMarkerInteractionClass(isActive, favorite);
   const textInteractionClass = getTextInteractionClass(isActive);
   const wonIconSizeClass = getWonIconSizeClass(favorite, isActive);
   const wonIconColorClass = getWonIconColorClass(isActive, baseTextColorClass);
-  const faveIconColorClass = getFaveIconColorClass(state, isActive);
+  const faveIconColorClass = getFaveIconColorClass(isPartial, isActive);
   const activeChipClass = isActive ? 'w-[1.5625rem] h-[1.5625rem] [&_span]:text-[1.1875rem]' : '';
 
   return (
-    <div className={`relative pt-2.5 ${className}`}>
-      <div className={`group/price flex items-start justify-end ${WRAPPER_CLASS_BY_ROOM_CHIP[roomChip]}`}>
+    <div className={`inline-block relative pt-2.5 ${className}`}>
+      <div className="group/price relative inline-flex items-start">
         <button
           type="button"
           onClick={onClick}
-          disabled={disabled}
           aria-pressed={isActive}
-          className={`h-10 px-5 py-2.5 border border-transparent shadow-price transition-all group-hover/price:h-[3.125rem] flex items-center justify-center gap-0.5 ${markerInteractionClass} ${hasRoomChip ? '-mr-[0.9375rem]' : ''} ${MARKER_BG_CLASS_BY_FAVORITE[favorite]} ${favorite === 'off' ? 'group-hover/price:border-gray-600' : ''} ${
-            disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-          }`}
+          className={`h-10 px-5 py-2.5 border border-transparent shadow-price transition-all group-hover/price:h-[3.125rem] flex items-center justify-center gap-0.5 ${markerInteractionClass} ${MARKER_BG_CLASS_BY_FAVORITE[favorite]} ${favorite === 'off' ? 'group-hover/price:border-gray-600' : ''} cursor-pointer`}
         >
           <WonIcon
             className={`${wonIconSizeClass} ${wonIconColorClass} [&_path]:fill-current`}
@@ -99,7 +84,12 @@ const PriceLabel = ({
           </span>
         </button>
 
-        {hasRoomChip && <PriceChip count={extraRoomCount} className={activeChipClass} />}
+        {hasRoomChip && (
+          <PriceChip
+            count={extraRoomCount}
+            className={`absolute top-0 right-[-0.3125rem] group-hover/price:right-[-0.625rem] ${activeChipClass}`}
+          />
+        )}
       </div>
 
       {hasFavorite && (
@@ -114,10 +104,5 @@ const PriceLabel = ({
   );
 };
 
-export type {
-  FavoriteState,
-  PriceLabelProps,
-  PriceLabelState,
-  RoomChipState,
-} from './PriceLabel.types';
+export type { FavoriteState, PriceLabelProps } from './PriceLabel.types';
 export default PriceLabel;
