@@ -1,3 +1,7 @@
+/**
+ * 가격 칩 컴포넌트
+ * 추가로 묶인 룸 개수를 원형 칩으로 표시합니다. PriceLabel과 함께 사용됩니다.
+ */
 import type { PriceChipProps } from './PriceChip.types';
 
 const PriceChip = ({ count, className = '' }: PriceChipProps) => {

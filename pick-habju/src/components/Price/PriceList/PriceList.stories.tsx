@@ -1,15 +1,18 @@
+/** PriceList 스토리: 목록만 / PriceLabel과 연동 토글 */
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import PriceLabel from '../PriceLabel/PriceLabel';
 import PriceList from './PriceList';
 import type { PriceListRoom } from './PriceList.types';
 
+/** 스토리용 룸 목록 */
 const rooms: PriceListRoom[] = [
   { id: 'a', name: 'A룸', priceText: '29,000' },
   { id: 'b', name: 'B룸', priceText: '119,000' },
   { id: 'c', name: 'C룸', priceText: '69,000' },
 ];
 
+/** PriceLabel 클릭 시 PriceList 열림/닫힘을 토글하는 래퍼 */
 const PriceListWithLabelTrigger = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -53,6 +56,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** 목록만 열린 상태 */
 export const Default: Story = {
   args: {
     rooms,
@@ -60,6 +64,7 @@ export const Default: Story = {
   },
 };
 
+/** PriceLabel 클릭으로 목록 토글하는 연동 예시 */
 export const WithPriceLabelTrigger: Story = {
   args: {
     rooms,
