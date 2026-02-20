@@ -182,7 +182,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           return { hour: h24 - 12, period: TimePeriod.PM };
         };
         const s12 = to12(start24);
-        const e12 = to12(end24 === 0 ? 24 % 24 : end24);
+        const e12 = to12(end24);
         return { startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period };
       }
     } catch (error) {
