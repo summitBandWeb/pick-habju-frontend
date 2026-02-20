@@ -25,7 +25,7 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
         {/* 스크롤 영역: 헤더 제외 나머지 */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-stable">
           <div className="w-full flex flex-col items-center bg-yellow-300">{children}</div>
-          <div className="flex justify-center py-6 w-full bg-yellow-300">
+          <div className="flex justify-center w-full bg-yellow-300">
             <Footer />
           </div>
         </div>
