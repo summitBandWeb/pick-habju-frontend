@@ -18,6 +18,9 @@ import RoutePaths from '../router/routePaths';
 import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 
 const HomePage = () => {
+  // Cold Start 방지 (서버 Warm-up)
+  usePingQuery();
+
   // 1. UI 상태 관리 (HeroArea 강제 리렌더링용)
   const [heroResetCounter, setHeroResetCounter] = useState(0);
 
