@@ -1,3 +1,5 @@
+import type { SearchParams } from '../../store/search/searchStore.types';
+
 /** 현재 열려 있는 드롭다운 종류. 아무것도 열리지 않은 경우 null */
 export type ActiveDropdown = 'dateTime' | 'person' | 'location' | null;
 
@@ -11,13 +13,5 @@ export interface HeroAreaProps {
   peopleCount: number;
   onDateTimeChange?: () => void;
   onPersonCountChange?: () => void;
-  onSearch: (params: {
-    location: string;
-    locationId: string;
-    coordinates: { lat: number; lng: number };
-    bounds: { swLat: number; swLng: number; neLat: number; neLng: number };
-    date: string;
-    hour_slots: string[];
-    peopleCount: number;
-  }) => void;
+  onSearch: (params: SearchParams) => void;
 }

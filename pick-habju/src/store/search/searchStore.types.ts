@@ -26,26 +26,10 @@ export type SearchState = {
   includePartiallyPossible: boolean;
   setIncludePartiallyPossible: (include: boolean) => void;
   // 마지막 검색 조건 (가격 계산 등에 사용)
-  lastQuery?: {
-    location: string;
-    locationId: string;
-    coordinates: { lat: number; lng: number };
-    bounds: { swLat: number; swLng: number; neLat: number; neLng: number };
-    date: string;
-    hour_slots: string[];
-    peopleCount: number;
-  };
+  lastQuery?: SearchParams;
   // 응답 → Default 카드 구성 액션
   setDefaultFromResponse: (args: { response: AvailabilityResponse; peopleCount: number }) => void;
-  setLastQuery: (q: {
-    location: string;
-    locationId: string;
-    coordinates: { lat: number; lng: number };
-    bounds: { swLat: number; swLng: number; neLat: number; neLng: number };
-    date: string;
-    hour_slots: string[];
-    peopleCount: number;
-  }) => void;
+  setLastQuery: (q: SearchParams) => void;
   // 필터링된 카드 설정 액션
   setFilteredCards: (cards: SearchCardItem[]) => void;
 };
