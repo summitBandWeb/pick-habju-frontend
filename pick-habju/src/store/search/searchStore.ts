@@ -1,6 +1,18 @@
 import { create } from 'zustand';
-import { SearchPhase, CardKind, type SearchState, type AvailabilityResponse, type SearchCardItem, type SlotAvailability } from './searchStore.types';
-import { ROOMS, UNKNOWN_DATES_BY_BUSINESS_ID, REOPEN_AFTER_DAYS_BY_BUSINESS_ID, type UnknownDateRule } from '../../constants/data';
+import {
+  SearchPhase,
+  CardKind,
+  type SearchState,
+  type AvailabilityResponse,
+  type SearchCardItem,
+  type SlotAvailability,
+} from './searchStore.types';
+import {
+  ROOMS,
+  UNKNOWN_DATES_BY_BUSINESS_ID,
+  REOPEN_AFTER_DAYS_BY_BUSINESS_ID,
+  type UnknownDateRule,
+} from '../../constants/data';
 
 // 오픈대기 안내에 사용할 임계일(현재 날짜 기준 X일 이후)
 const reopenDaysByBusinessId = REOPEN_AFTER_DAYS_BY_BUSINESS_ID;
@@ -30,7 +42,9 @@ export const useSearchStore = create<SearchState>((set) => ({
   setFilteredCards: (cards) => set({ filteredCards: cards }),
   setIncludePartiallyPossible: (include) => set({ includePartiallyPossible: include }),
   setDefaultFromResponse: ({ response }: { response: AvailabilityResponse; peopleCount: number }) => {
-    const availableIds = new Set<string>(Array.isArray(response.available_biz_item_ids) ? response.available_biz_item_ids : []);
+    const availableIds = new Set<string>(
+      Array.isArray(response.available_biz_item_ids) ? response.available_biz_item_ids : []
+    );
     const results = Array.isArray(response.results) ? response.results : [];
 
     const nextCards: SearchCardItem[] = [];
