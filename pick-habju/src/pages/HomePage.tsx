@@ -17,6 +17,9 @@ import RoutePaths from '../router/routePaths';
 // Hooks
 import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 
+// Utils
+import { usePingQuery } from '../api/coldStart/usePingQueries';
+
 const HomePage = () => {
   // Cold Start 방지 (서버 Warm-up)
   usePingQuery();
@@ -79,4 +82,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
