@@ -105,7 +105,7 @@ const Card = ({
         <button
           type="button"
           onClick={handleLikeClick}
-          className="hover:opacity-80 transition-opacity"
+          className="flex h-[37px] w-[36px] shrink-0 items-center justify-center hover:opacity-80 transition-opacity"
         >
           <img
             src={isLiked ? FaveOn : FaveOff}
