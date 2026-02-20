@@ -73,7 +73,6 @@ const PriceLabel = ({
   const wonIconSizeClass = getWonIconSizeClass(favorite, isActive);
   const wonIconColorClass = getWonIconColorClass(isActive, baseTextColorClass);
   const faveIconColorClass = getFaveIconColorClass(isPartial, isActive);
-  const activeChipClass = isActive ? 'w-[1.5625rem] h-[1.5625rem] [&_span]:text-[1.1875rem]' : '';
 
   return (
     <div className={`inline-block relative pt-2.5 ${className}`}>
@@ -98,7 +97,8 @@ const PriceLabel = ({
         {hasRoomChip && (
           <PriceChip
             count={extraRoomCount}
-            className={`absolute top-0 right-[-0.3125rem] group-hover/price:right-[-0.625rem] ${activeChipClass}`}
+            isActive={isActive}
+            className="absolute top-0 right-[-0.3125rem] group-hover/price:right-[-0.625rem]"
           />
         )}
       </div>
