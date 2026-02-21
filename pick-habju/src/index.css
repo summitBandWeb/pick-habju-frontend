@@ -194,6 +194,7 @@
     --box-shadow-card: 4px 4px 10px 0px rgba(0, 0, 0, 0.25);
     --box-shadow-search: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
     --box-shadow-filter: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+    --box-shadow-price: 0px 1px 3px 0px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -416,6 +417,9 @@
   }
   .shadow-filter {
     box-shadow: var(--box-shadow-filter);
+  }
+  .shadow-price {
+    box-shadow: var(--box-shadow-price);
   }
 
   /* Toast keyframes */

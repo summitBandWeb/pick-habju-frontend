@@ -9,7 +9,7 @@ import NoLocationIcon from '../../assets/svg/NoLocation.svg';
 const ErrorNotice = ({
   type,
   onClose,
-  autoHideAfter = 3000,
+  autoHideAfter = 6000,
   onAutoHide,
 }: ErrorNoticeProps) => {
   const [isVisible, setIsVisible] = useState(true);
