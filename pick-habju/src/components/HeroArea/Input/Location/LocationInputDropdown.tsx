@@ -8,16 +8,6 @@ export interface LocationOption {
   name: string;
   /** 역에 연결된 노선 정보 (예: "4호선·7호선"). */
   subwayLine: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  bounds: {
-    swLat: number;
-    swLng: number;
-    neLat: number;
-    neLng: number;
-  };
 }
 
 /** 노선 식별자: 숫자(1~9) 또는 문자(A=공항철도, K=경의중앙선) */

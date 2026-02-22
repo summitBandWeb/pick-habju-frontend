@@ -53,10 +53,10 @@ const Setup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const slot = `${String(hour).padStart(2, '0')}:00`;
 
     setLastQuery({
-      location: '이수역',
-      locationId: 'isuyeok',
-      coordinates: { lat: 37.4865, lng: 126.9818 },
-      bounds: { swLat: 37.484500, swLng: 126.979800, neLat: 37.488500, neLng: 126.983800 },
+      location: '사당',
+      stationId: 'sadang',
+      center: { lat: 37.476550, lng: 126.981688 },
+      bounds: { swLat: 37.47, swLng: 126.974, neLat: 37.483, neLng: 126.989 },
       date: dateIso,
       hour_slots: [slot],
       peopleCount: 12,

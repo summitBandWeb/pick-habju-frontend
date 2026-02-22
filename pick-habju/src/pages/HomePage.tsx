@@ -19,6 +19,7 @@ import { useDefaultDateTime } from '../hook/useDefaultDateTime';
 
 // Utils
 import { usePingQuery } from '../api/coldStart/usePingQueries';
+import type { SearchParams } from '../store/search/searchStore.types';
 
 const HomePage = () => {
   // Cold Start 방지 (서버 Warm-up)
@@ -37,16 +38,8 @@ const HomePage = () => {
   // 4. 라우터
   const navigate = useNavigate();
 
-  // 5. Event Handler: 검색 시작
-  const onSearch = (params: {
-    location: string;
-    locationId: string;
-    coordinates: { lat: number; lng: number };
-    bounds: { swLat: number; swLng: number; neLat: number; neLng: number };
-    date: string;
-    hour_slots: string[];
-    peopleCount: number;
-  }) => {
+  // 5. Event Handler: 검색 시작 (HeroArea에서 이미 full SearchParams 전달)
+  const onSearch = (params: SearchParams) => {
     setLastQuery(params);
     navigate(RoutePaths.MAP);
   };
