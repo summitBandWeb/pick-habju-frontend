@@ -28,8 +28,8 @@ export function loadNaverMapScript(): Promise<typeof naver> {
     );
     return loadPromise;
   }
-
-  const url = `${SCRIPT_BASE}?ncpClientId=${encodeURIComponent(clientId)}&submodules=geocoder`;
+  
+  const url = `${SCRIPT_BASE}?ncpKeyId=${encodeURIComponent(clientId)}&submodules=geocoder`;
 
   loadPromise = new Promise((resolve, reject) => {
     const existing = document.getElementById(NAVER_MAP_SCRIPT_ID);
