@@ -38,6 +38,7 @@
     "@storybook/test": "^8.6.12",
     "@tailwindcss/vite": "^4.1.6",
     "@tanstack/react-query-devtools": "^5.91.3",
+    "@types/navermaps": "^3.9.1",
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
