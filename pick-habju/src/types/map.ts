@@ -19,4 +19,6 @@ export type MapViewport = {
 export interface NaverMapHandle {
   getMap: () => naver.maps.Map | null; // 원본 지도 객체에 접근
   getViewport: () => MapViewport | null; // 현재 지도의 좌표 정보들을 가져옴
+  panTo: (lat: number, lng: number) => void; // 부드러운 이동 함수
+  setCenter: (lat: number, lng: number) => void; // 즉시 이동 함수
 }
