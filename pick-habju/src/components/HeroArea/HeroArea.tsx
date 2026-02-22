@@ -21,51 +21,17 @@ import { useSearchStore } from '../../store/search/searchStore';
 import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
-import { SUBWAY_REGIONS } from '../../constants/subway_regions';
+import { getServiceableStations, SERVICEABLE_STATION_IDS } from '../../constants/serviceable_stations';
 
-// subway_regions에서 좌표를 가져오는 헬퍼
-const findRegion = (name: string) => SUBWAY_REGIONS.find((r) => r.name === name);
+const STATIONS = getServiceableStations();
 
-// 지역 옵션 데이터 (좌표는 subway_regions에서, 노선 표시는 직접 관리)
-// - TODO: 추후 관리 방법 개선 해야함.
-const LOCATION_OPTIONS: LocationOption[] = [
-  {
-    id: 'sadang',
-    name: '사당',
-    subwayLine: '2호선·4호선',
-    coordinates: findRegion('사당')?.center ?? { lat: 37.4762, lng: 126.9812 },
-    bounds: findRegion('사당')?.bounds ?? { swLat: 37.47, swLng: 126.974, neLat: 37.483, neLng: 126.989 },
-  },
-  {
-    id: 'gangnam',
-    name: '강남',
-    subwayLine: '2호선',
-    coordinates: findRegion('강남')?.center ?? { lat: 37.4979, lng: 127.0276 },
-    bounds: findRegion('강남')?.bounds ?? { swLat: 37.495958, swLng: 127.025539, neLat: 37.499958, neLng: 127.029539 },
-  },
-  {
-    id: 'hongdae',
-    name: '홍대입구',
-    subwayLine: '2호선·공항철도·경의중앙선',
-    coordinates: findRegion('홍대입구')?.center ?? { lat: 37.5572, lng: 126.9239 },
-    bounds: findRegion('홍대입구')?.bounds ?? {
-      swLat: 37.554748,
-      swLng: 126.921643,
-      neLat: 37.558748,
-      neLng: 126.925643,
-    },
-  },
-  {
-    id: 'sinchon',
-    name: '신촌',
-    subwayLine: '2호선',
-    coordinates: findRegion('신촌')?.center ?? { lat: 37.5559, lng: 126.9362 },
-    bounds: findRegion('신촌')?.bounds ?? { swLat: 37.553153, swLng: 126.93489, neLat: 37.557153, neLng: 126.93889 },
-  },
-];
+const LOCATION_OPTIONS: LocationOption[] = STATIONS.map((station) => ({
+  id: station.id,
+  name: station.name,
+  subwayLine: station.subwayLine,
+}));
 
-// 기본 지역 ID (초기 선택값)
-const DEFAULT_LOCATION_ID = 'sadang';
+const DEFAULT_LOCATION_ID = SERVICEABLE_STATION_IDS[0];
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
@@ -311,11 +277,13 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
                   // UI 라벨 업데이트 보정
                   setDateTimeText(formatReservationLabel(dateIso, slots));
+                  const station =
+                    STATIONS.find((s) => s.id === selectedLocation.id) ?? STATIONS[0];
                   onSearch({
-                    location: selectedLocation.name,
-                    locationId: selectedLocation.id,
-                    coordinates: selectedLocation.coordinates,
-                    bounds: selectedLocation.bounds,
+                    location: station.name,
+                    stationId: station.id,
+                    center: station.center,
+                    bounds: station.bounds,
                     date: dateIso,
                     hour_slots: slots,
                     peopleCount: peopleCountText,
