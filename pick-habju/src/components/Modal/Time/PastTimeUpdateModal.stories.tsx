@@ -56,6 +56,7 @@ const Setup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       location: '이수역',
       locationId: 'isuyeok',
       coordinates: { lat: 37.4865, lng: 126.9818 },
+      bounds: { swLat: 37.484500, swLng: 126.979800, neLat: 37.488500, neLng: 126.983800 },
       date: dateIso,
       hour_slots: [slot],
       peopleCount: 12,

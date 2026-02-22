@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import Button from '../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import PersonCountInputDropdown from './Input/Person/PersonCountInputDropdown';
@@ -17,42 +18,49 @@ import { useToastStore } from '../../store/toast/toastStore';
 import { formatReservationLabel } from '../../utils/formatReservationLabel';
 import { generateHourSlots } from '../../utils/formatTime';
 import { useSearchStore } from '../../store/search/searchStore';
-import { SearchPhase } from '../../store/search/searchStore.types';
 import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
+import { SUBWAY_REGIONS } from '../../constants/subway_regions';
 
-// 지역 옵션 데이터
+// subway_regions에서 좌표를 가져오는 헬퍼
+const findRegion = (name: string) => SUBWAY_REGIONS.find((r) => r.name === name);
+
+// 지역 옵션 데이터 (좌표는 subway_regions에서, 노선 표시는 직접 관리)
+// - TODO: 추후 관리 방법 개선 해야함.
 const LOCATION_OPTIONS: LocationOption[] = [
-  { 
-    id: 'sadang', 
-    name: '사당', 
+  {
+    id: 'sadang',
+    name: '사당',
     subwayLine: '2호선·4호선',
-    coordinates: { lat: 37.4762, lng: 126.9812 }
+    coordinates: findRegion('사당')?.center ?? { lat: 37.4762, lng: 126.9812 },
+    bounds: findRegion('사당')?.bounds ?? { swLat: 37.47, swLng: 126.974, neLat: 37.483, neLng: 126.989 },
   },
-  { 
-    id: 'gangnam', 
-    name: '강남', 
+  {
+    id: 'gangnam',
+    name: '강남',
     subwayLine: '2호선',
-    coordinates: { lat: 37.4979, lng: 127.0276 }
+    coordinates: findRegion('강남')?.center ?? { lat: 37.4979, lng: 127.0276 },
+    bounds: findRegion('강남')?.bounds ?? { swLat: 37.495958, swLng: 127.025539, neLat: 37.499958, neLng: 127.029539 },
   },
-  { 
-    id: 'hongdae', 
-    name: '홍대입구', 
+  {
+    id: 'hongdae',
+    name: '홍대입구',
     subwayLine: '2호선·공항철도·경의중앙선',
-    coordinates: { lat: 37.5572, lng: 126.9239 }
+    coordinates: findRegion('홍대입구')?.center ?? { lat: 37.5572, lng: 126.9239 },
+    bounds: findRegion('홍대입구')?.bounds ?? {
+      swLat: 37.554748,
+      swLng: 126.921643,
+      neLat: 37.558748,
+      neLng: 126.925643,
+    },
   },
-  { 
-    id: 'sinchon', 
-    name: '신촌', 
+  {
+    id: 'sinchon',
+    name: '신촌',
     subwayLine: '2호선',
-    coordinates: { lat: 37.5559, lng: 126.9362 }
-  },
-  { 
-    id: 'jamsil', 
-    name: '잠실', 
-    subwayLine: '2호선·8호선',
-    coordinates: { lat: 37.5133, lng: 127.1000 }
+    coordinates: findRegion('신촌')?.center ?? { lat: 37.5559, lng: 126.9362 },
+    bounds: findRegion('신촌')?.bounds ?? { swLat: 37.553153, swLng: 126.93489, neLat: 37.557153, neLng: 126.93889 },
   },
 ];
 
@@ -62,16 +70,13 @@ const DEFAULT_LOCATION_ID = 'sadang';
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
-  
+
   // 초기 지역 선택: 상수 ID로 안전하게 찾고, 없으면 배열 첫번째로 폴백
   const [selectedLocation, setSelectedLocation] = useState<LocationOption>(
-    LOCATION_OPTIONS.find(loc => loc.id === DEFAULT_LOCATION_ID) ?? LOCATION_OPTIONS[0]
+    LOCATION_OPTIONS.find((loc) => loc.id === DEFAULT_LOCATION_ID) ?? LOCATION_OPTIONS[0]
   );
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
-  
-  const phase = useSearchStore((s) => s.phase);
-  const isLoading = phase === SearchPhase.Loading;
 
   // GoogleForm Toast Store
   const { incrementSearchCount, showToast } = useGoogleFormToastStore();
@@ -177,7 +182,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           return { hour: h24 - 12, period: TimePeriod.PM };
         };
         const s12 = to12(start24);
-        const e12 = to12(end24 === 0 ? 24 % 24 : end24);
+        const e12 = to12(end24);
         return { startHour: s12.hour, startPeriod: s12.period, endHour: e12.hour, endPeriod: e12.period };
       }
     } catch (error) {
@@ -191,9 +196,11 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
     };
   }, [hourSlots, dateTime.hour_slots]);
 
+  const anyDropdownOpen = activeDropdown !== null;
+
   return (
     <div
-      className="relative w-full h-[625px] flex flex-col items-center"
+      className="relative w-full h-[625px] flex flex-col items-center overflow-hidden"
       style={{
         backgroundImage: `url(${BackGroundImage})`,
         backgroundSize: 'cover',
@@ -206,101 +213,120 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
       {/* 실제 콘텐츠 */}
       <div className="relative z-10 flex flex-col items-center w-full">
-        <h1 className="text-primary-white font-hero-headline mt-[142.5px] mb-8">합주실 예약 현황을 한눈에</h1>
+        <motion.div
+          className="flex flex-col items-center"
+          animate={{
+            y:
+              activeDropdown === 'dateTime'
+                ? -180
+                : activeDropdown === 'location'
+                  ? -90
+                  : activeDropdown === 'person'
+                    ? -40
+                    : 0,
+          }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h1 className={`text-primary-white font-hero-headline ${anyDropdownOpen ? 'mt-30' : 'mt-[142.5px]'} mb-8`}>
+            합주실 예약 현황을 한눈에
+          </h1>
 
-        <div className="flex flex-col items-center">
-          <div className="flex flex-col gap-4 mb-8">
-            <LocationInputDropdown
-              location={selectedLocation.name}
-              options={LOCATION_OPTIONS}
-              onSelect={handleLocationSelect}
-              isOpen={activeDropdown === 'location'}
-              onOpenChange={handleLocationOpenChange}
-            />
-            <DateTimeInputDropdown
-              dateTime={dateTimeText}
-              initialSelectedDate={selectedDate ?? undefined}
-              onConfirm={handleDateTimeConfirm}
-              disabled={isToastVisible}
-              initialStartHour={initialTimeFromSlots.startHour}
-              initialStartPeriod={initialTimeFromSlots.startPeriod}
-              initialEndHour={initialTimeFromSlots.endHour}
-              initialEndPeriod={initialTimeFromSlots.endPeriod}
-              isOpen={activeDropdown === 'dateTime'}
-              onOpenChange={handleDateTimeOpenChange}
-            />
-            <PersonCountInputDropdown
-              count={peopleCountText}
-              onConfirm={handlePersonCountConfirm}
-              isOpen={activeDropdown === 'person'}
-              onOpenChange={handlePersonOpenChange}
-            />
-          </div>
-          <div>
-            <Button
-              label="검색하기"
-              onClick={() => {
-                if (isLoading || isSearchClickLocked) return;
-                setIsSearchClickLocked(true);
-                setTimeout(() => setIsSearchClickLocked(false), 600);
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col gap-4 mb-6">
+              <div>
+                <LocationInputDropdown
+                  location={selectedLocation.name}
+                  options={LOCATION_OPTIONS}
+                  onSelect={handleLocationSelect}
+                  isOpen={activeDropdown === 'location'}
+                  onOpenChange={handleLocationOpenChange}
+                />
+              </div>
+              <DateTimeInputDropdown
+                dateTime={dateTimeText}
+                initialSelectedDate={selectedDate ?? undefined}
+                onConfirm={handleDateTimeConfirm}
+                disabled={isToastVisible}
+                initialStartHour={initialTimeFromSlots.startHour}
+                initialStartPeriod={initialTimeFromSlots.startPeriod}
+                initialEndHour={initialTimeFromSlots.endHour}
+                initialEndPeriod={initialTimeFromSlots.endPeriod}
+                isOpen={activeDropdown === 'dateTime'}
+                onOpenChange={handleDateTimeOpenChange}
+              />
+              <PersonCountInputDropdown
+                count={peopleCountText}
+                onConfirm={handlePersonCountConfirm}
+                isOpen={activeDropdown === 'person'}
+                onOpenChange={handlePersonOpenChange}
+              />
+            </div>
+            <div className={activeDropdown === 'location' ? 'pb-5' : activeDropdown === 'person' ? 'pt-2.5' : ''}>
+              <Button
+                label="검색하기"
+                onClick={() => {
+                  if (isSearchClickLocked) return;
+                  setIsSearchClickLocked(true);
+                  setTimeout(() => setIsSearchClickLocked(false), 600);
 
-                // 스토어에 값이 없으면 props의 기본값 사용
-                let dateIso: string;
-                let slots: string[];
+                  // 스토어에 값이 없으면 props의 기본값 사용
+                  let dateIso: string;
+                  let slots: string[];
 
-                if (selectedDate) {
-                  dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
-                    selectedDate.getDate()
-                  ).padStart(2, '0')}`;
-                } else {
-                  dateIso = dateTime.date;
-                }
+                  if (selectedDate) {
+                    dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(
+                      selectedDate.getDate()
+                    ).padStart(2, '0')}`;
+                  } else {
+                    dateIso = dateTime.date;
+                  }
 
-                if (hourSlots && hourSlots.length > 0) {
-                  slots = hourSlots;
-                } else {
-                  slots = dateTime.hour_slots;
-                }
+                  if (hourSlots && hourSlots.length > 0) {
+                    slots = hourSlots;
+                  } else {
+                    slots = dateTime.hour_slots;
+                  }
 
-                // 직전 사이클 요약 전송 및 새 사이클 시작
-                try {
-                  useAnalyticsCycleStore.getState().endCycleAndFlush({
+                  // 직전 사이클 요약 전송 및 새 사이클 시작
+                  try {
+                    useAnalyticsCycleStore.getState().endCycleAndFlush({
+                      date: dateIso,
+                      hour_slots: slots,
+                      people_count: peopleCountText,
+                    });
+                  } catch (e) {
+                    console.debug('endCycleAndFlush failed', e);
+                  }
+
+                  // 검색 횟수 증가 및 토스트 표시 조건 확인
+                  incrementSearchCount();
+                  showToast();
+
+                  // 검색 버튼 클릭 이벤트를 GA에 추적
+                  trackSearchButtonClick({
                     date: dateIso,
                     hour_slots: slots,
-                    people_count: peopleCountText,
+                    peopleCount: peopleCountText,
                   });
-                } catch (e) {
-                  console.debug('endCycleAndFlush failed', e);
-                }
 
-                // 검색 횟수 증가 및 토스트 표시 조건 확인
-                incrementSearchCount();
-                showToast();
-
-                // 검색 버튼 클릭 이벤트를 GA에 추적
-                trackSearchButtonClick({
-                  date: dateIso,
-                  hour_slots: slots,
-                  peopleCount: peopleCountText,
-                });
-
-                // UI 라벨 업데이트 보정
-                setDateTimeText(formatReservationLabel(dateIso, slots));
-                onSearch({ 
-                  location: selectedLocation.name,
-                  locationId: selectedLocation.id,
-                  coordinates: selectedLocation.coordinates,
-                  date: dateIso, 
-                  hour_slots: slots, 
-                  peopleCount: peopleCountText 
-                });
-              }}
-              variant={ButtonVariant.Main}
-              size={BtnSizeVariant.MD}
-              disabled={isLoading}
-            />
+                  // UI 라벨 업데이트 보정
+                  setDateTimeText(formatReservationLabel(dateIso, slots));
+                  onSearch({
+                    location: selectedLocation.name,
+                    locationId: selectedLocation.id,
+                    coordinates: selectedLocation.coordinates,
+                    bounds: selectedLocation.bounds,
+                    date: dateIso,
+                    hour_slots: slots,
+                    peopleCount: peopleCountText,
+                  });
+                }}
+                variant={ButtonVariant.Main}
+                size={BtnSizeVariant.MD}
+              />
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* 토스트 (드롭다운/모달 검증용, 항상 마운트) */}

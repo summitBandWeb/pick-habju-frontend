@@ -1,6 +1,5 @@
-'use client';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import GuestCounter from '../../../GuestCounter/GuestCounter';
 import Button from '../../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../../Button/ButtonEnums';
@@ -81,18 +80,29 @@ const PersonCountInputDropdown = ({
     >
       <PersonCountInput count={count} onChangeClick={handleToggle} isOpen={isOpen} />
 
-      {isOpen && (
-        <div className="flex flex-col bg-primary-white gap-4 py-4 px-3.5 items-center">
-          <GuestCounter value={guestCount} onChange={setGuestCount} min={min} max={max} />
-          <Button
-            label="확인"
-            variant={ButtonVariant.Main}
-            size={BtnSizeVariant.SM}
-            disabled={disabled}
-            onClick={handleConfirm}
-          />
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="person-dropdown"
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 1, y: 0, height: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="origin-top"
+          >
+            <div className="flex flex-col bg-primary-white gap-4 py-4 px-3.5 items-center">
+              <GuestCounter value={guestCount} onChange={setGuestCount} min={min} max={max} />
+              <Button
+                label="확인"
+                variant={ButtonVariant.Main}
+                size={BtnSizeVariant.SM}
+                disabled={disabled}
+                onClick={handleConfirm}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
