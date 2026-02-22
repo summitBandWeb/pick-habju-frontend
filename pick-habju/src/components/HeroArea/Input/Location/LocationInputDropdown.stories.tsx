@@ -3,12 +3,12 @@ import { useState } from 'react';
 import LocationInputDropdown, { type LocationOption } from './LocationInputDropdown';
 
 const LOCATION_OPTIONS: LocationOption[] = [
-  { id: 'isuyeok', name: '이수역', subwayLine: '4호선·7호선', coordinates: { lat: 37.4865, lng: 126.9818 } },
-  { id: 'sangdo', name: '상도역', subwayLine: '7호선', coordinates: { lat: 37.5025, lng: 126.9492 } },
-  { id: 'sadang', name: '사당역', subwayLine: '2호선·4호선', coordinates: { lat: 37.4767, lng: 126.9816 } },
-  { id: 'heukseok', name: '흑석역', subwayLine: '9호선', coordinates: { lat: 37.5086, lng: 126.9616 } },
-  { id: 'gimpo', name: '김포공항역', subwayLine: '공항철도·5호선·9호선', coordinates: { lat: 37.5621, lng: 126.8014 } },
-  { id: 'digital', name: '디지털미디어시티역', subwayLine: '6호선·경의중앙선·공항철도', coordinates: { lat: 37.5772, lng: 126.9006 } },
+  { id: 'isuyeok', name: '이수역', subwayLine: '4호선·7호선', coordinates: { lat: 37.4865, lng: 126.9818 }, bounds: { swLat: 37.4845, swLng: 126.9798, neLat: 37.4885, neLng: 126.9838 } },
+  { id: 'sangdo', name: '상도역', subwayLine: '7호선', coordinates: { lat: 37.5025, lng: 126.9492 }, bounds: { swLat: 37.5005, swLng: 126.9472, neLat: 37.5045, neLng: 126.9512 } },
+  { id: 'sadang', name: '사당역', subwayLine: '2호선·4호선', coordinates: { lat: 37.4767, lng: 126.9816 }, bounds: { swLat: 37.4747, swLng: 126.9796, neLat: 37.4787, neLng: 126.9836 } },
+  { id: 'heukseok', name: '흑석역', subwayLine: '9호선', coordinates: { lat: 37.5086, lng: 126.9616 }, bounds: { swLat: 37.5066, swLng: 126.9596, neLat: 37.5106, neLng: 126.9636 } },
+  { id: 'gimpo', name: '김포공항역', subwayLine: '공항철도·5호선·9호선', coordinates: { lat: 37.5621, lng: 126.8014 }, bounds: { swLat: 37.5601, swLng: 126.7994, neLat: 37.5641, neLng: 126.8034 } },
+  { id: 'digital', name: '디지털미디어시티역', subwayLine: '6호선·경의중앙선·공항철도', coordinates: { lat: 37.5772, lng: 126.9006 }, bounds: { swLat: 37.5752, swLng: 126.8986, neLat: 37.5792, neLng: 126.9026 } },
 ];
 
 const meta: Meta<typeof LocationInputDropdown> = {

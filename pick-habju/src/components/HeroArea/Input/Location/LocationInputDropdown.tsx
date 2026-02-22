@@ -1,6 +1,5 @@
-'use client';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { KeyboardEvent } from 'react';
 import LocationIcon from '../../../../assets/svg/location.svg';
 
@@ -13,6 +12,12 @@ export interface LocationOption {
     lat: number;
     lng: number;
   };
+  bounds: {
+    swLat: number;
+    swLng: number;
+    neLat: number;
+    neLng: number;
+  };
 }
 
 /** 노선 식별자: 숫자(1~9) 또는 문자(A=공항철도, K=경의중앙선) */
@@ -20,8 +25,8 @@ type SubwayLineId = number | 'A' | 'K';
 
 /** 특수 노선 이름 → 노선 ID 매핑 */
 const SPECIAL_LINE_MAP: Record<string, SubwayLineId> = {
-  '공항철도': 'A',
-  '경의중앙선': 'K',
+  공항철도: 'A',
+  경의중앙선: 'K',
 };
 
 /** "4호선·7호선·공항철도·경의중앙선" 형태의 문자열에서 노선 배열 추출 (순서 유지) */
@@ -68,13 +73,7 @@ export interface LocationInputDropdownProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const LocationInputDropdown = ({
-  location,
-  options,
-  onSelect,
-  isOpen,
-  onOpenChange,
-}: LocationInputDropdownProps) => {
+const LocationInputDropdown = ({ location, options, onSelect, isOpen, onOpenChange }: LocationInputDropdownProps) => {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -239,7 +238,20 @@ const LocationInputDropdown = ({
       className={`flex flex-col w-[19.875rem] min-w-[14.375rem] rounded-lg border-2 border-gray-200 overflow-hidden shadow-search`}
     >
       {renderInputArea()}
-      {isOpen && renderDropdownArea()}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="location-dropdown"
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 1, y: 0, height: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="origin-top"
+          >
+            {renderDropdownArea()}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

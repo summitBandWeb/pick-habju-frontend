@@ -1,13 +1,8 @@
 import './index.css';
-import HomePage from './pages/HomePage';
-import AppWrapper from './layout/AppWrapper';
+import Router from './router/routes';
 
 function App() {
-  return (
-    <AppWrapper>
-      <HomePage />
-    </AppWrapper>
-  );
+  return <Router />;
 }
 
 export default App;

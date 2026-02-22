@@ -1,6 +1,5 @@
-'use client';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import DatePicker from '../../../DatePicker/DatePicker';
 import PickerFooter from '../../../PickerFooter/PickerFooter';
@@ -89,15 +88,12 @@ const DateTimeInputDropdown = ({
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const handleTimeDraftChange = useCallback(
-    (sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
-      setPickerState((s) => ({
-        ...s,
-        time: { startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep },
-      }));
-    },
-    []
-  );
+  const handleTimeDraftChange = useCallback((sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
+    setPickerState((s) => ({
+      ...s,
+      time: { startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep },
+    }));
+  }, []);
 
   const handleTimeConfirm = useCallback(() => {
     const date = pickerState.tempDate ?? pickerState.selectedDates[0];
@@ -167,41 +163,48 @@ const DateTimeInputDropdown = ({
     >
       <DateTimeInput dateTime={dateTime} onChangeClick={handleToggle} isOpen={isOpen} />
 
-      {isOpen && (
-        <div className="flex flex-col bg-primary-white">
-          {pickerState.step === 'DATE' ? (
-            <>
-              <DatePicker
-                initialSelectedDate={pickerState.selectedDates[0] ?? initialSelectedDate}
-                onChange={handleDateChange}
-              />
-              <PickerFooter
-                onConfirm={handleDateStepConfirm}
-                onCancel={handleDateStepCancel}
-                confirmText="다음"
-              />
-            </>
-          ) : (
-            <>
-              <TimePickerBody
-                startHour={pickerState.time.startHour}
-                startPeriod={pickerState.time.startPeriod}
-                endHour={pickerState.time.endHour}
-                endPeriod={pickerState.time.endPeriod}
-                onChange={handleTimeDraftChange}
-                disabled={disabled}
-              />
-              <PickerFooter
-                onConfirm={handleTimeConfirm}
-                onCancel={handleTimeCancel}
-                disabled={disabled}
-                confirmText="확인"
-                cancelText="이전"
-              />
-            </>
-          )}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="date-time-dropdown"
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 1, y: 0, height: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="origin-top"
+          >
+            <div className="flex flex-col bg-primary-white">
+              {pickerState.step === 'DATE' ? (
+                <>
+                  <DatePicker
+                    initialSelectedDate={pickerState.selectedDates[0] ?? initialSelectedDate}
+                    onChange={handleDateChange}
+                  />
+                  <PickerFooter onConfirm={handleDateStepConfirm} onCancel={handleDateStepCancel} confirmText="다음" />
+                </>
+              ) : (
+                <>
+                  <TimePickerBody
+                    startHour={pickerState.time.startHour}
+                    startPeriod={pickerState.time.startPeriod}
+                    endHour={pickerState.time.endHour}
+                    endPeriod={pickerState.time.endPeriod}
+                    onChange={handleTimeDraftChange}
+                    disabled={disabled}
+                  />
+                  <PickerFooter
+                    onConfirm={handleTimeConfirm}
+                    onCancel={handleTimeCancel}
+                    disabled={disabled}
+                    confirmText="확인"
+                    cancelText="이전"
+                  />
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
