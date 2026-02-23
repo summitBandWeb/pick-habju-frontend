@@ -21,12 +21,11 @@ export function loadNaverMapScript(): Promise<typeof naver> {
 
   const clientId = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
   if (!clientId || typeof clientId !== 'string') {
-    loadPromise = Promise.reject(
+    return Promise.reject(
       new Error(
         'VITE_NAVER_MAP_CLIENT_ID is not set. Add it to .env (e.g. VITE_NAVER_MAP_CLIENT_ID=your_client_id).'
       )
     );
-    return loadPromise;
   }
   
   const url = `${SCRIPT_BASE}?ncpKeyId=${encodeURIComponent(clientId)}&submodules=geocoder`;
