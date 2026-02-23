@@ -24,7 +24,7 @@
     "noUncheckedSideEffectImports": true,
 
     /* Types */
-    "types": ["navermaps"]
+    "types": ["navermaps", "node"]
   },
   "include": ["src"]
 }
