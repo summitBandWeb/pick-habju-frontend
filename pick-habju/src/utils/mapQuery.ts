@@ -12,12 +12,19 @@ import type { MapBounds, MapViewport } from '../types/map';
 const BOUNDS_EPSILON = 0.000001;
 
 const addOneHour = (time: string): string => {
-  const [hourRaw, minuteRaw] = time.split(':');
+  const parts = time.split(':');
+  if (parts.length !== 2) {
+    throw new Error(`Invalid time string: ${JSON.stringify(time)}`);
+  }
+  const [hourRaw, minuteRaw] = parts;
   const hour = Number(hourRaw);
   const minute = Number(minuteRaw);
 
   if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
-    return time;
+    throw new Error(`Invalid time string: ${JSON.stringify(time)}`);
+  }
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    throw new Error(`Invalid time string: ${JSON.stringify(time)}`);
   }
 
   const nextHour = (hour + 1) % 24;
