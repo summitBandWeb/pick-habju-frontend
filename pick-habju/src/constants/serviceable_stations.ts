@@ -1,25 +1,15 @@
+import type { MapCenter, MapBounds } from '../types/map';
+
 export const SERVICEABLE_STATION_IDS = ['isu', 'sadang', 'hongdae', 'sinchon'] as const;
 
 export type ServiceableStationId = (typeof SERVICEABLE_STATION_IDS)[number];
-
-export interface StationCenter {
-  lat: number;
-  lng: number;
-}
-
-export interface StationBounds {
-  swLat: number;
-  swLng: number;
-  neLat: number;
-  neLng: number;
-}
 
 export interface ServiceableStation {
   id: ServiceableStationId;
   name: string;
   subwayLine: string;
-  center: StationCenter;
-  bounds: StationBounds;
+  center: MapCenter;
+  bounds: MapBounds;
 }
 
 /** 서비스 가능 역 목록 (한 곳에서 id·이름·노선·좌표 정의) */
