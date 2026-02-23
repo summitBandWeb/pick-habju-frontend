@@ -16,6 +16,12 @@ export type MapViewport = {
 };
 
 // 4. 부모 컴포넌트(MapPage)가 NaverMap 컴포넌트를 직접 조종하기 위한 인터페이스
+export type MapMarker = {
+  id: string;
+  lat: number;
+  lng: number;
+};
+
 export interface NaverMapHandle {
   getMap: () => naver.maps.Map | null; // 원본 지도 객체에 접근
   getViewport: () => MapViewport | null; // 현재 지도의 좌표 정보들을 가져옴
