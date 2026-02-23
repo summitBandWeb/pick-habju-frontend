@@ -15,13 +15,21 @@ export interface RoomDetail {
   image_urls: string[];
   max_capacity: number;
   recommend_capacity: number;
+  recommend_capacity_range: [number, number];
   base_capacity: number | null;
   extra_charge: number | null;
+  price_config: Record<string, unknown>;
+  min_capacity: number;
+  min_hours: number;
+  max_hours: number | null;
   lat: number;
   lng: number;
   price_per_hour: number;
   can_reserve_one_hour: boolean;
   requires_call_on_sameday: boolean;
+  phoneNumber: string | null;
+  displayName: string | null;
+  openWaitRule: Record<string, unknown>;
 }
 
 // 3. 개별 룸 예약 가능 여부 (results 배열의 아이템)
@@ -30,6 +38,8 @@ export interface RoomAvailabilityResult {
   available: boolean;
   // 시간대별 가능 여부 (예: "13:00": true)
   available_slots: Record<string, boolean>;
+  estimated_price: number;
+  policy_warnings: string[];
 }
 
 // 4. 지점 요약 정보 (branch_summary 값)
