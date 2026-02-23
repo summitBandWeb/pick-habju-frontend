@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useRoomAvailabilityQuery } from '../api/get/useRoomQueries';
 import { useSearchStore } from '../store/search/searchStore';
-import type { MapViewport } from '../types/map';
+import type { MapMarker, MapViewport } from '../types/map';
 import {
   buildRoomAvailabilityPayload,
   isOutsideBaseBounds,
@@ -52,6 +52,41 @@ export const useMapPageSearch = () => {
     return 'Failed to fetch map availability';
   }, [roomAvailabilityQuery.error]);
 
+  /**
+   * 지도 컴포넌트(NaverMap)에 넘길 "마커 목록" 데이터.
+   * 형태: [{ id, lat, lng }, ...]
+   * NaverMap 내부에서 실제 마커를 찍을 때 그대로 사용.
+   * 소스: API 응답의 room_detail.biz_item_id, room_detail.lat, room_detail.lng
+   */
+  const markers = useMemo<MapMarker[]>(() => {
+    const results = roomAvailabilityQuery.data?.result?.results;
+    if (!results) return [];
+
+    return results
+      .map((item) => ({
+        id: item.room_detail.biz_item_id,
+        lat: item.room_detail.lat,
+        lng: item.room_detail.lng,
+      }))
+      .filter(
+        (marker) =>
+          marker.id.length > 0 && Number.isFinite(marker.lat) && Number.isFinite(marker.lng)
+      );
+  }, [roomAvailabilityQuery.data]);
+
+  /**
+   * 방 ID로 좌표를 빠르게 찾기 위한 인덱스(lookup map).
+   * 형태: { [id]: { lat, lng } }
+   * handleSelectRoom(id)에서 id만 받아도 즉시 좌표를 찾아 mapRef.current?.panTo(...) 할 수 있게 함.
+   * 매번 배열에서 find하지 않아도 되어 O(1) 조회.
+   */
+  const roomCoordById = useMemo<Record<string, { lat: number; lng: number }>>(() => {
+    return markers.reduce<Record<string, { lat: number; lng: number }>>((acc, marker) => {
+      acc[marker.id] = { lat: marker.lat, lng: marker.lng };
+      return acc;
+    }, {});
+  }, [markers]);
+
   return {
     showSearchHereButton,
     handleViewportChange,
@@ -59,5 +94,7 @@ export const useMapPageSearch = () => {
     isLoading: roomAvailabilityQuery.isFetching,
     errorMessage,
     data: roomAvailabilityQuery.data,
+    markers,
+    roomCoordById,
   };
 };

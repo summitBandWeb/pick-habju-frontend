@@ -1,24 +1,30 @@
 import { forwardRef, useEffect, useRef, useImperativeHandle, useState } from 'react';
-import type { MapViewport, NaverMapHandle } from '../../types/map';
+import type { MapMarker, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 
 type NaverMapProps = {
   initialCenter: { lat: number; lng: number };
   initialZoom: number;
+  markers?: MapMarker[];
+  selectedMarkerId?: string | null;
+  onMarkerClick?: (id: string) => void;
   onLoad?: (map: naver.maps.Map) => void;
   onViewportChange?: (viewport: MapViewport) => void;
   className?: string;
 };
 
 const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
-  ({ initialCenter, initialZoom, onLoad, onViewportChange, className }, ref) => {
+  ({ initialCenter, initialZoom, markers, selectedMarkerId, onMarkerClick, onLoad, onViewportChange, className }, ref) => {
     // 1. 지도가 그려질 DOM 요소를 잡기 위한 ref
     const mapContainerRef = useRef<HTMLDivElement>(null);
     // 2. 네이버 지도 객체를 보관하기 위한 ref
     const mapRef = useRef<naver.maps.Map | null>(null);
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
     const [scriptError, setScriptError] = useState<string | null>(null);
+    void markers;
+    void selectedMarkerId;
+    void onMarkerClick;
 
     // 3. 부모 컴포넌트에게 노출할 "손잡이(Handle)" 정의. 명령 권한을 부여합니다.
     useImperativeHandle(ref, () => ({
