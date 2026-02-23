@@ -1,4 +1,4 @@
-export const SERVICEABLE_STATION_IDS = ['isu', 'sangdo', 'sadang', 'heukseok', 'hongdae', 'hapjeong'] as const;
+export const SERVICEABLE_STATION_IDS = ['isu', 'sadang', 'hongdae', 'sinchon'] as const;
 
 export type ServiceableStationId = (typeof SERVICEABLE_STATION_IDS)[number];
 
@@ -32,25 +32,11 @@ const SERVICEABLE_STATIONS: ServiceableStation[] = [
     bounds: { swLat: 37.4845, swLng: 126.9798, neLat: 37.4885, neLng: 126.9838 },
   },
   {
-    id: 'sangdo',
-    name: '상도',
-    subwayLine: '7호선',
-    center: { lat: 37.502790, lng: 126.947949 },
-    bounds: { swLat: 37.500790, swLng: 126.945949, neLat: 37.504790, neLng: 126.949949 },
-  },
-  {
     id: 'sadang',
     name: '사당',
     subwayLine: '2호선·4호선',
     center: { lat: 37.476550, lng: 126.981688 },
-    bounds: { swLat: 37.47, swLng: 126.974, neLat: 37.483, neLng: 126.989 },
-  },
-  {
-    id: 'heukseok',
-    name: '흑석',
-    subwayLine: '9호선',
-    center: { lat: 37.50877, lng: 126.963708 },
-    bounds: { swLat: 37.5068, swLng: 126.9616, neLat: 37.5108, neLng: 126.9656 },
+    bounds: { swLat: 37.470000, swLng: 126.974000, neLat: 37.483000, neLng: 126.989000 },
   },
   {
     id: 'hongdae',
@@ -60,11 +46,11 @@ const SERVICEABLE_STATIONS: ServiceableStation[] = [
     bounds: { swLat: 37.554748, swLng: 126.921643, neLat: 37.558748, neLng: 126.925643 },
   },
   {
-    id: 'hapjeong',
-    name: '합정',
-    subwayLine: '2호선·6호선',
-    center: { lat: 37.549529, lng: 126.914051 },
-    bounds: { swLat: 37.547529, swLng: 126.912052, neLat: 37.551529, neLng: 126.916051 },
+    id: 'sinchon',
+    name: '신촌',
+    subwayLine: '2호선',
+    center: { lat: 37.555153, lng: 126.936890 },
+    bounds: { swLat: 37.553153, swLng: 126.934890, neLat: 37.557153, neLng: 126.938890 },
   },
 ];
 
