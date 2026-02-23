@@ -101,6 +101,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           naver.maps.Event.removeListener(idleListenerRef.current);
           idleListenerRef.current = null;
         }
+        if (mapRef.current) {
+          mapRef.current.destroy();
+          mapRef.current = null;
+        }
       };
       // 초기 1회 실행을 위해 의존성 배열을 비웁니다.
       // 만약 center/zoom 변경 시 지도를 이동시키려면 별도의 useEffect를 사용합니다.
