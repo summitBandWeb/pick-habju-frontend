@@ -3,6 +3,7 @@
  * - 공간 카드 UI (이미지, 제목, 가격, 권장 인원, 예약/오픈대기 버튼)
  * - 이미지 개수에 따라 1장/2장/3장 이상 그리드 레이아웃
  * - 이미지 영역 클릭 시 상세 이미지 모달(ImageCarouselModal) 오픈
+ * - Optimistic Update를 활용한 즐겨찾기 기능 지원
  */
 import { useState } from 'react';
 import classNames from 'classnames';
@@ -16,6 +17,7 @@ import TimeIcon from '../../assets/svg/Time.svg?react';
 import type { CardProps } from './Card.types';
 import { BtnSizeVariant, ButtonVariant } from '../Button/ButtonEnums';
 import { pushGtmEvent } from '../../utils/gtm';
+import { useCardFavorite } from '../../hook/useCardFavorite';
 
 /** 카드 이미지 그리드 좌우 비율 (13.75rem : 7.875rem ≈ 1.746 : 1) - 카드 너비가 줄어들어도 비율 유지 */
 const IMAGE_GRID_COLS = 'grid-cols-[1.746fr_minmax(0,1fr)]';
@@ -31,15 +33,17 @@ const Card = ({
   availableTimeRange,
   reOpenDaysFromNow = 90,
   btnsize,
-  isLiked = false,
+  bizItemId,
+  businessId,
   onBookClick,
-  onLike,
 }: CardProps) => {
   // 로딩된 이미지 인덱스 집합 ( shimmer 플레이스홀더 → 실제 이미지 전환용)
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const total = images.length;
   // 상세 이미지 모달 열림 여부
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { isLiked, handleLikeClick } = useCardFavorite({ bizItemId, businessId });
 
   /** 이미지 로드 완료 시 플레이스홀더 제거 */
   const handleImageLoad = (index: number) => {
@@ -54,12 +58,6 @@ const Card = ({
   /** 이미지 영역 클릭 → 상세 이미지 모달 오픈 (첫 번째 이미지부터) */
   const handleImageClick = () => {
     setIsModalOpen(true);
-  };
-
-  /** 즐겨찾기 버튼 클릭, 이벤트 버블링 차단 */
-  const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    onLike?.();
   };
 
   // ---------- 이미지 영역 위 UI (헤더, 오버레이, 플로팅 버튼) ----------
@@ -107,11 +105,7 @@ const Card = ({
           onClick={handleLikeClick}
           className="flex h-[37px] w-[36px] shrink-0 items-center justify-center hover:opacity-80 transition-opacity"
         >
-          <img
-            src={isLiked ? FaveOn : FaveOff}
-            alt={isLiked ? '즐겨찾기 해제' : '즐겨찾기'}
-            className="w-5 h-5"
-          />
+          <img src={isLiked ? FaveOn : FaveOff} alt={isLiked ? '즐겨찾기 해제' : '즐겨찾기'} className="w-5 h-5" />
         </button>
       )}
     </div>
@@ -159,10 +153,7 @@ const Card = ({
 
     if (total === 1) {
       return (
-        <div
-          className="absolute inset-0 cursor-pointer"
-          onClick={handleImageClick}
-        >
+        <div className="absolute inset-0 cursor-pointer" onClick={handleImageClick}>
           {renderImageCell(images[0], 0, 'w-full h-full')}
         </div>
       );
@@ -170,10 +161,7 @@ const Card = ({
 
     if (total === 2) {
       return (
-        <div
-          className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`}
-          onClick={handleImageClick}
-        >
+        <div className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`} onClick={handleImageClick}>
           {renderImageCell(images[0], 0, 'min-w-0 h-full')}
           {renderImageCell(images[1], 1, 'min-w-0 h-full')}
         </div>
@@ -182,15 +170,10 @@ const Card = ({
 
     // 3장 이상: 왼쪽 1장 + 오른쪽 2장 세로 배치, 4장 이상일 때만 세 번째 이미지에 4+ 오버레이
     return (
-      <div
-        className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`}
-        onClick={handleImageClick}
-      >
+      <div className={`absolute inset-0 grid ${IMAGE_GRID_COLS} cursor-pointer`} onClick={handleImageClick}>
         <div className="min-w-0 h-full overflow-hidden">{renderImageCell(images[0], 0, 'w-full h-full')}</div>
         <div className="min-w-0 min-h-0 h-full overflow-hidden grid grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="min-h-0 overflow-hidden">
-            {renderImageCell(images[1], 1, 'w-full h-full')}
-          </div>
+          <div className="min-h-0 overflow-hidden">{renderImageCell(images[1], 1, 'w-full h-full')}</div>
           <div className="relative min-h-0 overflow-hidden">
             {renderImageCell(images[2], 2, 'w-full h-full')}
             {/* 4장 이상: 세 번째 칸 위에 반투명 + ImgIcon + "4+" 텍스트 */}
@@ -244,7 +227,7 @@ const Card = ({
           <img src={People} alt="인원 아이콘" />
           <span>권장 인원 {booked ? 'N인' : capacity}</span>
         </div>
-        
+
         {partialAvailable && availableTimeRange && (
           <div className="flex items-center space-x-1 font-card-info whitespace-nowrap">
             <TimeIcon className="w-3 h-3 text-blue-500" />
@@ -271,9 +254,9 @@ const Card = ({
   );
 
   return (
-        <div className="w-86.5 h-60.5 rounded-xl shadow-card bg-primary-white overflow-hidden">
+    <div className="w-86.5 h-60.5 rounded-xl shadow-card bg-primary-white overflow-hidden">
       {/* 이미지 영역: 그리드 + 그라데이션 + 헤더/즐겨찾기/오버레이 */}
-            <div className="relative w-full h-40.75 bg-gray-100 overflow-hidden">
+      <div className="relative w-full h-40.75 bg-gray-100 overflow-hidden">
         {renderImages()}
 
         {/* 상단 그라데이션 */}
@@ -294,12 +277,7 @@ const Card = ({
       </div>
 
       {/* 이미지 영역 클릭 시 상세 이미지 모달 (첫 장부터) */}
-      {isModalOpen && (
-        <ImageCarouselModal
-          images={images}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      {isModalOpen && <ImageCarouselModal images={images} onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };
