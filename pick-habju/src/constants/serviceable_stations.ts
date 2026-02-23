@@ -44,4 +44,4 @@ const SERVICEABLE_STATIONS: ServiceableStation[] = [
   },
 ];
 
-export const getServiceableStations = (): ServiceableStation[] => SERVICEABLE_STATIONS;
+export const getServiceableStations = (): readonly ServiceableStation[] => SERVICEABLE_STATIONS;
