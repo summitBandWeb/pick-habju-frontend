@@ -34,7 +34,18 @@ export function loadNaverMapScript(): Promise<typeof naver> {
     const existing = document.getElementById(NAVER_MAP_SCRIPT_ID);
     if (existing) {
       if (window.naver?.maps) resolve(window.naver);
-      else existing.addEventListener('load', () => resolve(window.naver));
+      else {
+        existing.addEventListener(
+          'load',
+          () => resolve(window.naver),
+          { once: true }
+        );
+        existing.addEventListener(
+          'error',
+          () => reject(new Error('Failed to load Naver Map script')),
+          { once: true }
+        );
+      }
       return;
     }
     const script = document.createElement('script');
