@@ -21,6 +21,9 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // 2. 네이버 지도 객체를 보관하기 위한 ref
     const mapRef = useRef<naver.maps.Map | null>(null);
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
+    // 콜백이 바뀌어도 지도 초기화 effect는 1회만 실행하므로, 최신 콜백을 ref로 참조
+    const onLoadRef = useRef(onLoad);
+    const onViewportChangeRef = useRef(onViewportChange);
     const [scriptError, setScriptError] = useState<string | null>(null);
     void markers;
     void selectedMarkerId;
@@ -48,6 +51,13 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     }), []);
 
     useEffect(() => {
+      onLoadRef.current = onLoad;
+    }, [onLoad]);
+    useEffect(() => {
+      onViewportChangeRef.current = onViewportChange;
+    }, [onViewportChange]);
+
+    useEffect(() => {
       if (!mapContainerRef.current) return;
 
       let cancelled = false;
@@ -69,14 +79,14 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           const map = new naver.maps.Map(mapContainerRef.current, mapOptions);
           mapRef.current = map;
 
-          // 5. 생성 직후 onLoad 콜백 실행
-          if (onLoad) onLoad(map);
+          // 5. 생성 직후 onLoad 콜백 실행 (ref로 최신 콜백 호출)
+          const loadCb = onLoadRef.current;
+          if (loadCb) loadCb(map);
 
           // 6. 지도 움직임이 멈췄을 때(idle) 이벤트 리스너 등록
           idleListenerRef.current = naver.maps.Event.addListener(map, 'idle', () => {
-            if (onViewportChange) {
-              onViewportChange(getViewportFromMap(map));
-            }
+            const viewportCb = onViewportChangeRef.current;
+            if (viewportCb) viewportCb(getViewportFromMap(map));
           });
         })
         .catch((err) => {
