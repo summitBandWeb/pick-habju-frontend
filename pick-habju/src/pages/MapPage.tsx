@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
 import NaverMap from '../components/Map/NaverMap';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
@@ -16,7 +17,6 @@ const MapPage = () => {
   const mapRef = useRef<NaverMapHandle | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
-  /** 룸이 2개 이상인 마커를 클릭했을 때, 그 지점(businessId)의 팝오버를 열기 위해 사용. 값이 있으면 NaverMap에서 해당 마커에 InfoWindow(PriceList) 표시. 같은 마커 다시 클릭 시 null로 토글하여 닫음. */
   const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
   const [isFavoriteFilterActive] = useState(false);
   const {
@@ -27,6 +27,7 @@ const MapPage = () => {
     errorMessage,
     markers,
     roomCoordById,
+    roomsById,
     results,
     branchSummary,
     favoriteBizItemIds,
@@ -52,6 +53,27 @@ const MapPage = () => {
     ]
   );
 
+  const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
+    const orderedUniqueRoomIds = Array.from(
+      new Set(markerViewModels.flatMap((marker) => marker.rooms.map((room) => String(room.id))))
+    );
+
+    return orderedUniqueRoomIds
+      .map((roomId) => roomsById[roomId]?.room_detail)
+      .filter((roomDetail): roomDetail is NonNullable<typeof roomDetail> => Boolean(roomDetail))
+      .map((roomDetail) => ({
+        name: roomDetail.name,
+        branch: roomDetail.branch,
+        businessId: roomDetail.business_id,
+        bizItemId: roomDetail.biz_item_id,
+        imageUrls: roomDetail.image_urls,
+        recommendCapacity: roomDetail.recommend_capacity,
+        pricePerHour: roomDetail.price_per_hour,
+      }));
+  }, [markerViewModels, roomsById]);
+
+  void carouselRooms;
+
   const handleSelectRoom = useCallback(
     (id: string) => {
       if (id === selectedRoomId) return;
@@ -69,12 +91,6 @@ const MapPage = () => {
     [isCarouselOpen, openedMarkerPopoverId, roomCoordById, selectedRoomId]
   );
 
-  /**
-   * 마커 클릭 시 분기:
-   * - 룸이 1개: 해당 룸을 바로 선택(handleSelectRoom)하고 캐러셀 열기. 팝오버는 사용하지 않음.
-   * - 룸이 2개 이상: openedMarkerPopoverId를 토글. 이미 열린 마커면 null로 닫고, 다른 마커면 해당 markerId로 열어서 NaverMap에서 그 마커 위에 룸 리스트 팝오버 표시.
-   * 공통: 클릭한 마커 위치로 지도 panTo.
-   */
   const handleMarkerClick = useCallback(
     (markerId: string) => {
       const marker = markerViewModels.find((item) => item.id === markerId);
@@ -97,7 +113,6 @@ const MapPage = () => {
     [handleSelectRoom, isCarouselOpen, markerViewModels]
   );
 
-  /** 팝오버(InfoWindow) 안에서 룸 행을 클릭했을 때 호출. 팝오버를 닫고 해당 roomId로 룸 선택(캐러셀 열기·panTo). NaverMap의 domready 리스너에서 addEventListener로 바인딩된 클릭이 이 콜백을 호출함. */
   const handleMarkerRoomClick = useCallback(
     (roomId: string) => {
       setOpenedMarkerPopoverId(null);
@@ -115,6 +130,26 @@ const MapPage = () => {
       setOpenedMarkerPopoverId(null);
     }
   }, [isCarouselOpen, openedMarkerPopoverId]);
+
+  const filterChangeGuardRef = useRef({
+    includePartiallyPossible,
+    isFavoriteFilterActive,
+  });
+  useEffect(() => {
+    const prev = filterChangeGuardRef.current;
+    const filterChanged =
+      prev.includePartiallyPossible !== includePartiallyPossible ||
+      prev.isFavoriteFilterActive !== isFavoriteFilterActive;
+
+    if (filterChanged) {
+      resetSelectionUiState();
+    }
+
+    filterChangeGuardRef.current = {
+      includePartiallyPossible,
+      isFavoriteFilterActive,
+    };
+  }, [includePartiallyPossible, isFavoriteFilterActive, resetSelectionUiState]);
 
   useEffect(() => {
     if (!lastQuery) {
@@ -163,3 +198,4 @@ const MapPage = () => {
 };
 
 export default MapPage;
+

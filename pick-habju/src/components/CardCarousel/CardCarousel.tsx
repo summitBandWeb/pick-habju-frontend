@@ -4,8 +4,8 @@ import { Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import type { CardCarouselProps } from './CardCarousel.types';
-import type { RoomMetadata } from '../../types/RoomMetadata';
+import type { CardCarouselProps, CardCarouselRoom } from './CardCarousel.types';
+import type { CardProps } from '../Card/Card.types';
 import { useMobileDetect } from '../../hook/useMobileDetect';
 import Card from '../Card/Card';
 import Chevron from '../Chevron/Chevron';
@@ -38,19 +38,29 @@ const getSwiperProps = (isDesktop: boolean) =>
         allowTouchMove: true,
       };
 
-/** 슬라이드 한 장: RoomMetadata → Card 렌더, 모바일 활성 슬라이드 시 scale */
+/** 슬라이드 한 장: CardCarouselRoom -> Card 렌더, 모바일 활성 슬라이드 시 scale */
 function CarouselSlideContent({
   room,
   isActive,
   isMobile,
   isDesktop,
 }: {
-  room: RoomMetadata;
+  room: CardCarouselRoom;
   isActive: boolean;
   isMobile: boolean;
   isDesktop: boolean;
 }) {
   const shouldScale = isMobile && isActive;
+
+  const cardProps: CardProps = {
+    images: room.imageUrls,
+    title: room.branch,
+    subtitle: room.name,
+    price: room.pricePerHour,
+    capacity: `${room.recommendCapacity}인`,
+    bizItemId: room.bizItemId,
+    businessId: room.businessId,
+  };
 
   return (
     <div className={isDesktop ? 'w-full flex justify-center' : 'flex justify-center'}>
@@ -59,15 +69,7 @@ function CarouselSlideContent({
           shouldScale ? 'scale-105 z-10' : 'scale-100'
         }`}
       >
-        <Card
-          images={room.imageUrls}
-          title={room.branch}
-          subtitle={room.name}
-          price={room.pricePerHour}
-          capacity={`${room.recommendCapacity}인`}
-          bizItemId={room.bizItemId}
-          businessId={room.businessId}
-        />
+        <Card {...cardProps} />
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import CardCarousel from './CardCarousel';
 import { ROOMS } from '../../constants/data';
-import type { RoomMetadata } from '../../types/RoomMetadata';
+import type { CardCarouselRoom } from './CardCarousel.types';
 
-const rooms = ROOMS as RoomMetadata[];
+const rooms: CardCarouselRoom[] = ROOMS;
 
 const meta = {
   title: 'Components/CardCarousel',
