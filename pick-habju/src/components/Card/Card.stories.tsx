@@ -21,9 +21,7 @@ const meta: Meta<CardProps> = {
     },
   },
   argTypes: {
-    onLike: { action: 'clicked', description: '즐겨찾기 버튼 클릭' },
     onBookClick: { action: 'clicked', description: '예약하기 버튼 클릭' },
-    isLiked: { control: 'boolean', description: '즐겨찾기 상태' },
   },
 };
 export default meta;
@@ -38,7 +36,8 @@ const baseArgs: CardProps = {
   capacity: '12인',
   booked: false,
   btnsize: BtnSizeVariant.XXSM,
-  isLiked: false,
+  bizItemId: 'test-biz-item-id',
+  businessId: 'test-business-id',
 };
 
 // 이미지 개수별 스토리
@@ -75,15 +74,6 @@ export const FourPlusImages: Story = {
 };
 
 // 상태별 스토리
-export const Liked: Story = {
-  name: '즐겨찾기 됨',
-  args: {
-    ...baseArgs,
-    images: [image1, image2, image3],
-    isLiked: true,
-  },
-};
-
 export const Booked: Story = {
   name: '오픈 대기',
   args: {

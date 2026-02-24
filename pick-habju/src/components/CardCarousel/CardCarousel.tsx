@@ -65,6 +65,8 @@ function CarouselSlideContent({
           subtitle={room.name}
           price={room.pricePerHour}
           capacity={`${room.recommendCapacity}인`}
+          bizItemId={room.bizItemId}
+          businessId={room.businessId}
         />
       </div>
     </div>

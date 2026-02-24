@@ -1,8 +1,11 @@
+import type { ServiceableStationId } from '../../constants/serviceable_stations';
+import type { MapCenter, MapBounds } from '../../types/map';
+
 export interface SearchParams {
   location: string; // 지역 이름 (화면 표시용)
-  locationId: string; // 지역 ID (내부 식별자)
-  coordinates: { lat: number; lng: number }; // 지역 중심 좌표
-  bounds: { swLat: number; swLng: number; neLat: number; neLng: number }; // 지역 범위 좌표
+  stationId: ServiceableStationId; // 역 ID (내부 식별자)
+  center: MapCenter; // 역 중심 좌표
+  bounds: MapBounds; // 지역 범위 좌표
   date: string;
   hour_slots: string[];
   peopleCount: number;
