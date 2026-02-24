@@ -155,7 +155,26 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       };
     }, [initialCenter.lat, initialCenter.lng, initialZoom]);
 
-    /** markerViewModels(또는 markers) 기준으로 마커 생성/갱신. PriceLabel 커스텀 아이콘, 클릭 시 onMarkerClick. */
+    /** 
+     * 팝오버 렌더 방식 (MapPage의 openedMarkerPopoverId와 연동)
+     *
+     * 1) openedMarkerPopoverId 감지
+     *    - MapPage에서 룸 2개 이상인 마커를 클릭하면 이 값이 해당 지점 id(businessId)로 설정됨.
+     *    - 이 effect는 그 값을 감지해 해당 마커에만 룸 리스트 팝오버를 붙임.
+     *
+     * 2) 팝오버 표시
+     *    - markerViewModels에서 openedMarkerPopoverId에 해당하는 markerModel 조회.
+     *    - markerInstancesRef에서 같은 id의 naver.maps.Marker 인스턴스 조회.
+     *    - PriceList를 renderToStaticMarkup으로 HTML 문자열로 만든 뒤, naver.maps.InfoWindow의 content에 넣고
+     *      infoWindow.open(map, marker) 로 해당 마커에 열어서 "마커 위에 리스트"가 보이게 함.
+     *
+     * 3) 룸 클릭 처리 (React 이벤트 아님)
+     *    - InfoWindow 내용은 지도 API가 DOM으로 넣기 때문에 React 이벤트가 동작하지 않음.
+     *    - InfoWindow 'domready' 이벤트 후, data-popover-key로 컨테이너를 찾고 그 안의 button들을 querySelectorAll로 찾음.
+     *    - 버튼 순서와 markerModel.rooms 순서를 매핑(button index === rooms[index])해서
+     *      각 버튼에 addEventListener('click', () => onMarkerRoomClick(room.id)) 로 수동 바인딩.
+     *    - 바인딩 해제 함수를 popoverListenersRef에 넣어 두고, effect cleanup 또는 openedMarkerPopoverId 변경 시 제거.
+    */
     useEffect(() => {
       if (!isMapReady || !mapRef.current) return;
 
@@ -249,10 +268,19 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         </div>
       `;
 
+      /** marker icon.anchor(Point(48,48)) 기준으로 리스트를 위로 보정 */
+      const SELECTED_MARKER_HEIGHT_PX = 50;
+      const SELECTED_MARKER_WIDTH_PX = 129;
+      const MARKER_ANCHOR_X_PX = 48;
+      const LIST_TO_MARKER_GAP_PX = 10;
+      const listPixelOffsetY = -(SELECTED_MARKER_HEIGHT_PX + LIST_TO_MARKER_GAP_PX);
+      const listPixelOffsetX = (SELECTED_MARKER_WIDTH_PX / 2) - MARKER_ANCHOR_X_PX; // 16.5
+
       const infoWindow = new naver.maps.InfoWindow({
         content,
         borderWidth: 0,
-        disableAnchor: false,
+        disableAnchor: true,
+        pixelOffset: new naver.maps.Point(listPixelOffsetX, listPixelOffsetY),
         backgroundColor: 'transparent',
       });
       popoverRef.current = infoWindow;
