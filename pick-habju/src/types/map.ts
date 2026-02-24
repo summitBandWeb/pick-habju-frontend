@@ -1,28 +1,28 @@
-// 1. 위도(lat), 경도(lng)를 가진 단순한 좌표 객체
+/** 지도 중심 좌표 (위도, 경도). */
 export type MapCenter = { lat: number; lng: number };
 
-// 2. 지도의 사각형 영역 (남서쪽 좌표 ~ 북동쪽 좌표)
-export type MapBounds = { 
-  swLat: number; 
-  swLng: number; 
-  neLat: number; 
-  neLng: number 
+/** 지도 영역의 사각형 범위. sw = 남서, ne = 북동. */
+export type MapBounds = {
+  swLat: number;
+  swLng: number;
+  neLat: number;
+  neLng: number;
 };
 
-// 3. 현재 지도의 중심과 영역을 한 번에 나타내는 뷰포트 정보
-export type MapViewport = { 
-  center: MapCenter; 
-  bounds: MapBounds 
+/** 지도 뷰포트: 현재 중심과 보이는 영역(bounds). 검색/뷰포트 변경 시 사용. */
+export type MapViewport = {
+  center: MapCenter;
+  bounds: MapBounds;
 };
 
-// 4. 부모 컴포넌트(MapPage)가 NaverMap 컴포넌트를 직접 조종하기 위한 인터페이스
+/** 지도 마커 기본 정보. id는 room 또는 business 식별자. */
 export type MapMarker = {
   id: string;
   lat: number;
   lng: number;
 };
 
-// PriceList에 표시할 룸 단위 데이터
+/** 마커(지점) 내 개별 룸 항목. 캐러셀·팝오버 리스트용. */
 export type MarkerRoomItem = {
   id: string;
   name: string;
@@ -33,14 +33,14 @@ export type MarkerRoomItem = {
   favorite: 'on' | 'off';
 };
 
-// MarkerType 없이 조합 상태로 마커 UI를 표현
+/** 마커 UI 상태. 부분 가능·즐겨찾기·선택(활성) 여부. */
 export type MarkerUiState = {
   isPartial: boolean;
   favorite: 'on' | 'off';
   isActive: boolean;
 };
 
-// 지도 마커 렌더링용 ViewModel
+/** 지도 마커 하나에 대한 뷰모델. 좌표 + 가격 텍스트 + UI 상태 + 해당 지점의 룸 목록(rooms). */
 export type MarkerViewModel = MapMarker &
   MarkerUiState & {
     priceText: string;
@@ -48,9 +48,11 @@ export type MarkerViewModel = MapMarker &
     rooms: MarkerRoomItem[];
   };
 
+/** NaverMap ref로 노출하는 핸들. 지도 인스턴스 조회, 뷰포트 조회, panTo/setCenter. */
 export interface NaverMapHandle {
-  getMap: () => naver.maps.Map | null; // 원본 지도 객체에 접근
-  getViewport: () => MapViewport | null; // 현재 지도의 좌표 정보들을 가져옴
-  panTo: (lat: number, lng: number) => void; // 부드러운 이동 함수
-  setCenter: (lat: number, lng: number) => void; // 즉시 이동 함수
+  getMap: () => naver.maps.Map | null;
+  getViewport: () => MapViewport | null;
+  panTo: (lat: number, lng: number) => void;
+  setCenter: (lat: number, lng: number) => void;
 }
+

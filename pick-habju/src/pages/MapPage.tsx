@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NaverMap from '../components/Map/NaverMap';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
 import { useSearchStore } from '../store/search/searchStore';
 import type { NaverMapHandle } from '../types/map';
+import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
 
 const DEFAULT_MAP_ZOOM = 14;
 
 const MapPage = () => {
   const lastQuery = useSearchStore((s) => s.lastQuery);
+  const includePartiallyPossible = useSearchStore((s) => s.includePartiallyPossible);
   const navigate = useNavigate();
   const mapRef = useRef<NaverMapHandle | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
+  const [isFavoriteFilterActive] = useState(false);
   const {
     showSearchHereButton,
     handleViewportChange,
@@ -23,7 +26,30 @@ const MapPage = () => {
     errorMessage,
     markers,
     roomCoordById,
+    results,
+    branchSummary,
+    favoriteBizItemIds,
   } = useMapPageSearch();
+
+  const markerViewModels = useMemo(
+    () =>
+      buildMarkerViewModels({
+        branchSummary,
+        results,
+        selectedRoomId,
+        includePartiallyPossible,
+        isFavoriteFilterActive,
+        favoriteBizItemIds,
+      }),
+    [
+      branchSummary,
+      favoriteBizItemIds,
+      includePartiallyPossible,
+      isFavoriteFilterActive,
+      results,
+      selectedRoomId,
+    ]
+  );
 
   const handleSelectRoom = useCallback(
     (id: string) => {
@@ -40,6 +66,36 @@ const MapPage = () => {
       mapRef.current?.panTo(coord.lat, coord.lng);
     },
     [isCarouselOpen, openedMarkerPopoverId, roomCoordById, selectedRoomId]
+  );
+
+  const handleMarkerClick = useCallback(
+    (markerId: string) => {
+      const marker = markerViewModels.find((item) => item.id === markerId);
+      if (!marker) return;
+
+      mapRef.current?.panTo(marker.lat, marker.lng);
+
+      if (marker.rooms.length <= 1) {
+        const onlyRoom = marker.rooms[0];
+        if (!onlyRoom) return;
+        handleSelectRoom(onlyRoom.id);
+        return;
+      }
+
+      if (isCarouselOpen) {
+        setIsCarouselOpen(false);
+      }
+      setOpenedMarkerPopoverId((prev) => (prev === markerId ? null : markerId));
+    },
+    [handleSelectRoom, isCarouselOpen, markerViewModels]
+  );
+
+  const handleMarkerRoomClick = useCallback(
+    (roomId: string) => {
+      setOpenedMarkerPopoverId(null);
+      handleSelectRoom(roomId);
+    },
+    [handleSelectRoom]
   );
 
   const resetSelectionUiState = useCallback(() => {
@@ -85,8 +141,11 @@ const MapPage = () => {
           initialCenter={lastQuery.center}
           initialZoom={DEFAULT_MAP_ZOOM}
           markers={markers}
+          markerViewModels={markerViewModels}
+          openedMarkerPopoverId={openedMarkerPopoverId}
           selectedMarkerId={selectedRoomId}
-          onMarkerClick={handleSelectRoom}
+          onMarkerClick={handleMarkerClick}
+          onMarkerRoomClick={handleMarkerRoomClick}
           onViewportChange={handleViewportChange}
           className="h-full w-full"
         />
