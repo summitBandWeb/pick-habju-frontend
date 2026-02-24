@@ -54,6 +54,13 @@ const MapPage = () => {
     ]
   );
 
+  const selectedMarkerId = useMemo(() => {
+    if (!selectedRoomId) return null;
+    return (
+      markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null
+    );
+  }, [markerViewModels, selectedRoomId]);
+
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
     const orderedUniqueRoomIds = Array.from(
       new Set(markerViewModels.flatMap((marker) => marker.rooms.map((room) => String(room.id))))
@@ -99,6 +106,8 @@ const MapPage = () => {
 
   const handleMarkerClick = useCallback(
     (markerId: string) => {
+      if (markerId === selectedMarkerId) return;
+
       const marker = markerViewModels.find((item) => item.id === markerId);
       if (!marker) return;
 
@@ -116,7 +125,7 @@ const MapPage = () => {
       }
       setOpenedMarkerPopoverId((prev) => (prev === markerId ? null : markerId));
     },
-    [handleSelectRoom, isCarouselOpen, markerViewModels]
+    [handleSelectRoom, isCarouselOpen, markerViewModels, selectedMarkerId]
   );
 
   const handleMarkerRoomClick = useCallback(
@@ -209,7 +218,7 @@ const MapPage = () => {
           markers={markers}
           markerViewModels={markerViewModels}
           openedMarkerPopoverId={openedMarkerPopoverId}
-          selectedMarkerId={selectedRoomId}
+          selectedMarkerId={selectedMarkerId}
           onMarkerClick={handleMarkerClick}
           onMarkerRoomClick={handleMarkerRoomClick}
           onViewportChange={handleViewportChange}
