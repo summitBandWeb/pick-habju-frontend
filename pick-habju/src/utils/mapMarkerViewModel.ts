@@ -6,7 +6,7 @@ export type BuildMarkerViewModelsArgs = {
   branchSummary: Record<string, BranchSummaryInfo> | undefined;
   results: RoomAvailabilityResult[] | undefined;
   selectedRoomId: string | null;
-  includePartiallyPossible: boolean;
+  isPartialFilterActive: boolean;
   isFavoriteFilterActive: boolean;
   favoriteBizItemIds: Set<string>;
 };
@@ -42,14 +42,13 @@ const toMarkerRoomItem = (
 };
 
 /** 부분 가능 포함/즐겨찾기 필터에 따라 마커(지점) 노출 여부 판별. */
-const isVisibleByFilters = (
-  isPartial: boolean,
-  favorite: 'on' | 'off',
-  includePartiallyPossible: boolean,
+const isRoomMatchedByFilters = (
+  room: MarkerRoomItem,
+  isPartialFilterActive: boolean,
   isFavoriteFilterActive: boolean
 ): boolean => {
-  const partialMatched = !includePartiallyPossible || isPartial;
-  const favoriteMatched = !isFavoriteFilterActive || favorite === 'on';
+  const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
+  const favoriteMatched = !isFavoriteFilterActive || room.favorite === 'on';
   return partialMatched && favoriteMatched;
 };
 
@@ -63,7 +62,7 @@ export const buildMarkerViewModels = ({
   branchSummary,
   results,
   selectedRoomId,
-  includePartiallyPossible,
+  isPartialFilterActive,
   isFavoriteFilterActive,
   favoriteBizItemIds,
 }: BuildMarkerViewModelsArgs): MarkerViewModel[] => {
@@ -91,22 +90,19 @@ export const buildMarkerViewModels = ({
     const summary = branchSummary?.[businessId];
     const rooms = groupedRooms.map((room) => toMarkerRoomItem(room, favoriteBizItemIds));
 
-    const isPartial = rooms.some((room) => room.isPartial);
-    const favorite: 'on' | 'off' = rooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
-    const isActive =
-      selectedRoomId !== null &&
-      rooms.some((room) => String(room.id) === String(selectedRoomId));
-
-    if (
-      !isVisibleByFilters(
-        isPartial,
-        favorite,
-        includePartiallyPossible,
-        isFavoriteFilterActive
-      )
-    ) {
+    const visibleRooms = rooms.filter((room) =>
+      isRoomMatchedByFilters(room, isPartialFilterActive, isFavoriteFilterActive)
+    );
+    if (visibleRooms.length === 0) {
       continue;
     }
+
+    const isPartial = visibleRooms.some((room) => room.isPartial);
+    const favorite: 'on' | 'off' =
+      visibleRooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
+    const isActive =
+      selectedRoomId !== null &&
+      visibleRooms.some((room) => String(room.id) === String(selectedRoomId));
 
     const fallbackMinPrice = Math.min(
       ...groupedRooms.map((room) => room.room_detail.price_per_hour).filter((price) => Number.isFinite(price))
@@ -120,11 +116,10 @@ export const buildMarkerViewModels = ({
       isPartial,
       favorite,
       isActive,
-      extraRoomCount: Math.max(rooms.length - 1, 0),
-      rooms,
+      extraRoomCount: Math.max(visibleRooms.length - 1, 0),
+      rooms: visibleRooms,
     });
   }
 
   return markerViewModels;
 };
-

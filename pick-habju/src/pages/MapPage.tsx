@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
+import FilterSection from '../components/FilterSection/FilterSection';
 import NaverMap from '../components/Map/NaverMap';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
@@ -13,13 +14,13 @@ const DEFAULT_MAP_ZOOM = 14;
 
 const MapPage = () => {
   const lastQuery = useSearchStore((s) => s.lastQuery);
-  const includePartiallyPossible = useSearchStore((s) => s.includePartiallyPossible);
   const navigate = useNavigate();
   const mapRef = useRef<NaverMapHandle | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
-  const [isFavoriteFilterActive] = useState(false);
+  const [isPartialFilterActive, setIsPartialFilterActive] = useState(false);
+  const [isFavoriteFilterActive, setIsFavoriteFilterActive] = useState(false);
   const {
     showSearchHereButton,
     handleViewportChange,
@@ -40,14 +41,14 @@ const MapPage = () => {
         branchSummary,
         results,
         selectedRoomId,
-        includePartiallyPossible,
+        isPartialFilterActive,
         isFavoriteFilterActive,
         favoriteBizItemIds,
       }),
     [
       branchSummary,
       favoriteBizItemIds,
-      includePartiallyPossible,
+      isPartialFilterActive,
       isFavoriteFilterActive,
       results,
       selectedRoomId,
@@ -63,7 +64,17 @@ const MapPage = () => {
 
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
     const orderedUniqueRoomIds = Array.from(
-      new Set(markerViewModels.flatMap((marker) => marker.rooms.map((room) => String(room.id))))
+      new Set(
+        markerViewModels.flatMap((marker) =>
+          marker.rooms
+            .filter((room) => {
+              const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
+              const favoriteMatched = !isFavoriteFilterActive || room.favorite === 'on';
+              return partialMatched && favoriteMatched;
+            })
+            .map((room) => String(room.id))
+        )
+      )
     );
 
     return orderedUniqueRoomIds
@@ -78,7 +89,7 @@ const MapPage = () => {
         recommendCapacity: roomDetail.recommend_capacity,
         pricePerHour: roomDetail.price_per_hour,
       }));
-  }, [markerViewModels, roomsById]);
+  }, [isFavoriteFilterActive, isPartialFilterActive, markerViewModels, roomsById]);
 
   const handleSelectRoom = useCallback(
     (id: string) => {
@@ -147,13 +158,13 @@ const MapPage = () => {
   }, [isCarouselOpen, openedMarkerPopoverId]);
 
   const filterChangeGuardRef = useRef({
-    includePartiallyPossible,
+    isPartialFilterActive,
     isFavoriteFilterActive,
   });
   useEffect(() => {
     const prev = filterChangeGuardRef.current;
     const filterChanged =
-      prev.includePartiallyPossible !== includePartiallyPossible ||
+      prev.isPartialFilterActive !== isPartialFilterActive ||
       prev.isFavoriteFilterActive !== isFavoriteFilterActive;
 
     if (filterChanged) {
@@ -161,10 +172,10 @@ const MapPage = () => {
     }
 
     filterChangeGuardRef.current = {
-      includePartiallyPossible,
+      isPartialFilterActive,
       isFavoriteFilterActive,
     };
-  }, [includePartiallyPossible, isFavoriteFilterActive, resetSelectionUiState]);
+  }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
 
   useEffect(() => {
     if (!lastQuery) {
@@ -196,6 +207,12 @@ const MapPage = () => {
   return (
     <div className="flex h-screen w-full flex-col">
       <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+        <FilterSection
+          isPartialFilterActive={isPartialFilterActive}
+          onPartialFilterToggle={setIsPartialFilterActive}
+          isFavoriteFilterActive={isFavoriteFilterActive}
+          onFavoriteFilterToggle={setIsFavoriteFilterActive}
+        />
         <div className="text-sm text-gray-600" role="status" aria-live="polite">
           {isLoading ? 'Loading map search...' : errorMessage ? `Error: ${errorMessage}` : 'Map search ready'}
         </div>
