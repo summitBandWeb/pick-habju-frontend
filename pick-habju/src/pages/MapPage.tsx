@@ -157,6 +157,16 @@ const MapPage = () => {
     }
   }, [isCarouselOpen, openedMarkerPopoverId]);
 
+  const resetMapUiState = useCallback(() => {
+    resetSelectionUiState();
+    if (isPartialFilterActive) {
+      setIsPartialFilterActive(false);
+    }
+    if (isFavoriteFilterActive) {
+      setIsFavoriteFilterActive(false);
+    }
+  }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
+
   const filterChangeGuardRef = useRef({
     isPartialFilterActive,
     isFavoriteFilterActive,
@@ -219,7 +229,7 @@ const MapPage = () => {
         {showSearchHereButton && (
           <button
             type="button"
-            onClick={() => handleSearchHere(resetSelectionUiState)}
+            onClick={() => handleSearchHere(resetMapUiState)}
             className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white"
           >
             Search this area
