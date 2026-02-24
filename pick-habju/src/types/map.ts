@@ -22,6 +22,32 @@ export type MapMarker = {
   lng: number;
 };
 
+// PriceList에 표시할 룸 단위 데이터
+export type MarkerRoomItem = {
+  id: string;
+  name: string;
+  priceText: string;
+  lat: number;
+  lng: number;
+  isPartial: boolean;
+  favorite: 'on' | 'off';
+};
+
+// MarkerType 없이 조합 상태로 마커 UI를 표현
+export type MarkerUiState = {
+  isPartial: boolean;
+  favorite: 'on' | 'off';
+  isActive: boolean;
+};
+
+// 지도 마커 렌더링용 ViewModel
+export type MarkerViewModel = MapMarker &
+  MarkerUiState & {
+    priceText: string;
+    extraRoomCount: number;
+    rooms: MarkerRoomItem[];
+  };
+
 export interface NaverMapHandle {
   getMap: () => naver.maps.Map | null; // 원본 지도 객체에 접근
   getViewport: () => MapViewport | null; // 현재 지도의 좌표 정보들을 가져옴
