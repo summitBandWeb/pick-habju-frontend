@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
 import NaverMap from '../components/Map/NaverMap';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
@@ -72,8 +73,6 @@ const MapPage = () => {
       }));
   }, [markerViewModels, roomsById]);
 
-  void carouselRooms;
-
   const handleSelectRoom = useCallback(
     (id: string) => {
       if (id === selectedRoomId) return;
@@ -89,6 +88,13 @@ const MapPage = () => {
       mapRef.current?.panTo(coord.lat, coord.lng);
     },
     [isCarouselOpen, openedMarkerPopoverId, roomCoordById, selectedRoomId]
+  );
+
+  const handleCardChange = useCallback(
+    (id: string) => {
+      handleSelectRoom(id);
+    },
+    [handleSelectRoom]
   );
 
   const handleMarkerClick = useCallback(
@@ -157,6 +163,23 @@ const MapPage = () => {
     }
   }, [lastQuery, navigate]);
 
+  useEffect(() => {
+    if (!selectedRoomId) return;
+    if (roomCoordById[selectedRoomId]) return;
+
+    setSelectedRoomId(null);
+    if (isCarouselOpen) {
+      setIsCarouselOpen(false);
+    }
+  }, [isCarouselOpen, roomCoordById, selectedRoomId]);
+
+  useEffect(() => {
+    if (carouselRooms.length > 0) return;
+    if (isCarouselOpen) {
+      setIsCarouselOpen(false);
+    }
+  }, [carouselRooms.length, isCarouselOpen]);
+
   if (!lastQuery) {
     return null;
   }
@@ -178,7 +201,7 @@ const MapPage = () => {
         )}
       </div>
 
-      <div className="flex-1">
+      <div className="relative flex-1">
         <NaverMap
           ref={mapRef}
           initialCenter={lastQuery.center}
@@ -192,10 +215,17 @@ const MapPage = () => {
           onViewportChange={handleViewportChange}
           className="h-full w-full"
         />
+        {carouselRooms.length > 0 && (
+          <CardCarousel
+            rooms={carouselRooms}
+            selectedRoomId={selectedRoomId}
+            isOpen={isCarouselOpen}
+            onCardChange={handleCardChange}
+          />
+        )}
       </div>
     </div>
   );
 };
 
 export default MapPage;
-

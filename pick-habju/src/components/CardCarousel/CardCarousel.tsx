@@ -107,7 +107,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-0 left-0 right-0 z-40 h-48 w-full pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 z-40 h-48 w-full pointer-events-none"
           style={{
             background: 'linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(29, 20, 20, 0.8) 100%)',
           }}
@@ -121,7 +121,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 w-full pb-8 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 z-50 w-full pb-8 pointer-events-none"
           >
             {/* [L3] 카드 영역 프레임: 데스크탑 1장 폭 + 그림자 들어갈 간격 (w-92.5), 모바일 풀폭. relative로 Chevron 기준점 제공 */}
           <div
