@@ -40,8 +40,9 @@ export const useMapPageSearch = () => {
   }, []);
 
   /** lastQuery를 draft 뷰포트로 커밋 → 재검색 트리거, draft 초기화 */
-  const handleSearchHere = useCallback(() => {
+  const handleSearchHere = useCallback((onBeforeSearch?: () => void) => {
     if (!lastQuery || !draftViewport) return;
+    onBeforeSearch?.();
     setLastQuery(mergeViewportToLastQuery(lastQuery, draftViewport));
     setDraftViewport(null);
   }, [draftViewport, lastQuery, setLastQuery]);

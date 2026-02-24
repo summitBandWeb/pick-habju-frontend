@@ -13,6 +13,8 @@ const MapPage = () => {
   const navigate = useNavigate();
   const mapRef = useRef<NaverMapHandle | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
+  const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
   const {
     showSearchHereButton,
     handleViewportChange,
@@ -27,12 +29,28 @@ const MapPage = () => {
     (id: string) => {
       if (id === selectedRoomId) return;
       setSelectedRoomId(id);
+      if (!isCarouselOpen) {
+        setIsCarouselOpen(true);
+      }
+      if (openedMarkerPopoverId !== null) {
+        setOpenedMarkerPopoverId(null);
+      }
       const coord = roomCoordById[id];
       if (!coord) return;
       mapRef.current?.panTo(coord.lat, coord.lng);
     },
-    [roomCoordById, selectedRoomId]
+    [isCarouselOpen, openedMarkerPopoverId, roomCoordById, selectedRoomId]
   );
+
+  const resetSelectionUiState = useCallback(() => {
+    setSelectedRoomId(null);
+    if (isCarouselOpen) {
+      setIsCarouselOpen(false);
+    }
+    if (openedMarkerPopoverId !== null) {
+      setOpenedMarkerPopoverId(null);
+    }
+  }, [isCarouselOpen, openedMarkerPopoverId]);
 
   useEffect(() => {
     if (!lastQuery) {
@@ -53,7 +71,7 @@ const MapPage = () => {
         {showSearchHereButton && (
           <button
             type="button"
-            onClick={handleSearchHere}
+            onClick={() => handleSearchHere(resetSelectionUiState)}
             className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white"
           >
             Search this area
