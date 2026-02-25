@@ -6,21 +6,35 @@ import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/m
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 
-/** 네이버 지도 컴포넌트 props. 초기 중심/줌, 마커·뷰모델, 팝오버·선택 상태, 콜백 등. */
 type NaverMapProps = {
   initialCenter: { lat: number; lng: number };
   initialZoom: number;
   markerViewModels?: MarkerViewModel[];
+  /** 팝오버(룸 목록)를 열 마커 ID. null이면 팝오버 없음. */
   openedMarkerPopoverId?: string | null;
+  /** 선택된 룸이 속한 마커 ID. 해당 마커 아이콘을 active 상태로 표시. */
   selectedMarkerId?: string | null;
   onMarkerClick?: (id: string) => void;
   onMarkerRoomClick?: (roomId: string) => void;
   onLoad?: (map: naver.maps.Map) => void;
   onViewportChange?: (viewport: MapViewport) => void;
+  /** 드래그·줌 시작 시 호출 — 팝오버 닫기 등 외부 상태 초기화용. */
+  onMapInteractionStart?: () => void;
   className?: string;
 };
 
-/** 네이버 지도 래퍼. 스크립트 로드 후 지도 생성, 마커·팝오버·뷰포트 변경 이벤트 처리. ref로 지도 인스턴스/뷰포트/panTo/setCenter 노출. */
+/** 팝오버 오버레이의 위치(px)와 표시할 룸 목록. 마커 클릭 시 생성됨. */
+type ReactMarkerPopover = {
+  left: number;
+  top: number;
+  rooms: Array<{ id: string; name: string; priceText: string }>;
+};
+
+/** PriceLabel 마커 아이콘 너비(px). 팝오버 수평 중앙 정렬 계산에 사용. */
+const MARKER_WIDTH_PX = 129;
+/** 팝오버 하단과 마커 상단 사이 간격(px). */
+const LIST_TO_MARKER_GAP_PX = 10;
+
 const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
   (
     {
@@ -33,27 +47,40 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onMarkerRoomClick,
       onLoad,
       onViewportChange,
+      onMapInteractionStart,
       className,
     },
     ref
   ) => {
+    // ── DOM 및 Naver Maps 인스턴스 refs ──
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<naver.maps.Map | null>(null);
-    /** 지도 idle 시 뷰포트 변경 콜백 등록용. 언마운트 시 제거. */
+
+    // ── 지도 이벤트 리스너 refs (cleanup 시 removeListener에 사용) ──
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
+    const dragStartListenerRef = useRef<naver.maps.MapEventListener | null>(null);
+    const zoomChangedListenerRef = useRef<naver.maps.MapEventListener | null>(null);
+
+    // ── 콜백 안정화 refs ──
+    // 마커 클릭 리스너는 생성 시점 클로저를 캡처하므로,
+    // props 콜백이 바뀌어도 항상 최신값을 참조할 수 있도록 ref에 동기화한다.
     const onLoadRef = useRef(onLoad);
     const onViewportChangeRef = useRef(onViewportChange);
+    const onMapInteractionStartRef = useRef(onMapInteractionStart);
+
+    // ── 마커 인스턴스 및 팝오버 상태 refs ──
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
     const markerListenersRef = useRef<naver.maps.MapEventListener[]>([]);
-    const popoverRef = useRef<naver.maps.InfoWindow | null>(null);
-    /** 이전 active 마커 id 추적. active 상태 전용 effect에서 이전 마커를 비활성화하는 데 사용. */
     const prevSelectedMarkerIdRef = useRef<string | null>(null);
-    /** 팝오버 내 버튼 클릭 리스너 제거용. effect 정리 시 호출. */
-    const popoverListenersRef = useRef<Array<() => void>>([]);
+    // 마커 클릭 핸들러에서 현재 openedMarkerPopoverId를 읽기 위한 ref.
+    // 클로저 생성 시점의 값을 캡처하므로 직접 prop을 참조할 수 없음.
+    const openedMarkerPopoverIdRef = useRef<string | null>(null);
+
     const [scriptError, setScriptError] = useState<string | null>(null);
     const [isMapReady, setIsMapReady] = useState(false);
+    /** 현재 표시 중인 팝오버 데이터. null이면 팝오버 미표시. */
+    const [reactPopover, setReactPopover] = useState<ReactMarkerPopover | null>(null);
 
-    /** ref로 부모에 지도 인스턴스, getViewport, panTo, setCenter 노출. */
     useImperativeHandle(
       ref,
       () => ({
@@ -76,6 +103,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       []
     );
 
+    // 콜백 ref 동기화 — props가 바뀔 때마다 ref에 최신값 유지
     useEffect(() => {
       onLoadRef.current = onLoad;
     }, [onLoad]);
@@ -84,9 +112,17 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onViewportChangeRef.current = onViewportChange;
     }, [onViewportChange]);
 
-    /** 네이버 지도 스크립트 로드 후 지도 생성, idle 시 onViewportChange 호출. 언마운트 시 리스너·마커·팝오버·지도 정리. */
+    useEffect(() => {
+      onMapInteractionStartRef.current = onMapInteractionStart;
+    }, [onMapInteractionStart]);
+
+    // 네이버 지도 SDK 스크립트 로드 → 지도 인스턴스 생성 → 이벤트 리스너 등록.
+    // initialCenter·initialZoom이 바뀌면 지도를 재생성한다.
     useEffect(() => {
       if (!mapContainerRef.current) return;
+      // cleanup에서 ref.current를 직접 읽으면 lint 경고가 발생하므로 로컬에 캡처.
+      // markerInstancesRef.current는 항상 동일한 Map 객체를 가리키므로 안전하다.
+      const markerInstances = markerInstancesRef.current;
 
       let cancelled = false;
 
@@ -112,6 +148,13 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
           });
+
+          dragStartListenerRef.current = naver.maps.Event.addListener(map, 'dragstart', () => {
+            onMapInteractionStartRef.current?.();
+          });
+          zoomChangedListenerRef.current = naver.maps.Event.addListener(map, 'zoom_changed', () => {
+            onMapInteractionStartRef.current?.();
+          });
         })
         .catch((err) => {
           if (!cancelled) {
@@ -127,24 +170,22 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         }
         markerListenersRef.current = [];
 
-        for (const marker of markerInstancesRef.current.values()) {
+        for (const marker of markerInstances.values()) {
           marker.setMap(null);
         }
-        markerInstancesRef.current.clear();
-
-        for (const cleanup of popoverListenersRef.current) {
-          cleanup();
-        }
-        popoverListenersRef.current = [];
-
-        if (popoverRef.current) {
-          popoverRef.current.close();
-          popoverRef.current = null;
-        }
+        markerInstances.clear();
 
         if (idleListenerRef.current) {
           naver.maps.Event.removeListener(idleListenerRef.current);
           idleListenerRef.current = null;
+        }
+        if (dragStartListenerRef.current) {
+          naver.maps.Event.removeListener(dragStartListenerRef.current);
+          dragStartListenerRef.current = null;
+        }
+        if (zoomChangedListenerRef.current) {
+          naver.maps.Event.removeListener(zoomChangedListenerRef.current);
+          zoomChangedListenerRef.current = null;
         }
 
         if (mapRef.current) {
@@ -152,31 +193,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           mapRef.current = null;
           setIsMapReady(false);
         }
+        setReactPopover(null);
       };
     }, [initialCenter.lat, initialCenter.lng, initialZoom]);
 
-    /** 
-     * 팝오버 렌더 방식 (MapPage의 openedMarkerPopoverId와 연동)
-     *
-     * 1) openedMarkerPopoverId 감지
-     *    - MapPage에서 룸 2개 이상인 마커를 클릭하면 이 값이 해당 지점 id(businessId)로 설정됨.
-     *    - 이 effect는 그 값을 감지해 해당 마커에만 룸 리스트 팝오버를 붙임.
-     *
-     * 2) 팝오버 표시
-     *    - markerViewModels에서 openedMarkerPopoverId에 해당하는 markerModel 조회.
-     *    - markerInstancesRef에서 같은 id의 naver.maps.Marker 인스턴스 조회.
-     *    - PriceList를 renderToStaticMarkup으로 HTML 문자열로 만든 뒤, naver.maps.InfoWindow의 content에 넣고
-     *      infoWindow.open(map, marker) 로 해당 마커에 열어서 "마커 위에 리스트"가 보이게 함.
-     *
-     * 3) 룸 클릭 처리 (React 이벤트 아님)
-     *    - InfoWindow 내용은 지도 API가 DOM으로 넣기 때문에 React 이벤트가 동작하지 않음.
-     *    - InfoWindow 'domready' 이벤트 후, data-popover-key로 컨테이너를 찾고 그 안의 button들을 querySelectorAll로 찾음.
-     *    - 버튼 순서와 markerModel.rooms 순서를 매핑(button index === rooms[index])해서
-     *      각 버튼에 addEventListener('click', () => onMarkerRoomClick(room.id)) 로 수동 바인딩.
-     *    - 바인딩 해제 함수를 popoverListenersRef에 넣어 두고, effect cleanup 또는 openedMarkerPopoverId 변경 시 제거.
-    */
+    // markerViewModels 변경 시 마커 전체 재생성.
+    // 단일 룸 마커: 클릭 시 바로 룸 선택.
+    // 복수 룸 마커: 클릭 시 팝오버 토글.
     useEffect(() => {
-      if (!isMapReady || !mapRef.current) return;
+      if (!isMapReady) return;
 
       for (const listener of markerListenersRef.current) {
         naver.maps.Event.removeListener(listener);
@@ -189,8 +214,9 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       markerInstancesRef.current.clear();
 
       const map = mapRef.current;
-      const models = markerViewModels ?? [];
+      if (!map) return;
 
+      const models = markerViewModels ?? [];
       for (const model of models) {
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(model.lat, model.lng),
@@ -205,25 +231,43 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48),
+            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           },
         });
 
         markerInstancesRef.current.set(model.id, marker);
         markerListenersRef.current.push(
           naver.maps.Event.addListener(marker, 'click', () => {
+            if (model.rooms.length > 1) {
+              if (openedMarkerPopoverIdRef.current === model.id) {
+                // 이미 열린 마커 재클릭 → 팝오버 닫기
+                setReactPopover(null);
+              } else {
+                // SDK의 map.getProjection().fromCoordToOffset()은 패닝 후 내부 캐시를
+                // 즉시 갱신하지 않아 stale한 좌표를 반환한다 (줌은 projection 스케일이
+                // 바뀌어 강제 재계산되므로 정상 동작).
+                // → 마커 DOM 요소의 getBoundingClientRect()로 실제 화면 위치를 직접 읽는다.
+                const markerEl = markerInstancesRef.current.get(model.id)?.getElement();
+                if (markerEl && mapContainerRef.current) {
+                  const markerRect = markerEl.getBoundingClientRect();
+                  const containerRect = mapContainerRef.current.getBoundingClientRect();
+                  setReactPopover({
+                    // 마커 이미지 좌상단 기준 → 시각적 중앙(x), 상단에서 gap(y)으로 보정
+                    left: markerRect.left - containerRect.left + MARKER_WIDTH_PX / 2,
+                    top: markerRect.top - containerRect.top - LIST_TO_MARKER_GAP_PX,
+                    rooms: model.rooms.map((r) => ({ id: r.id, name: r.name, priceText: r.priceText })),
+                  });
+                }
+              }
+            }
             onMarkerClick?.(model.id);
           })
         );
       }
     }, [isMapReady, markerViewModels, onMarkerClick]);
 
-    /**
-     * 선택 마커의 active 아이콘만 교체. 마커 전체 재생성 없이 이전·신규 마커 두 개만 setIcon 호출.
-     * - selectedMarkerId만 바뀔 때(룸 선택): Effect 1은 실행되지 않고 이 effect만 두 마커 아이콘 교체.
-     * - markerViewModels가 바뀔 때(데이터·필터 갱신): Effect 1이 먼저 전체를 isActive:false로 재생성한 뒤
-     *   이 effect가 실행되어 현재 selectedMarkerId에 active를 복원. selectedMarkerId가 null이면 복원 없음.
-     */
+    // selectedMarkerId 변경 시 이전·현재 마커 아이콘만 교체 (isActive 플래그).
+    // 전체 마커를 재생성하지 않고 두 개만 갱신하여 성능 최적화.
     useEffect(() => {
       if (!isMapReady) return;
 
@@ -245,7 +289,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={prevModel.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48),
+            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           });
         }
       }
@@ -264,85 +308,22 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48),
+            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           });
         }
       }
     }, [isMapReady, selectedMarkerId, markerViewModels]);
 
-    /** openedMarkerPopoverId에 해당하는 지점에 PriceList 팝오버 표시. rooms > 1일 때만. 팝오버 내 룸 클릭 시 onMarkerRoomClick. */
+    // openedMarkerPopoverId 동기화 및 팝오버 닫기.
+    // - ref 동기화: 마커 클릭 핸들러에서 현재값을 읽기 위함 (클로저 stale 방지).
+    // - null로 변경 시 팝오버 닫기: 필터 변경·룸 선택 등 외부에서 팝오버를 닫을 때 호출됨.
     useEffect(() => {
-      if (!isMapReady || !mapRef.current) return;
-
-      for (const cleanup of popoverListenersRef.current) {
-        cleanup();
+      openedMarkerPopoverIdRef.current = openedMarkerPopoverId ?? null;
+      if (!openedMarkerPopoverId) {
+        setReactPopover(null);
       }
-      popoverListenersRef.current = [];
+    }, [openedMarkerPopoverId]);
 
-      if (popoverRef.current) {
-        popoverRef.current.close();
-        popoverRef.current = null;
-      }
-
-      if (!openedMarkerPopoverId || !markerViewModels) return;
-
-      const markerModel = markerViewModels.find((m) => m.id === openedMarkerPopoverId);
-      if (!markerModel || markerModel.rooms.length <= 1) return;
-
-      const marker = markerInstancesRef.current.get(openedMarkerPopoverId);
-      if (!marker || !mapRef.current) return;
-
-      const popoverKey = `marker-popover-${openedMarkerPopoverId}`;
-      const rooms = markerModel.rooms.map((room) => ({
-        id: room.id,
-        name: room.name,
-        priceText: room.priceText,
-      }));
-
-      const content = `
-        <div data-popover-key="${popoverKey}">
-          ${renderToStaticMarkup(<PriceList rooms={rooms} isOpen />)}
-        </div>
-      `;
-
-      /** marker icon.anchor(Point(48,48)) 기준으로 리스트를 위로 보정 */
-      const SELECTED_MARKER_HEIGHT_PX = 50;
-      const SELECTED_MARKER_WIDTH_PX = 129;
-      const MARKER_ANCHOR_X_PX = 48;
-      const LIST_TO_MARKER_GAP_PX = 10;
-      const listPixelOffsetY = -(SELECTED_MARKER_HEIGHT_PX + LIST_TO_MARKER_GAP_PX);
-      const listPixelOffsetX = (SELECTED_MARKER_WIDTH_PX / 2) - MARKER_ANCHOR_X_PX; // 16.5
-
-      const infoWindow = new naver.maps.InfoWindow({
-        content,
-        borderWidth: 0,
-        disableAnchor: true,
-        pixelOffset: new naver.maps.Point(listPixelOffsetX, listPixelOffsetY),
-        backgroundColor: 'transparent',
-      });
-      popoverRef.current = infoWindow;
-
-      const domReadyListener = naver.maps.Event.addListener(infoWindow, 'domready', () => {
-        const container = document.querySelector(`[data-popover-key="${popoverKey}"]`);
-        if (!container) return;
-
-        const buttons = Array.from(container.querySelectorAll('button'));
-        const removers: Array<() => void> = [];
-        buttons.forEach((button, index) => {
-          const room = markerModel.rooms[index];
-          if (!room) return;
-          const handler = () => onMarkerRoomClick?.(room.id);
-          button.addEventListener('click', handler);
-          removers.push(() => button.removeEventListener('click', handler));
-        });
-        popoverListenersRef.current.push(...removers);
-      });
-      markerListenersRef.current.push(domReadyListener);
-
-      infoWindow.open(mapRef.current, marker);
-    }, [isMapReady, markerViewModels, onMarkerRoomClick, openedMarkerPopoverId]);
-
-    /** 스크립트 로드 실패 시 에러 메시지 영역 렌더. */
     if (scriptError) {
       return (
         <div
@@ -359,11 +340,42 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       );
     }
 
-    return <div ref={mapContainerRef} className={className} style={{ width: '100%', height: '100%' }} />;
+    return (
+      // position: relative — 팝오버 absolute 기준점
+      <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+
+        {/* 룸 목록 팝오버.
+            Naver Maps InfoWindow는 React 트리 밖 DOM이라 클릭 이벤트가 동작하지 않으므로,
+            absolute div + React 컴포넌트로 대체.
+            transform: translate(-50%, -100%) → 수평 중앙 정렬, 마커 상단에 하단 배치.
+            stopPropagation → 팝오버 위 터치·클릭이 지도 이벤트로 전파되지 않도록 차단. */}
+        {reactPopover && (
+          <div
+            className="absolute z-30"
+            style={{
+              left: reactPopover.left,
+              top: reactPopover.top,
+              transform: 'translate(-50%, -100%)',
+            }}
+            onMouseDown={(event) => event.stopPropagation()}
+            onMouseUp={(event) => event.stopPropagation()}
+            onTouchStart={(event) => event.stopPropagation()}
+            onTouchEnd={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <PriceList
+              rooms={reactPopover.rooms}
+              isOpen
+              onRoomClick={(room) => onMarkerRoomClick?.(String(room.id))}
+            />
+          </div>
+        )}
+      </div>
+    );
   }
 );
 
 NaverMap.displayName = 'NaverMap';
 
 export default NaverMap;
-
