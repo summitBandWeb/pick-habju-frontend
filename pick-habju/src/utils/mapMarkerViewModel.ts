@@ -8,6 +8,7 @@ export type BuildMarkerViewModelsArgs = {
   isPartialFilterActive: boolean;
   isFavoriteFilterActive: boolean;
   favoriteBizItemIds: Set<string>;
+  searchText?: string;
 };
 
 /** 가격을 한국어 로케일 포맷 문자열로 변환. 유효하지 않으면 '0'. */
@@ -61,6 +62,7 @@ export const buildMarkerViewModels = ({
   isPartialFilterActive,
   isFavoriteFilterActive,
   favoriteBizItemIds,
+  searchText,
 }: BuildMarkerViewModelsArgs): MarkerViewModel[] => {
   if (!results || results.length === 0) {
     return [];
@@ -79,12 +81,18 @@ export const buildMarkerViewModels = ({
 
   const markerViewModels: MarkerViewModel[] = [];
 
+  const normalizedSearch = searchText?.trim().toLowerCase() ?? '';
+
   for (const [businessId, groupedRooms] of roomsByBusinessId.entries()) {
     if (groupedRooms.length === 0) continue;
 
     const first = groupedRooms[0];
     const summary = branchSummary?.[businessId];
     const rooms = groupedRooms.map((room) => toMarkerRoomItem(room, favoriteBizItemIds));
+
+    if (normalizedSearch && !first.room_detail.branch.toLowerCase().includes(normalizedSearch)) {
+      continue;
+    }
 
     const visibleRooms = rooms.filter((room) =>
       isRoomMatchedByFilters(room, isPartialFilterActive, isFavoriteFilterActive)

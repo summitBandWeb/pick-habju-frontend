@@ -4,11 +4,13 @@ import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
 import FilterSection from '../components/FilterSection/FilterSection';
 import NaverMap from '../components/Map/NaverMap';
+import SearchBar from '../components/SearchBar/SearchBar';
 import SearchHereButton from '../components/SearchHereButton/SearchHereButton';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
 import { useSearchStore } from '../store/search/searchStore';
 import type { NaverMapHandle } from '../types/map';
+import { formatSearchConditionDateTime } from '../utils/dateTimeLabel';
 import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
 
 const DEFAULT_MAP_ZOOM = 14;
@@ -22,6 +24,7 @@ const MapPage = () => {
   const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
   const [isPartialFilterActive, setIsPartialFilterActive] = useState(false);
   const [isFavoriteFilterActive, setIsFavoriteFilterActive] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const {
     showSearchHereButton,
     handleViewportChange,
@@ -40,6 +43,7 @@ const MapPage = () => {
         isPartialFilterActive,
         isFavoriteFilterActive,
         favoriteBizItemIds,
+        searchText,
       }),
     [
       branchSummary,
@@ -47,6 +51,7 @@ const MapPage = () => {
       isPartialFilterActive,
       isFavoriteFilterActive,
       results,
+      searchText,
     ]
   );
 
@@ -167,6 +172,13 @@ const MapPage = () => {
     };
   }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
 
+  const prevSearchTextRef = useRef(searchText);
+  useEffect(() => {
+    if (prevSearchTextRef.current === searchText) return;
+    prevSearchTextRef.current = searchText;
+    resetSelectionUiState();
+  }, [searchText, resetSelectionUiState]);
+
   useEffect(() => {
     if (!lastQuery) {
       navigate(RoutePaths.HOME, { replace: true });
@@ -194,9 +206,34 @@ const MapPage = () => {
     return null;
   }
 
+  const searchCondition = {
+    location: lastQuery.location,
+    peopleCount: lastQuery.peopleCount,
+    dateTime: formatSearchConditionDateTime(lastQuery.date, lastQuery.hour_slots),
+  };
+
   return (
-    <div className="flex h-screen w-full flex-col">
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+    <div className="relative h-screen w-full">
+      <NaverMap
+        ref={mapRef}
+        initialCenter={lastQuery.center}
+        initialZoom={DEFAULT_MAP_ZOOM}
+        markerViewModels={markerViewModels}
+        openedMarkerPopoverId={openedMarkerPopoverId}
+        selectedMarkerId={selectedMarkerId}
+        onMarkerClick={handleMarkerClick}
+        onMarkerRoomClick={handleMarkerRoomClick}
+        onViewportChange={handleViewportChange}
+        className="h-full w-full"
+      />
+
+      <div className="absolute left-0 right-0 top-0 z-10 flex flex-col gap-3 p-3">
+        <SearchBar
+          value={searchText}
+          onSearchChange={setSearchText}
+          searchCondition={searchCondition}
+          onConditionClick={() => navigate(RoutePaths.HOME)}
+        />
         <FilterSection
           isPartialFilterActive={isPartialFilterActive}
           onPartialFilterToggle={setIsPartialFilterActive}
@@ -205,33 +242,19 @@ const MapPage = () => {
         />
       </div>
 
-      <div className="relative flex-1">
-        <NaverMap
-          ref={mapRef}
-          initialCenter={lastQuery.center}
-          initialZoom={DEFAULT_MAP_ZOOM}
-          markerViewModels={markerViewModels}
-          openedMarkerPopoverId={openedMarkerPopoverId}
-          selectedMarkerId={selectedMarkerId}
-          onMarkerClick={handleMarkerClick}
-          onMarkerRoomClick={handleMarkerRoomClick}
-          onViewportChange={handleViewportChange}
-          className="h-full w-full"
+      {carouselRooms.length > 0 && (
+        <CardCarousel
+          rooms={carouselRooms}
+          selectedRoomId={selectedRoomId}
+          isOpen={isCarouselOpen}
+          onCardChange={handleCardChange}
         />
-        {carouselRooms.length > 0 && (
-          <CardCarousel
-            rooms={carouselRooms}
-            selectedRoomId={selectedRoomId}
-            isOpen={isCarouselOpen}
-            onCardChange={handleCardChange}
-          />
-        )}
-        {showSearchHereButton && (
-          <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
-            <SearchHereButton onClick={() => handleSearchHere(resetMapUiState)} />
-          </div>
-        )}
-      </div>
+      )}
+      {showSearchHereButton && (
+        <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
+          <SearchHereButton onClick={() => handleSearchHere(resetMapUiState)} />
+        </div>
+      )}
     </div>
   );
 };
