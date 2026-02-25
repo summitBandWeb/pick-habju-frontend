@@ -296,6 +296,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const prevMarker = markerInstancesRef.current.get(prev);
         const prevModel = models.find((m) => m.id === prev);
         if (prevMarker && prevModel) {
+          prevMarker.setZIndex(0);
           prevMarker.setIcon({
             content: renderToStaticMarkup(
               <PriceLabel
@@ -315,6 +316,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const marker = markerInstancesRef.current.get(selectedMarkerId);
         const model = models.find((m) => m.id === selectedMarkerId);
         if (marker && model) {
+          marker.setZIndex(10);
           marker.setIcon({
             content: renderToStaticMarkup(
               <PriceLabel

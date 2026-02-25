@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
@@ -82,15 +82,34 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
 
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
+  /** Swiper loop 초기화 중 발생하는 spurious onSlideChange를 무시하기 위한 flag.
+   *  onSwiper(마운트)에서 false로 리셋, 첫 슬라이드 동기화 완료 후 true로 전환한다. */
+  const isSwipeReadyRef = useRef(false);
+
+  /** Swiper가 (재)마운트될 때마다 준비 flag를 리셋하고 인스턴스를 저장 */
+  const handleSwiper = (swiper: SwiperType) => {
+    isSwipeReadyRef.current = false;
+    setSwiperInstance(swiper);
+  };
+
   /** 지도 핀 클릭(selectedRoomId 변경) 시 해당 슬라이드로 동기화. Loop 모드이므로 slideToLoop 사용 */
   useEffect(() => {
     if (swiperInstance && selectedRoomId && isOpen && rooms.length > 0) {
       const index = rooms.findIndex((room) => room.bizItemId === selectedRoomId);
-      if (index !== -1 && swiperInstance.realIndex !== index) {
-        swiperInstance.slideToLoop(index);
+      if (index !== -1) {
+        if (swiperInstance.realIndex !== index) {
+          swiperInstance.slideToLoop(index);
+        }
+        isSwipeReadyRef.current = true;
       }
     }
   }, [selectedRoomId, isOpen, swiperInstance, rooms]);
+
+  /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
+   *  Swiper는 initialSlide를 마운트 시에만 사용하므로 매 render마다 계산해도 안전하다. */
+  const initialSlide = selectedRoomId
+    ? Math.max(rooms.findIndex((room) => room.bizItemId === selectedRoomId), 0)
+    : 0;
 
   const handlePrev = () => swiperInstance?.slidePrev();
   const handleNext = () => swiperInstance?.slideNext();
@@ -150,9 +169,11 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
               modules={[Navigation]}
               loop={true}
               navigation={false}
-              onSwiper={setSwiperInstance}
+              initialSlide={initialSlide}
+              onSwiper={handleSwiper}
               {...getSwiperProps(isDesktop)}
               onSlideChange={(swiper) => {
+                if (!isSwipeReadyRef.current) return;
                 const currentRoom = rooms[swiper.realIndex];
                 if (currentRoom && currentRoom.bizItemId !== selectedRoomId) {
                   onCardChange(currentRoom.bizItemId);
