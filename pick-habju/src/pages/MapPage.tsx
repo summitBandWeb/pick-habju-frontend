@@ -64,13 +64,15 @@ const MapPage = () => {
     ]
   );
 
-  // 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시
+  // 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
+  // 팝오버가 열린 마커도 active 상태로 표시한다 (룸 미선택 상태에서 팝오버를 열었을 때).
   const selectedMarkerId = useMemo(() => {
+    if (openedMarkerPopoverId) return openedMarkerPopoverId;
     if (!selectedRoomId) return null;
     return (
       markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null
     );
-  }, [markerViewModels, selectedRoomId]);
+  }, [markerViewModels, openedMarkerPopoverId, selectedRoomId]);
 
   // 캐러셀에 표시할 룸 목록: 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {

@@ -72,6 +72,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const onViewportChangeRef = useRef(onViewportChange);
     const onMapInteractionStartRef = useRef(onMapInteractionStart);
     const onMapEmptyClickRef = useRef(onMapEmptyClick);
+    const onMarkerClickRef = useRef(onMarkerClick);
 
     // ── 마커 인스턴스 및 팝오버 상태 refs ──
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
@@ -124,6 +125,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     useEffect(() => {
       onMapEmptyClickRef.current = onMapEmptyClick;
     }, [onMapEmptyClick]);
+
+    useEffect(() => {
+      onMarkerClickRef.current = onMarkerClick;
+    }, [onMarkerClick]);
 
     // 네이버 지도 SDK 스크립트 로드 → 지도 인스턴스 생성 → 이벤트 리스너 등록.
     // initialCenter·initialZoom이 바뀌면 지도를 재생성한다.
@@ -277,11 +282,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 }
               }
             }
-            onMarkerClick?.(model.id);
+            onMarkerClickRef.current?.(model.id);
           })
         );
       }
-    }, [isMapReady, markerViewModels, onMarkerClick]);
+    }, [isMapReady, markerViewModels]);
 
     // selectedMarkerId 변경 시 이전·현재 마커 아이콘만 교체 (isActive 플래그).
     // 전체 마커를 재생성하지 않고 두 개만 갱신하여 성능 최적화.
