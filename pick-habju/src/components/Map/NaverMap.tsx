@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { renderToStaticMarkup } from 'react-dom/server';
 import PriceLabel from '../Price/PriceLabel/PriceLabel';
 import PriceList from '../Price/PriceList/PriceList';
-import type { MapMarker, MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
+import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 
@@ -10,7 +10,6 @@ import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 type NaverMapProps = {
   initialCenter: { lat: number; lng: number };
   initialZoom: number;
-  markers?: MapMarker[];
   markerViewModels?: MarkerViewModel[];
   openedMarkerPopoverId?: string | null;
   selectedMarkerId?: string | null;
@@ -27,7 +26,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     {
       initialCenter,
       initialZoom,
-      markers,
       markerViewModels,
       openedMarkerPopoverId,
       selectedMarkerId,
@@ -189,39 +187,24 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       markerInstancesRef.current.clear();
 
       const map = mapRef.current;
-      const fallbackMarkers = markers ?? [];
-      const models =
-        markerViewModels ??
-        fallbackMarkers.map<MarkerViewModel>((marker) => ({
-          id: marker.id,
-          lat: marker.lat,
-          lng: marker.lng,
-          priceText: '',
-          isPartial: false,
-          favorite: 'off',
-          isActive: marker.id === selectedMarkerId,
-          extraRoomCount: 0,
-          rooms: [],
-        }));
+      const models = markerViewModels ?? [];
 
       for (const model of models) {
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(model.lat, model.lng),
           map,
-          icon: markerViewModels
-            ? {
-                content: renderToStaticMarkup(
-                  <PriceLabel
-                    priceText={model.priceText}
-                    isPartial={model.isPartial}
-                    favorite={model.favorite}
-                    isActive={model.isActive}
-                    extraRoomCount={model.extraRoomCount}
-                  />
-                ),
-                anchor: new naver.maps.Point(48, 48),
-              }
-            : undefined,
+          icon: {
+            content: renderToStaticMarkup(
+              <PriceLabel
+                priceText={model.priceText}
+                isPartial={model.isPartial}
+                favorite={model.favorite}
+                isActive={model.isActive}
+                extraRoomCount={model.extraRoomCount}
+              />
+            ),
+            anchor: new naver.maps.Point(48, 48),
+          },
         });
 
         markerInstancesRef.current.set(model.id, marker);
@@ -231,7 +214,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           })
         );
       }
-    }, [isMapReady, markers, markerViewModels, onMarkerClick, selectedMarkerId]);
+    }, [isMapReady, markerViewModels, onMarkerClick, selectedMarkerId]);
 
     /** openedMarkerPopoverId에 해당하는 지점에 PriceList 팝오버 표시. rooms > 1일 때만. 팝오버 내 룸 클릭 시 onMarkerRoomClick. */
     useEffect(() => {

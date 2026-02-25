@@ -34,8 +34,6 @@ const toMarkerRoomItem = (
     id: roomId,
     name: item.room_detail.name,
     priceText: formatPriceText(item.room_detail.price_per_hour),
-    lat: item.room_detail.lat,
-    lng: item.room_detail.lng,
     isPartial,
     favorite: favoriteBizItemIds.has(roomId) ? 'on' : 'off',
   };

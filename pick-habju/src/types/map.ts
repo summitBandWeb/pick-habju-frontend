@@ -27,8 +27,6 @@ export type MarkerRoomItem = {
   id: string;
   name: string;
   priceText: string;
-  lat: number;
-  lng: number;
   isPartial: boolean;
   favorite: 'on' | 'off';
 };

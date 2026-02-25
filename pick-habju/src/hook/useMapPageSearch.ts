@@ -4,99 +4,38 @@ import { useFavoritesQuery } from '../api/get/useFavoritesQueries';
 import { useRoomAvailabilityQuery } from '../api/get/useRoomQueries';
 import { useDeviceId } from './useDeviceId';
 import { useSearchStore } from '../store/search/searchStore';
-import type { MapMarker, MapViewport } from '../types/map';
+import type { MapViewport } from '../types/map';
 import {
   buildRoomAvailabilityPayload,
   isOutsideBaseBounds,
   mergeViewportToLastQuery,
 } from '../utils/mapQuery';
 
-/** 지점(branch) 단위로 정규화된 데이터. 지도 마커/캐러셀용. */
-type BranchNormalized = {
-  businessId: string;
-  roomIds: string[];
-  lat: number;
-  lng: number;
-  minPrice: number;
-  availableCount: number;
-};
-
-/** 지도 페이지 검색 결과를 정규화한 타입. 룸/지점/마커/좌표 등을 ID별 맵으로 제공. */
+/** 지도 페이지 검색 결과를 정규화한 타입. 룸·지점 ID별 맵으로 제공. */
 export type MapAvailabilityNormalized = {
   results: RoomAvailabilityResult[];
   branchSummary: Record<string, BranchSummaryInfo>;
   roomsById: Record<string, RoomAvailabilityResult>;
-  branchById: Record<string, BranchNormalized>;
-  markers: MapMarker[];
-  roomCoordById: Record<string, { lat: number; lng: number }>;
 };
 
 /**
  * 예약 API 응답을 지도 페이지용으로 정규화.
- * - 룸별/지점별 맵, 마커 배열, 룸 좌표 맵 생성.
- * - 좌표가 없는 룸은 제외.
+ * - roomsById: O(1) 룸 조회용 맵 생성. 좌표가 없는 룸은 제외.
  */
 const normalizeMapAvailability = (response: BookingAPIResponse): MapAvailabilityNormalized => {
   const results = response.result?.results ?? [];
   const branchSummary = response.result?.branch_summary ?? {};
   const roomsById: Record<string, RoomAvailabilityResult> = {};
-  const branchById: Record<string, BranchNormalized> = {};
-  const markers: MapMarker[] = [];
-  const roomCoordById: Record<string, { lat: number; lng: number }> = {};
 
   for (const item of results) {
     const roomId = item.room_detail.biz_item_id;
-    const businessId = item.room_detail.business_id;
-
     if (!roomId || !Number.isFinite(item.room_detail.lat) || !Number.isFinite(item.room_detail.lng)) {
       continue;
     }
-
     roomsById[roomId] = item;
-    markers.push({
-      id: roomId,
-      lat: item.room_detail.lat,
-      lng: item.room_detail.lng,
-    });
-    roomCoordById[roomId] = { lat: item.room_detail.lat, lng: item.room_detail.lng };
-
-    const summary = branchSummary[businessId];
-    const currentBranch = branchById[businessId];
-    if (currentBranch) {
-      currentBranch.roomIds.push(roomId);
-      continue;
-    }
-
-    branchById[businessId] = {
-      businessId,
-      roomIds: [roomId],
-      lat: summary?.lat ?? item.room_detail.lat,
-      lng: summary?.lng ?? item.room_detail.lng,
-      minPrice: summary?.min_price ?? item.room_detail.price_per_hour,
-      availableCount: summary?.available_count ?? 0,
-    };
   }
 
-  for (const [businessId, summary] of Object.entries(branchSummary)) {
-    if (branchById[businessId]) continue;
-    branchById[businessId] = {
-      businessId,
-      roomIds: [],
-      lat: summary.lat,
-      lng: summary.lng,
-      minPrice: summary.min_price,
-      availableCount: summary.available_count,
-    };
-  }
-
-  return {
-    results,
-    branchSummary,
-    roomsById,
-    branchById,
-    markers,
-    roomCoordById,
-  };
+  return { results, branchSummary, roomsById };
 };
 
 /**
@@ -162,11 +101,7 @@ export const useMapPageSearch = () => {
     handleSearchHere,
     isLoading: roomAvailabilityQuery.isFetching,
     errorMessage,
-    data: roomAvailabilityQuery.data,
-    markers: roomAvailabilityQuery.data?.markers ?? [],
-    roomCoordById: roomAvailabilityQuery.data?.roomCoordById ?? {},
     roomsById: roomAvailabilityQuery.data?.roomsById ?? {},
-    branchById: roomAvailabilityQuery.data?.branchById ?? {},
     branchSummary: roomAvailabilityQuery.data?.branchSummary ?? {},
     results: roomAvailabilityQuery.data?.results ?? [],
     favoriteBizItemIds,

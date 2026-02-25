@@ -26,8 +26,6 @@ const MapPage = () => {
     showSearchHereButton,
     handleViewportChange,
     handleSearchHere,
-    markers,
-    roomCoordById,
     roomsById,
     results,
     branchSummary,
@@ -62,21 +60,9 @@ const MapPage = () => {
   }, [markerViewModels, selectedRoomId]);
 
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
-    const orderedUniqueRoomIds = Array.from(
-      new Set(
-        markerViewModels.flatMap((marker) =>
-          marker.rooms
-            .filter((room) => {
-              const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
-              const favoriteMatched = !isFavoriteFilterActive || room.favorite === 'on';
-              return partialMatched && favoriteMatched;
-            })
-            .map((room) => String(room.id))
-        )
-      )
-    );
+    const roomIds = markerViewModels.flatMap((marker) => marker.rooms.map((room) => room.id));
 
-    return orderedUniqueRoomIds
+    return [...new Set(roomIds)]
       .map((roomId) => roomsById[roomId]?.room_detail)
       .filter((roomDetail): roomDetail is NonNullable<typeof roomDetail> => Boolean(roomDetail))
       .map((roomDetail) => ({
@@ -88,7 +74,7 @@ const MapPage = () => {
         recommendCapacity: roomDetail.recommend_capacity,
         pricePerHour: roomDetail.price_per_hour,
       }));
-  }, [isFavoriteFilterActive, isPartialFilterActive, markerViewModels, roomsById]);
+  }, [markerViewModels, roomsById]);
 
   const handleSelectRoom = useCallback(
     (id: string) => {
@@ -100,11 +86,11 @@ const MapPage = () => {
       if (openedMarkerPopoverId !== null) {
         setOpenedMarkerPopoverId(null);
       }
-      const coord = roomCoordById[id];
-      if (!coord) return;
-      mapRef.current?.panTo(coord.lat, coord.lng);
+      const roomDetail = roomsById[id]?.room_detail;
+      if (!roomDetail) return;
+      mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
     },
-    [isCarouselOpen, openedMarkerPopoverId, roomCoordById, selectedRoomId]
+    [isCarouselOpen, openedMarkerPopoverId, roomsById, selectedRoomId]
   );
 
   const handleCardChange = useCallback(
@@ -130,12 +116,9 @@ const MapPage = () => {
         return;
       }
 
-      if (isCarouselOpen) {
-        setIsCarouselOpen(false);
-      }
       setOpenedMarkerPopoverId((prev) => (prev === markerId ? null : markerId));
     },
-    [handleSelectRoom, isCarouselOpen, markerViewModels, selectedMarkerId]
+    [handleSelectRoom, markerViewModels, selectedMarkerId]
   );
 
   const handleMarkerRoomClick = useCallback(
@@ -194,13 +177,13 @@ const MapPage = () => {
 
   useEffect(() => {
     if (!selectedRoomId) return;
-    if (roomCoordById[selectedRoomId]) return;
+    if (roomsById[selectedRoomId]) return;
 
     setSelectedRoomId(null);
     if (isCarouselOpen) {
       setIsCarouselOpen(false);
     }
-  }, [isCarouselOpen, roomCoordById, selectedRoomId]);
+  }, [isCarouselOpen, roomsById, selectedRoomId]);
 
   useEffect(() => {
     if (carouselRooms.length > 0) return;
@@ -229,7 +212,6 @@ const MapPage = () => {
           ref={mapRef}
           initialCenter={lastQuery.center}
           initialZoom={DEFAULT_MAP_ZOOM}
-          markers={markers}
           markerViewModels={markerViewModels}
           openedMarkerPopoverId={openedMarkerPopoverId}
           selectedMarkerId={selectedMarkerId}
