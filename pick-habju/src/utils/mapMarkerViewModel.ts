@@ -39,15 +39,13 @@ const toMarkerRoomItem = (
   };
 };
 
-/** 부분 가능 포함/즐겨찾기 필터에 따라 마커(지점) 노출 여부 판별. */
+/** 부분 가능 포함 필터에 따라 마커(지점) 노출 여부 판별. */
 const isRoomMatchedByFilters = (
   room: MarkerRoomItem,
-  isPartialFilterActive: boolean,
-  isFavoriteFilterActive: boolean
+  isPartialFilterActive: boolean
 ): boolean => {
   const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
-  const favoriteMatched = !isFavoriteFilterActive || room.favorite === 'on';
-  return partialMatched && favoriteMatched;
+  return partialMatched;
 };
 
 /**
@@ -95,7 +93,7 @@ export const buildMarkerViewModels = ({
     }
 
     const visibleRooms = rooms.filter((room) =>
-      isRoomMatchedByFilters(room, isPartialFilterActive, isFavoriteFilterActive)
+      isRoomMatchedByFilters(room, isPartialFilterActive)
     );
     if (visibleRooms.length === 0) {
       continue;
@@ -103,7 +101,7 @@ export const buildMarkerViewModels = ({
 
     const isPartial = visibleRooms.some((room) => room.isPartial);
     const favorite: 'on' | 'off' =
-      visibleRooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
+      isFavoriteFilterActive && rooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
     const fallbackMinPrice = Math.min(
       ...groupedRooms.map((room) => room.room_detail.price_per_hour).filter((price) => Number.isFinite(price))
     );

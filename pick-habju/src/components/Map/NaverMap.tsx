@@ -243,6 +243,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(model.lat, model.lng),
           map,
+          zIndex: model.favorite === 'on' ? 1 : 0,
           icon: {
             content: renderToStaticMarkup(
               <PriceLabel
@@ -301,7 +302,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const prevMarker = markerInstancesRef.current.get(prev);
         const prevModel = models.find((m) => m.id === prev);
         if (prevMarker && prevModel) {
-          prevMarker.setZIndex(0);
+          prevMarker.setZIndex(prevModel.favorite === 'on' ? 1 : 0);
           prevMarker.setIcon({
             content: renderToStaticMarkup(
               <PriceLabel
