@@ -4,6 +4,7 @@ import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
 import FilterSection from '../components/FilterSection/FilterSection';
 import NaverMap from '../components/Map/NaverMap';
+import SearchHereButton from '../components/SearchHereButton/SearchHereButton';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
 import { useSearchStore } from '../store/search/searchStore';
@@ -25,8 +26,6 @@ const MapPage = () => {
     showSearchHereButton,
     handleViewportChange,
     handleSearchHere,
-    isLoading,
-    errorMessage,
     markers,
     roomCoordById,
     roomsById,
@@ -223,18 +222,6 @@ const MapPage = () => {
           isFavoriteFilterActive={isFavoriteFilterActive}
           onFavoriteFilterToggle={setIsFavoriteFilterActive}
         />
-        <div className="text-sm text-gray-600" role="status" aria-live="polite">
-          {isLoading ? 'Loading map search...' : errorMessage ? `Error: ${errorMessage}` : 'Map search ready'}
-        </div>
-        {showSearchHereButton && (
-          <button
-            type="button"
-            onClick={() => handleSearchHere(resetMapUiState)}
-            className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white"
-          >
-            Search this area
-          </button>
-        )}
       </div>
 
       <div className="relative flex-1">
@@ -258,6 +245,11 @@ const MapPage = () => {
             isOpen={isCarouselOpen}
             onCardChange={handleCardChange}
           />
+        )}
+        {showSearchHereButton && (
+          <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
+            <SearchHereButton onClick={() => handleSearchHere(resetMapUiState)} />
+          </div>
         )}
       </div>
     </div>
