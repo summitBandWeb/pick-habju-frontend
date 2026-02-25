@@ -46,6 +46,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
     const markerListenersRef = useRef<naver.maps.MapEventListener[]>([]);
     const popoverRef = useRef<naver.maps.InfoWindow | null>(null);
+    /** 이전 active 마커 id 추적. active 상태 전용 effect에서 이전 마커를 비활성화하는 데 사용. */
+    const prevSelectedMarkerIdRef = useRef<string | null>(null);
     /** 팝오버 내 버튼 클릭 리스너 제거용. effect 정리 시 호출. */
     const popoverListenersRef = useRef<Array<() => void>>([]);
     const [scriptError, setScriptError] = useState<string | null>(null);
@@ -214,7 +216,59 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           })
         );
       }
-    }, [isMapReady, markerViewModels, onMarkerClick, selectedMarkerId]);
+    }, [isMapReady, markerViewModels, onMarkerClick]);
+
+    /**
+     * 선택 마커의 active 아이콘만 교체. 마커 전체 재생성 없이 이전·신규 마커 두 개만 setIcon 호출.
+     * - selectedMarkerId만 바뀔 때(룸 선택): Effect 1은 실행되지 않고 이 effect만 두 마커 아이콘 교체.
+     * - markerViewModels가 바뀔 때(데이터·필터 갱신): Effect 1이 먼저 전체를 isActive:false로 재생성한 뒤
+     *   이 effect가 실행되어 현재 selectedMarkerId에 active를 복원. selectedMarkerId가 null이면 복원 없음.
+     */
+    useEffect(() => {
+      if (!isMapReady) return;
+
+      const models = markerViewModels ?? [];
+      const prev = prevSelectedMarkerIdRef.current;
+      prevSelectedMarkerIdRef.current = selectedMarkerId ?? null;
+
+      if (prev) {
+        const prevMarker = markerInstancesRef.current.get(prev);
+        const prevModel = models.find((m) => m.id === prev);
+        if (prevMarker && prevModel) {
+          prevMarker.setIcon({
+            content: renderToStaticMarkup(
+              <PriceLabel
+                priceText={prevModel.priceText}
+                isPartial={prevModel.isPartial}
+                favorite={prevModel.favorite}
+                isActive={false}
+                extraRoomCount={prevModel.extraRoomCount}
+              />
+            ),
+            anchor: new naver.maps.Point(48, 48),
+          });
+        }
+      }
+
+      if (selectedMarkerId) {
+        const marker = markerInstancesRef.current.get(selectedMarkerId);
+        const model = models.find((m) => m.id === selectedMarkerId);
+        if (marker && model) {
+          marker.setIcon({
+            content: renderToStaticMarkup(
+              <PriceLabel
+                priceText={model.priceText}
+                isPartial={model.isPartial}
+                favorite={model.favorite}
+                isActive={true}
+                extraRoomCount={model.extraRoomCount}
+              />
+            ),
+            anchor: new naver.maps.Point(48, 48),
+          });
+        }
+      }
+    }, [isMapReady, selectedMarkerId, markerViewModels]);
 
     /** openedMarkerPopoverId에 해당하는 지점에 PriceList 팝오버 표시. rooms > 1일 때만. 팝오버 내 룸 클릭 시 onMarkerRoomClick. */
     useEffect(() => {

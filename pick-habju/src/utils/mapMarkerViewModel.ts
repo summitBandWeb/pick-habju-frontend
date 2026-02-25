@@ -1,11 +1,10 @@
 import type { BranchSummaryInfo, RoomAvailabilityResult } from '../api/api.types';
 import type { MarkerRoomItem, MarkerViewModel } from '../types/map';
 
-/** 지도 마커 뷰모델 생성 시 필요한 인자. 필터·선택 상태·즐겨찾기 등. */
+/** 지도 마커 뷰모델 생성 시 필요한 인자. 필터·즐겨찾기 등. isActive는 NaverMap에서 별도 관리. */
 export type BuildMarkerViewModelsArgs = {
   branchSummary: Record<string, BranchSummaryInfo> | undefined;
   results: RoomAvailabilityResult[] | undefined;
-  selectedRoomId: string | null;
   isPartialFilterActive: boolean;
   isFavoriteFilterActive: boolean;
   favoriteBizItemIds: Set<string>;
@@ -51,15 +50,14 @@ const isRoomMatchedByFilters = (
 };
 
 /**
- * 검색 결과·필터·선택 상태를 바탕으로 지도 마커용 뷰모델 배열 생성.
+ * 검색 결과·필터를 바탕으로 지도 마커용 뷰모델 배열 생성.
  * - results를 businessId별로 그룹핑 후, 지점당 하나의 MarkerViewModel 생성.
- * - includePartiallyPossible / isFavoriteFilterActive 에 따라 노출 여부 필터링.
- * - selectedRoomId와 일치하는 룸이 있으면 해당 지점 마커를 isActive로 표시.
+ * - isPartialFilterActive / isFavoriteFilterActive 에 따라 노출 여부 필터링.
+ * - isActive는 항상 false. NaverMap의 active 상태 전용 effect에서 별도 관리.
  */
 export const buildMarkerViewModels = ({
   branchSummary,
   results,
-  selectedRoomId,
   isPartialFilterActive,
   isFavoriteFilterActive,
   favoriteBizItemIds,
@@ -98,10 +96,6 @@ export const buildMarkerViewModels = ({
     const isPartial = visibleRooms.some((room) => room.isPartial);
     const favorite: 'on' | 'off' =
       visibleRooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
-    const isActive =
-      selectedRoomId !== null &&
-      visibleRooms.some((room) => String(room.id) === String(selectedRoomId));
-
     const fallbackMinPrice = Math.min(
       ...groupedRooms.map((room) => room.room_detail.price_per_hour).filter((price) => Number.isFinite(price))
     );
@@ -113,7 +107,7 @@ export const buildMarkerViewModels = ({
       priceText: formatPriceText(summary?.min_price ?? fallbackMinPrice),
       isPartial,
       favorite,
-      isActive,
+      isActive: false,
       extraRoomCount: Math.max(visibleRooms.length - 1, 0),
       rooms: visibleRooms,
     });

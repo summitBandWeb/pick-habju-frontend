@@ -37,7 +37,6 @@ const MapPage = () => {
       buildMarkerViewModels({
         branchSummary,
         results,
-        selectedRoomId,
         isPartialFilterActive,
         isFavoriteFilterActive,
         favoriteBizItemIds,
@@ -48,7 +47,6 @@ const MapPage = () => {
       isPartialFilterActive,
       isFavoriteFilterActive,
       results,
-      selectedRoomId,
     ]
   );
 
