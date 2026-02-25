@@ -253,7 +253,7 @@ const MapPage = () => {
   };
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative h-full w-full">
       <NaverMap
         ref={mapRef}
         initialCenter={lastQuery.center}
@@ -265,6 +265,7 @@ const MapPage = () => {
         onMarkerRoomClick={handleMarkerRoomClick}
         onViewportChange={handleMapViewportChange}
         onMapInteractionStart={handleMapInteractionStart}
+        onMapEmptyClick={resetSelectionUiState}
         className="h-full w-full"
       />
 

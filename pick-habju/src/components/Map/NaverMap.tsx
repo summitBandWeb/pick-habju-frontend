@@ -20,6 +20,8 @@ type NaverMapProps = {
   onViewportChange?: (viewport: MapViewport) => void;
   /** 드래그·줌 시작 시 호출 — 팝오버 닫기 등 외부 상태 초기화용. */
   onMapInteractionStart?: () => void;
+  /** 마커가 없는 빈 지도 영역 클릭 시 호출. */
+  onMapEmptyClick?: () => void;
   className?: string;
 };
 
@@ -48,6 +50,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onLoad,
       onViewportChange,
       onMapInteractionStart,
+      onMapEmptyClick,
       className,
     },
     ref
@@ -60,6 +63,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
     const dragStartListenerRef = useRef<naver.maps.MapEventListener | null>(null);
     const zoomChangedListenerRef = useRef<naver.maps.MapEventListener | null>(null);
+    const mapClickListenerRef = useRef<naver.maps.MapEventListener | null>(null);
 
     // ── 콜백 안정화 refs ──
     // 마커 클릭 리스너는 생성 시점 클로저를 캡처하므로,
@@ -67,6 +71,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const onLoadRef = useRef(onLoad);
     const onViewportChangeRef = useRef(onViewportChange);
     const onMapInteractionStartRef = useRef(onMapInteractionStart);
+    const onMapEmptyClickRef = useRef(onMapEmptyClick);
 
     // ── 마커 인스턴스 및 팝오버 상태 refs ──
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
@@ -116,6 +121,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onMapInteractionStartRef.current = onMapInteractionStart;
     }, [onMapInteractionStart]);
 
+    useEffect(() => {
+      onMapEmptyClickRef.current = onMapEmptyClick;
+    }, [onMapEmptyClick]);
+
     // 네이버 지도 SDK 스크립트 로드 → 지도 인스턴스 생성 → 이벤트 리스너 등록.
     // initialCenter·initialZoom이 바뀌면 지도를 재생성한다.
     useEffect(() => {
@@ -155,6 +164,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           zoomChangedListenerRef.current = naver.maps.Event.addListener(map, 'zoom_changed', () => {
             onMapInteractionStartRef.current?.();
           });
+
+          mapClickListenerRef.current = naver.maps.Event.addListener(map, 'click', () => {
+            onMapEmptyClickRef.current?.();
+          });
         })
         .catch((err) => {
           if (!cancelled) {
@@ -186,6 +199,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         if (zoomChangedListenerRef.current) {
           naver.maps.Event.removeListener(zoomChangedListenerRef.current);
           zoomChangedListenerRef.current = null;
+        }
+        if (mapClickListenerRef.current) {
+          naver.maps.Event.removeListener(mapClickListenerRef.current);
+          mapClickListenerRef.current = null;
         }
 
         if (mapRef.current) {
