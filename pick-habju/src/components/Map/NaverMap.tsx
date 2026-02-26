@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+﻿import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import PriceLabel from '../Price/PriceLabel/PriceLabel';
 import PriceList from '../Price/PriceList/PriceList';
@@ -34,8 +34,6 @@ type ReactMarkerPopover = {
 
 /** PriceLabel 마커 아이콘 너비(px). 팝오버 수평 중앙 정렬 계산에 사용. */
 const MARKER_WIDTH_PX = 129;
-/** 팝오버 하단과 마커 상단 사이 간격(px). */
-const LIST_TO_MARKER_GAP_PX = 10;
 
 const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
   (
@@ -277,7 +275,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                   setReactPopover({
                     // 마커 이미지 좌상단 기준 → 시각적 중앙(x), 상단에서 gap(y)으로 보정
                     left: markerRect.left - containerRect.left + MARKER_WIDTH_PX / 2,
-                    top: markerRect.top - containerRect.top - LIST_TO_MARKER_GAP_PX,
+                    top: markerRect.top - containerRect.top,
                     rooms: model.rooms.map((r) => ({ id: r.id, name: r.name, priceText: r.priceText })),
                   });
                 }
@@ -351,12 +349,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
 
     if (scriptError) {
       return (
-        <div
-          className={className}
-          style={{ width: '100%', height: '100%' }}
-          role="alert"
-          aria-live="polite"
-        >
+        <div className={className} style={{ width: '100%', height: '100%' }} role="alert" aria-live="polite">
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-gray-600">
             <span>지도를 불러올 수 없습니다.</span>
             <span className="text-sm">{scriptError}</span>
@@ -389,11 +382,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             onTouchEnd={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
           >
-            <PriceList
-              rooms={reactPopover.rooms}
-              isOpen
-              onRoomClick={(room) => onMarkerRoomClick?.(String(room.id))}
-            />
+            <PriceList rooms={reactPopover.rooms} isOpen onRoomClick={(room) => onMarkerRoomClick?.(String(room.id))} />
           </div>
         )}
       </div>
