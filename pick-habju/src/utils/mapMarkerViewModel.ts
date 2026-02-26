@@ -23,10 +23,7 @@ const hasAnyAvailableSlot = (slots: Record<string, boolean> | undefined): boolea
 };
 
 /** RoomAvailabilityResult → MarkerRoomItem. 가격 텍스트, 부분 가능, 즐겨찾기 상태 포함. */
-const toMarkerRoomItem = (
-  item: RoomAvailabilityResult,
-  favoriteBizItemIds: Set<string>
-): MarkerRoomItem => {
+const toMarkerRoomItem = (item: RoomAvailabilityResult, favoriteBizItemIds: Set<string>): MarkerRoomItem => {
   const roomId = item.room_detail.biz_item_id;
   const isPartial = item.available === false && hasAnyAvailableSlot(item.available_slots);
 
@@ -40,10 +37,7 @@ const toMarkerRoomItem = (
 };
 
 /** 부분 가능 포함 필터에 따라 마커(지점) 노출 여부 판별. */
-const isRoomMatchedByFilters = (
-  room: MarkerRoomItem,
-  isPartialFilterActive: boolean
-): boolean => {
+const isRoomMatchedByFilters = (room: MarkerRoomItem, isPartialFilterActive: boolean): boolean => {
   const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
   return partialMatched;
 };
@@ -51,7 +45,7 @@ const isRoomMatchedByFilters = (
 /**
  * 검색 결과·필터를 바탕으로 지도 마커용 뷰모델 배열 생성.
  * - results를 businessId별로 그룹핑 후, 지점당 하나의 MarkerViewModel 생성.
- * - isPartialFilterActive / isFavoriteFilterActive 에 따라 노출 여부 필터링.
+ * - isPartialFilterActive / searchText 에 따라 노출 여부 필터링.
  * - isActive는 항상 false. NaverMap의 active 상태 전용 effect에서 별도 관리.
  */
 export const buildMarkerViewModels = ({
@@ -92,9 +86,7 @@ export const buildMarkerViewModels = ({
       continue;
     }
 
-    const visibleRooms = rooms.filter((room) =>
-      isRoomMatchedByFilters(room, isPartialFilterActive)
-    );
+    const visibleRooms = rooms.filter((room) => isRoomMatchedByFilters(room, isPartialFilterActive));
     if (visibleRooms.length === 0) {
       continue;
     }

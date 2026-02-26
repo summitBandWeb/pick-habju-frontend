@@ -54,14 +54,7 @@ const MapPage = () => {
         favoriteBizItemIds,
         searchText,
       }),
-    [
-      branchSummary,
-      favoriteBizItemIds,
-      isPartialFilterActive,
-      isFavoriteFilterActive,
-      results,
-      searchText,
-    ]
+    [branchSummary, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, results, searchText]
   );
 
   // 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
@@ -69,9 +62,7 @@ const MapPage = () => {
   const selectedMarkerId = useMemo(() => {
     if (openedMarkerPopoverId) return openedMarkerPopoverId;
     if (!selectedRoomId) return null;
-    return (
-      markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null
-    );
+    return markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null;
   }, [markerViewModels, openedMarkerPopoverId, selectedRoomId]);
 
   // 캐러셀에 표시할 룸 목록: 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회
@@ -195,8 +186,7 @@ const MapPage = () => {
   useEffect(() => {
     const prev = filterChangeGuardRef.current;
     const filterChanged =
-      prev.isPartialFilterActive !== isPartialFilterActive ||
-      prev.isFavoriteFilterActive !== isFavoriteFilterActive;
+      prev.isPartialFilterActive !== isPartialFilterActive || prev.isFavoriteFilterActive !== isFavoriteFilterActive;
 
     if (filterChanged) {
       resetSelectionUiState();
@@ -296,7 +286,11 @@ const MapPage = () => {
         />
       )}
       {showSearchHereButton && (
-        <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
+        <div
+          className={`absolute left-1/2 z-[60] -translate-x-1/2 transition-all duration-300 ease-out ${
+            isCarouselOpen ? 'bottom-74' : 'bottom-6'
+          }`}
+        >
           <SearchHereButton onClick={() => handleSearchHere(resetMapUiState)} />
         </div>
       )}

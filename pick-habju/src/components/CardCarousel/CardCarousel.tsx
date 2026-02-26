@@ -64,11 +64,7 @@ function CarouselSlideContent({
 
   return (
     <div className={isDesktop ? 'w-full flex justify-center' : 'flex justify-center'}>
-      <div
-        className={`transform transition-transform duration-300 ${
-          shouldScale ? 'scale-105 z-10' : 'scale-100'
-        }`}
-      >
+      <div className={`transform transition-transform duration-300 ${shouldScale ? 'scale-105 z-10' : 'scale-100'}`}>
         <Card {...cardProps} />
       </div>
     </div>
@@ -108,7 +104,10 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
   /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
    *  Swiper는 initialSlide를 마운트 시에만 사용하므로 매 render마다 계산해도 안전하다. */
   const initialSlide = selectedRoomId
-    ? Math.max(rooms.findIndex((room) => room.bizItemId === selectedRoomId), 0)
+    ? Math.max(
+        rooms.findIndex((room) => room.bizItemId === selectedRoomId),
+        0
+      )
     : 0;
 
   const handlePrev = () => swiperInstance?.slidePrev();
@@ -117,22 +116,8 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
   return (
     // [L1] 조건부 마운트 + 등장/퇴장 애니메이션
     <AnimatePresence>
-      {(isOpen && rooms.length > 0) && (
+      {isOpen && rooms.length > 0 && (
         <>
-          {/* 그라데이션: 화면 하단 고정 (애니메이션과 분리해 간격 방지) */}
-          <motion.div
-            key="carousel-gradient"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="absolute bottom-0 left-0 right-0 z-40 h-48 w-full pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(29, 20, 20, 0.8) 100%)',
-          }}
-          aria-hidden="true"
-        />
-
           {/* [L2] 고정 위치 오버레이 (하단 풀폭, z-50, 등장 시 아래→위 슬라이드) */}
           <motion.div
             key="carousel-content"
@@ -140,63 +125,58 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="absolute bottom-0 left-0 right-0 z-50 w-full pb-8 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 z-50 w-full pb-2 pointer-events-none"
           >
             {/* [L3] 카드 영역 프레임: 데스크탑 1장 폭 + 그림자 들어갈 간격 (w-92.5), 모바일 풀폭. relative로 Chevron 기준점 제공 */}
-          <div
-            className={
-              isDesktop
-                ? 'relative z-10 mx-auto w-92.5 overflow-visible pointer-events-auto'
-                : 'relative z-10 w-full pointer-events-auto'
-            }
-          >
-            {/* [L4] 데스크탑 전용: Chevron 좌우 네비게이션 (프레임 기준 absolute) */}
-            {isDesktop && rooms.length > 1 && (
-              <div className="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between pointer-events-none">
-                <Chevron
-                  variant={ChevronVariant.Middle}
-                  onPrev={handlePrev}
-                  onNext={handleNext}
-                  containerClassName={CHEVRON_CONTAINER_STYLES}
-                />
-              </div>
-            )}
-
-            {/* [L5] Swiper 캐러셀: 루프, 디바이스별 옵션, 슬라이드 변경 시 onCardChange로 부모에 알림 */}
-            <Swiper
-              role="region"
-              aria-label="룸 카드 캐러셀"
-              modules={[Navigation]}
-              loop={true}
-              navigation={false}
-              initialSlide={initialSlide}
-              onSwiper={handleSwiper}
-              {...getSwiperProps(isDesktop)}
-              onSlideChange={(swiper) => {
-                if (!isSwipeReadyRef.current) return;
-                const currentRoom = rooms[swiper.realIndex];
-                if (currentRoom && currentRoom.bizItemId !== selectedRoomId) {
-                  onCardChange(currentRoom.bizItemId);
-                }
-              }}
-              className="w-full h-full !py-8"
+            <div
+              className={
+                isDesktop
+                  ? 'relative z-10 mx-auto w-92.5 overflow-visible pointer-events-auto'
+                  : 'relative z-10 w-full pointer-events-auto'
+              }
             >
-              {rooms.map((room) => (
-                // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
-                <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
-                  {({ isActive }: { isActive: boolean }) => (
-                    <CarouselSlideContent
-                      room={room}
-                      isActive={isActive}
-                      isMobile={isMobile}
-                      isDesktop={isDesktop}
-                    />
-                  )}
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </motion.div>
+              {/* [L4] 데스크탑 전용: Chevron 좌우 네비게이션 (프레임 기준 absolute) */}
+              {isDesktop && rooms.length > 1 && (
+                <div className="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between pointer-events-none">
+                  <Chevron
+                    variant={ChevronVariant.Middle}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    containerClassName={CHEVRON_CONTAINER_STYLES}
+                  />
+                </div>
+              )}
+
+              {/* [L5] Swiper 캐러셀: 루프, 디바이스별 옵션, 슬라이드 변경 시 onCardChange로 부모에 알림 */}
+              <Swiper
+                role="region"
+                aria-label="룸 카드 캐러셀"
+                modules={[Navigation]}
+                loop={true}
+                navigation={false}
+                initialSlide={initialSlide}
+                onSwiper={handleSwiper}
+                {...getSwiperProps(isDesktop)}
+                onSlideChange={(swiper) => {
+                  if (!isSwipeReadyRef.current) return;
+                  const currentRoom = rooms[swiper.realIndex];
+                  if (currentRoom && currentRoom.bizItemId !== selectedRoomId) {
+                    onCardChange(currentRoom.bizItemId);
+                  }
+                }}
+                className="w-full h-full !py-8"
+              >
+                {rooms.map((room) => (
+                  // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
+                  <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
+                    {({ isActive }: { isActive: boolean }) => (
+                      <CarouselSlideContent room={room} isActive={isActive} isMobile={isMobile} isDesktop={isDesktop} />
+                    )}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>
