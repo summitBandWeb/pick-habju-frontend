@@ -6,17 +6,25 @@ import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/m
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 
+/** NaverMap 컴포넌트 Props. */
 type NaverMapProps = {
+  /** 지도 초기 중심 좌표 */
   initialCenter: { lat: number; lng: number };
+  /** 지도 초기 줌 레벨 */
   initialZoom: number;
+  /** 렌더링할 마커 뷰모델 목록. 변경 시 마커 전체 재생성. */
   markerViewModels?: MarkerViewModel[];
   /** 팝오버(룸 목록)를 열 마커 ID. null이면 팝오버 없음. */
   openedMarkerPopoverId?: string | null;
   /** 선택된 룸이 속한 마커 ID. 해당 마커 아이콘을 active 상태로 표시. */
   selectedMarkerId?: string | null;
+  /** 마커 클릭 시 호출. 마커 ID를 전달. */
   onMarkerClick?: (id: string) => void;
+  /** 팝오버 내 룸 클릭 시 호출. 룸 ID를 전달. */
   onMarkerRoomClick?: (roomId: string) => void;
+  /** 지도 SDK 로드 완료 후 호출. naver.maps.Map 인스턴스를 전달. */
   onLoad?: (map: naver.maps.Map) => void;
+  /** idle 이벤트마다 호출. 현재 뷰포트(center + bounds)를 전달. */
   onViewportChange?: (viewport: MapViewport) => void;
   /** 드래그·줌 시작 시 호출 — 팝오버 닫기 등 외부 상태 초기화용. */
   onMapInteractionStart?: () => void;
@@ -35,6 +43,12 @@ type ReactMarkerPopover = {
 /** PriceLabel 마커 아이콘 너비(px). 팝오버 수평 중앙 정렬 계산에 사용. */
 const MARKER_WIDTH_PX = 129;
 
+/**
+ * 네이버 지도 SDK 기반 지도 컴포넌트.
+ * - markerViewModels로 PriceLabel 마커를 렌더링하고, 클릭·드래그·줌 이벤트를 상위에 전달.
+ * - 복수 룸 마커 클릭 시 InfoWindow 대신 React 오버레이(PriceList) 팝오버를 표시.
+ * - ref로 NaverMapHandle(panTo, setCenter, getViewport 등)을 외부에 노출.
+ */
 const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
   (
     {

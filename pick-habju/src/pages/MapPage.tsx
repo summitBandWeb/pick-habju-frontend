@@ -15,6 +15,12 @@ import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
 
 const DEFAULT_MAP_ZOOM = 14;
 
+/**
+ * 지도 기반 합주실 검색 페이지.
+ * - 마커 클릭 → 룸 선택 → 캐러셀 표시의 선택 흐름을 관리.
+ * - partial/favorite 필터, 브랜치명 검색 텍스트를 마커 뷰모델 빌더에 전달.
+ * - lastQuery가 없으면 홈으로 redirect (직접 URL 진입 방지).
+ */
 const MapPage = () => {
   const lastQuery = useSearchStore((s) => s.lastQuery);
   const navigate = useNavigate();
@@ -43,7 +49,7 @@ const MapPage = () => {
     favoriteBizItemIds,
   } = useMapPageSearch();
 
-  // 필터·검색 텍스트 적용 후 지도에 표시할 마커 뷰모델 목록
+  /** 필터·검색 텍스트 적용 후 지도에 표시할 마커 뷰모델 목록 */
   const markerViewModels = useMemo(
     () =>
       buildMarkerViewModels({
@@ -57,15 +63,17 @@ const MapPage = () => {
     [branchSummary, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, results, searchText]
   );
 
-  // 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
-  // 팝오버가 열린 마커도 active 상태로 표시한다 (룸 미선택 상태에서 팝오버를 열었을 때).
+  /**
+   * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
+   * 팝오버가 열린 마커도 active 상태로 표시한다 (룸 미선택 상태에서 팝오버를 열었을 때).
+   */
   const selectedMarkerId = useMemo(() => {
     if (openedMarkerPopoverId) return openedMarkerPopoverId;
     if (!selectedRoomId) return null;
     return markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null;
   }, [markerViewModels, openedMarkerPopoverId, selectedRoomId]);
 
-  // 캐러셀에 표시할 룸 목록: 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회
+  /** 캐러셀에 표시할 룸 목록. 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회. */
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
     const roomIds = markerViewModels.flatMap((marker) => marker.rooms.map((room) => room.id));
 
@@ -83,7 +91,10 @@ const MapPage = () => {
       }));
   }, [markerViewModels, roomsById]);
 
-  // 룸 선택: 캐러셀 열기, 팝오버 닫기, 해당 좌표로 panTo (다른 룸으로 이동할 때만)
+  /**
+   * 룸 선택 핸들러. 캐러셀을 열고 팝오버를 닫으며, 다른 룸으로 이동할 때만 panTo 실행.
+   * @param id 선택할 룸의 bizItemId
+   */
   const handleSelectRoom = useCallback(
     (id: string) => {
       const isSameRoom = id === selectedRoomId;
@@ -104,7 +115,10 @@ const MapPage = () => {
     [isCarouselOpen, openedMarkerPopoverId, roomsById, selectedRoomId]
   );
 
-  // 캐러셀 카드 변경 → 룸 선택
+  /**
+   * 캐러셀 스와이프로 활성 카드가 바뀔 때 호출. 해당 룸을 선택 상태로 전환.
+   * @param id 새로 활성화된 슬라이드의 bizItemId
+   */
   const handleCardChange = useCallback(
     (id: string) => {
       handleSelectRoom(id);
@@ -112,7 +126,12 @@ const MapPage = () => {
     [handleSelectRoom]
   );
 
-  // 마커 클릭: 단일 룸 마커면 바로 선택, 복수 룸 마커면 팝오버 토글
+  /**
+   * 마커 클릭 핸들러.
+   * - 단일 룸 마커: 해당 룸을 바로 선택.
+   * - 복수 룸 마커: 팝오버 토글 (같은 마커 재클릭 시 닫힘).
+   * @param markerId 클릭된 마커의 businessId
+   */
   const handleMarkerClick = useCallback(
     (markerId: string) => {
       const marker = markerViewModels.find((item) => item.id === markerId);
@@ -130,7 +149,10 @@ const MapPage = () => {
     [handleSelectRoom, markerViewModels]
   );
 
-  // 팝오버 내 룸 클릭 → 팝오버 닫기 후 룸 선택
+  /**
+   * 팝오버(PriceList) 내 룸 클릭 핸들러. 팝오버를 닫은 뒤 해당 룸을 선택.
+   * @param roomId 클릭된 룸의 bizItemId
+   */
   const handleMarkerRoomClick = useCallback(
     (roomId: string) => {
       setOpenedMarkerPopoverId(null);
@@ -139,7 +161,10 @@ const MapPage = () => {
     [handleSelectRoom]
   );
 
-  // 뷰포트 변경 → '이 위치에서 재검색' 버튼 표시 여부 갱신
+  /**
+   * 지도 뷰포트 변경 시 호출. useMapPageSearch의 draftViewport를 갱신해
+   * '이 위치에서 재검색' 버튼 표시 여부를 결정한다.
+   */
   const handleMapViewportChange = useCallback(
     (viewport: Parameters<typeof handleViewportChange>[0]) => {
       handleViewportChange(viewport);
@@ -147,14 +172,14 @@ const MapPage = () => {
     [handleViewportChange]
   );
 
-  // 지도 드래그·줌 시작 시 팝오버 닫기
+  /** 지도 드래그·줌 시작 시 열린 팝오버를 닫는다. */
   const handleMapInteractionStart = useCallback(() => {
     if (openedMarkerPopoverId !== null) {
       setOpenedMarkerPopoverId(null);
     }
   }, [openedMarkerPopoverId]);
 
-  // 선택 UI 초기화: 선택된 룸·캐러셀·팝오버를 모두 닫음
+  /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버를 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
     setSelectedRoomId(null);
     if (isCarouselOpen) {
@@ -165,7 +190,7 @@ const MapPage = () => {
     }
   }, [isCarouselOpen, openedMarkerPopoverId]);
 
-  // 맵 전체 초기화: 선택 UI + 필터 버튼 (재검색 시 사용)
+  /** 맵 UI 전체 초기화. 선택 UI에 더해 partial/favorite 필터도 리셋. '여기서 검색' 실행 전 콜백으로 사용. */
   const resetMapUiState = useCallback(() => {
     resetSelectionUiState();
     if (isPartialFilterActive) {

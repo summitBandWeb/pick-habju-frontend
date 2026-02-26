@@ -2,6 +2,11 @@ import type { FilterSectionProps } from './FilterSection.types';
 import TimeIcon from '../../assets/svg/Time.svg?react';
 import FavoriteButton from '../FavoriteButton/FavoriteButton';
 
+/**
+ * 지도 검색 결과 필터 버튼 영역.
+ * - '일부 시간만 가능' 토글과 찜한 합주실 필터를 제공.
+ * - partial/favorite 필터 상태를 외부에서 제어(controlled)한다.
+ */
 const FilterSection = ({
   isPartialFilterActive = false,
   onPartialFilterToggle,

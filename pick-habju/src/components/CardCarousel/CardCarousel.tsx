@@ -71,6 +71,12 @@ function CarouselSlideContent({
   );
 }
 
+/**
+ * 검색 결과 룸 목록을 하단 슬라이딩 오버레이로 표시하는 캐러셀.
+ * - selectedRoomId 변경 시 해당 슬라이드로 자동 이동 (slideToLoop).
+ * - 사용자 스와이프 시 onCardChange로 선택 룸 ID를 상위에 전달.
+ * - isOpen / rooms.length에 따라 AnimatePresence로 슬라이드 인·아웃 처리.
+ */
 const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice }: CardCarouselProps) => {
   const detectedMobile = useMobileDetect();
   const isMobile = forceDevice ? forceDevice === 'mobile' : detectedMobile;
