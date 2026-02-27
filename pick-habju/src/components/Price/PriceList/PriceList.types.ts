@@ -1,6 +1,6 @@
 /** 가격 목록에 표시할 룸 항목 */
 export interface PriceListRoom {
-  id: string | number;
+  id: string;
   name: string;
   priceText: string;
 }

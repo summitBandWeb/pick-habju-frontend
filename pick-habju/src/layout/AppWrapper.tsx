@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppHeader from '../components/Header/AppHeader.tsx';
 import Footer from '../components/Footer/Footer';
 import { useIsWindows } from '../hook/useIsWindow.ts';
+import RoutePaths from '../router/routePaths.ts';
 
 type AppWrapperProps = { children?: ReactNode };
 
@@ -10,6 +12,9 @@ type AppWrapperProps = { children?: ReactNode };
  */
 const AppWrapper = ({ children }: AppWrapperProps) => {
   const isWindows = useIsWindows();
+  const { pathname } = useLocation();
+  const isMapPage = pathname === RoutePaths.MAP;
+  const showFooter = !isMapPage;
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
       {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
@@ -23,11 +28,17 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
         <AppHeader />
 
         {/* 스크롤 영역: 헤더 제외 나머지 */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center scrollbar-stable">
-          <div className="w-full flex flex-col items-center bg-yellow-300">{children}</div>
-          <div className="flex justify-center w-full bg-yellow-300">
-            <Footer />
-          </div>
+        <div
+          className={`flex-1 flex flex-col scrollbar-stable ${
+            isMapPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden items-center'
+          }`}
+        >
+          <div className={`w-full flex flex-col items-center ${isMapPage ? 'h-full' : ''}`}>{children}</div>
+          {showFooter && (
+            <div className="flex justify-center w-full">
+              <Footer />
+            </div>
+          )}
         </div>
       </div>
     </div>
