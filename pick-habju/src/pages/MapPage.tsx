@@ -172,13 +172,9 @@ const MapPage = () => {
   /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버를 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
     setSelectedRoomId(null);
-    if (isCarouselOpen) {
-      setIsCarouselOpen(false);
-    }
-    if (openedMarkerPopoverId !== null) {
-      setOpenedMarkerPopoverId(null);
-    }
-  }, [isCarouselOpen, openedMarkerPopoverId]);
+    setIsCarouselOpen(false);
+    setOpenedMarkerPopoverId(null);
+  }, []);
 
   /** 맵 UI 전체 초기화. 선택 UI에 더해 partial/favorite 필터도 리셋. '여기서 검색' 실행 전 콜백으로 사용. */
   const resetMapUiState = useCallback(() => {
@@ -191,35 +187,12 @@ const MapPage = () => {
     }
   }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
 
-  // 필터 변경 시 선택 UI 초기화.
-  // resetSelectionUiState를 deps에 넣으면 isCarouselOpen·openedMarkerPopoverId 변경 시에도
-  // effect가 실행되므로, ref로 이전값을 직접 비교해 필터 변경 여부를 판단한다.
-  const filterChangeGuardRef = useRef({
-    isPartialFilterActive,
-    isFavoriteFilterActive,
-  });
+  // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
-    const prev = filterChangeGuardRef.current;
-    const filterChanged =
-      prev.isPartialFilterActive !== isPartialFilterActive || prev.isFavoriteFilterActive !== isFavoriteFilterActive;
-
-    if (filterChanged) {
-      resetSelectionUiState();
-    }
-
-    filterChangeGuardRef.current = {
-      isPartialFilterActive,
-      isFavoriteFilterActive,
-    };
+    resetSelectionUiState();
   }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
 
-  // searchText 변경 시 선택 UI 초기화.
-  // resetSelectionUiState가 deps에 있어 같은 searchText로도 재실행될 수 있으므로,
-  // ref로 이전값을 비교해 실제 변경이 있을 때만 초기화한다.
-  const prevSearchTextRef = useRef(searchText);
   useEffect(() => {
-    if (prevSearchTextRef.current === searchText) return;
-    prevSearchTextRef.current = searchText;
     resetSelectionUiState();
   }, [searchText, resetSelectionUiState]);
 
