@@ -42,6 +42,8 @@ type ReactMarkerPopover = {
 
 /** PriceLabel 마커 아이콘 너비(px). 팝오버 수평 중앙 정렬 계산에 사용. */
 const MARKER_WIDTH_PX = 129;
+/** PriceLabel 마커 앵커 좌표(px). 아이콘 좌상단 기준 클릭 포인트 위치. */
+const MARKER_ANCHOR_PX = 48;
 
 /**
  * 네이버 지도 SDK 기반 지도 컴포넌트.
@@ -266,7 +268,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           },
         });
 
@@ -325,7 +327,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={prevModel.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           });
         }
       }
@@ -345,7 +347,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(48, 48), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
           });
         }
       }
