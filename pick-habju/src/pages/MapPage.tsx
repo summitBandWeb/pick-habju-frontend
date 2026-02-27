@@ -176,17 +176,6 @@ const MapPage = () => {
     setOpenedMarkerPopoverId(null);
   }, []);
 
-  /** 맵 UI 전체 초기화. 선택 UI에 더해 partial/favorite 필터도 리셋. '여기서 검색' 실행 전 콜백으로 사용. */
-  const resetMapUiState = useCallback(() => {
-    resetSelectionUiState();
-    if (isPartialFilterActive) {
-      setIsPartialFilterActive(false);
-    }
-    if (isFavoriteFilterActive) {
-      setIsFavoriteFilterActive(false);
-    }
-  }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
-
   // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
     resetSelectionUiState();
@@ -279,7 +268,7 @@ const MapPage = () => {
             isCarouselOpen ? 'bottom-74' : 'bottom-6'
           }`}
         >
-          <SearchHereButton onClick={() => handleSearchHere(resetMapUiState)} />
+          <SearchHereButton onClick={() => handleSearchHere(resetSelectionUiState)} />
         </div>
       )}
     </div>
