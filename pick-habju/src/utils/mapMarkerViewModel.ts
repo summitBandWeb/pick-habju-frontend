@@ -94,15 +94,16 @@ export const buildMarkerViewModels = ({
     const isPartial = visibleRooms.some((room) => room.isPartial);
     const favorite: 'on' | 'off' =
       isFavoriteFilterActive && rooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
-    const fallbackMinPrice = Math.min(
-      ...groupedRooms.map((room) => room.room_detail.price_per_hour).filter((price) => Number.isFinite(price))
-    );
+    const validPrices = groupedRooms
+      .map((room) => room.room_detail.price_per_hour)
+      .filter((price): price is number => Number.isFinite(price));
+    const fallbackMinPrice = validPrices.length > 0 ? Math.min(...validPrices) : undefined;
 
     markerViewModels.push({
       id: businessId,
       lat: summary?.lat ?? first.room_detail.lat,
       lng: summary?.lng ?? first.room_detail.lng,
-      priceText: formatPriceText(summary?.min_price ?? fallbackMinPrice),
+      priceText: formatPriceText(summary?.min_price ?? fallbackMinPrice ?? 0),
       isPartial,
       favorite,
       isActive: false,
