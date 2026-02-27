@@ -22,8 +22,9 @@ export function formatDateKoreanWithWeekday(dateIso: string): string {
   return `${dt.getFullYear()}년 ${m}월 ${d}일 (${WEEKDAYS[dt.getDay()]})`;
 }
 
-/** date("YYYY-MM-DD")와 hour_slots(["14","15"])를 받아 검색 조건 요약 문자열로 변환. 예: "02/26 14-17시" */
+/** date("YYYY-MM-DD")와 hour_slots(["14","15"])를 받아 검색 조건 요약 문자열로 변환. 예: "02/26 14-17시". 빈 배열이면 빈 문자열. */
 export function formatSearchConditionDateTime(date: string, hourSlots: string[]): string {
+  if (!hourSlots || hourSlots.length === 0) return '';
   const [, month, day] = date.split('-');
   const slots = hourSlots.map((s) => parseInt(s.split(':')[0], 10) || 0);
   const startHour = Math.min(...slots);

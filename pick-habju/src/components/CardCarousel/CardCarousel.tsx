@@ -102,8 +102,8 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
         if (swiperInstance.realIndex !== index) {
           swiperInstance.slideToLoop(index);
         }
-        isSwipeReadyRef.current = true;
       }
+      isSwipeReadyRef.current = true;
     }
   }, [selectedRoomId, isOpen, swiperInstance, rooms]);
 
