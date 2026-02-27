@@ -161,16 +161,6 @@ const MapPage = () => {
     [handleSelectRoom]
   );
 
-  /**
-   * 지도 뷰포트 변경 시 호출. useMapPageSearch의 draftViewport를 갱신해
-   * '이 위치에서 재검색' 버튼 표시 여부를 결정한다.
-   */
-  const handleMapViewportChange = useCallback(
-    (viewport: Parameters<typeof handleViewportChange>[0]) => {
-      handleViewportChange(viewport);
-    },
-    [handleViewportChange]
-  );
 
   /** 지도 드래그·줌 시작 시 열린 팝오버를 닫는다. */
   const handleMapInteractionStart = useCallback(() => {
@@ -280,7 +270,7 @@ const MapPage = () => {
         selectedMarkerId={selectedMarkerId}
         onMarkerClick={handleMarkerClick}
         onMarkerRoomClick={handleMarkerRoomClick}
-        onViewportChange={handleMapViewportChange}
+        onViewportChange={handleViewportChange}
         onMapInteractionStart={handleMapInteractionStart}
         onMapEmptyClick={resetSelectionUiState}
         className="h-full w-full"
