@@ -396,7 +396,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             onTouchEnd={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
           >
-            <PriceList rooms={reactPopover.rooms} isOpen onRoomClick={(room) => onMarkerRoomClick?.(String(room.id))} />
+            <PriceList rooms={reactPopover.rooms} isOpen onRoomClick={(room) => onMarkerRoomClick?.(room.id)} />
           </div>
         )}
       </div>
