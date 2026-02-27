@@ -33,11 +33,9 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
             isMapPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden items-center'
           }`}
         >
-          <div className={`w-full flex flex-col items-center bg-yellow-300 ${isMapPage ? 'h-full' : ''}`}>
-            {children}
-          </div>
+          <div className={`w-full flex flex-col items-center ${isMapPage ? 'h-full' : ''}`}>{children}</div>
           {showFooter && (
-            <div className="flex justify-center w-full bg-yellow-300">
+            <div className="flex justify-center w-full">
               <Footer />
             </div>
           )}
