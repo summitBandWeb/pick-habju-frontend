@@ -145,7 +145,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     }, [onMarkerClick]);
 
     // 네이버 지도 SDK 스크립트 로드 → 지도 인스턴스 생성 → 이벤트 리스너 등록.
-    // initialCenter·initialZoom이 바뀌면 지도를 재생성한다.
+    // initialCenter·initialZoom은 마운트 시 1회만 사용. props 변경 시 지도를 재생성하지 않는다.
+    const initialCenterRef = useRef(initialCenter);
+    const initialZoomRef = useRef(initialZoom);
+
     useEffect(() => {
       if (!mapContainerRef.current) return;
       // cleanup에서 ref.current를 직접 읽으면 lint 경고가 발생하므로 로컬에 캡처.
@@ -160,8 +163,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           setScriptError(null);
 
           const map = new naver.maps.Map(mapContainerRef.current, {
-            center: new naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
-            zoom: initialZoom,
+            center: new naver.maps.LatLng(initialCenterRef.current.lat, initialCenterRef.current.lng),
+            zoom: initialZoomRef.current,
             zoomControl: false,
             mapDataControl: false,
           });
@@ -231,7 +234,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         }
         setReactPopover(null);
       };
-    }, [initialCenter.lat, initialCenter.lng, initialZoom]);
+    }, []);
 
     // markerViewModels 변경 시 마커 전체 재생성.
     // 단일 룸 마커: 클릭 시 바로 룸 선택.
