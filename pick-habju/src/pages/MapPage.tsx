@@ -13,7 +13,7 @@ import type { NaverMapHandle } from '../types/map';
 import { formatSearchConditionDateTime } from '../utils/dateTimeLabel';
 import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
 
-const DEFAULT_MAP_ZOOM = 14;
+const DEFAULT_MAP_ZOOM = 16;
 
 /**
  * 지도 기반 합주실 검색 페이지.
