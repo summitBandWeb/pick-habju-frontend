@@ -11,6 +11,21 @@ import type { MapBounds, MapViewport } from '../types/map';
 
 const BOUNDS_EPSILON = 0.000001;
 
+/**
+ * 뷰포트 span의 30%를 버퍼로 계산 (하한 0.002° ≈ 200m, 상한 0.025° ≈ 2.5km).
+ * 버퍼를 적용한 MapBounds 반환. API 호출 영역 및 lastQuery.bounds 저장에 사용.
+ */
+export const expandBounds = (bounds: MapBounds): MapBounds => {
+  const latBuffer = Math.min(Math.max((bounds.neLat - bounds.swLat) * 0.3, 0.002), 0.025);
+  const lngBuffer = Math.min(Math.max((bounds.neLng - bounds.swLng) * 0.3, 0.002), 0.025);
+  return {
+    swLat: bounds.swLat - latBuffer,
+    swLng: bounds.swLng - lngBuffer,
+    neLat: bounds.neLat + latBuffer,
+    neLng: bounds.neLng + lngBuffer,
+  };
+};
+
 const addOneHour = (time: string): string => {
   const parts = time.split(':');
   if (parts.length !== 2) {
@@ -31,14 +46,14 @@ const addOneHour = (time: string): string => {
   return `${String(nextHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 };
 
-/** 기존 검색 조건(date, peopleCount, hour_slots 등) 유지하고 center/bounds만 viewport 값으로 교체 */
+/** 기존 검색 조건(date, peopleCount, hour_slots 등) 유지하고 center는 viewport, bounds는 버퍼 적용한 값으로 교체 */
 export const mergeViewportToLastQuery = (
   lastQuery: SearchParams,
   viewport: MapViewport
 ): SearchParams => ({
   ...lastQuery,
   center: viewport.center,
-  bounds: viewport.bounds,
+  bounds: expandBounds(viewport.bounds),
 });
 
 /** 현재 bounds가 기준(base) bounds를 벗어났는지 판정 (약간의 오차 허용) */
