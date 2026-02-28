@@ -19,28 +19,28 @@ const SERVICEABLE_STATIONS: ServiceableStation[] = [
     name: '이수',
     subwayLine: '4호선·7호선',
     center: { lat: 37.485196, lng: 126.981605 },
-    bounds: { swLat: 37.4845, swLng: 126.9798, neLat: 37.4885, neLng: 126.9838 },
+    bounds: { swLat: 37.465196, swLng: 126.956605, neLat: 37.505196, neLng: 127.006605 },
   },
   {
     id: 'sadang',
     name: '사당',
     subwayLine: '2호선·4호선',
     center: { lat: 37.476550, lng: 126.981688 },
-    bounds: { swLat: 37.470000, swLng: 126.974000, neLat: 37.483000, neLng: 126.989000 },
+    bounds: { swLat: 37.456550, swLng: 126.956688, neLat: 37.496550, neLng: 127.006688 },
   },
   {
     id: 'hongdae',
     name: '홍대입구',
     subwayLine: '2호선·공항철도·경의중앙선',
     center: { lat: 37.556748, lng: 126.923643 },
-    bounds: { swLat: 37.554748, swLng: 126.921643, neLat: 37.558748, neLng: 126.925643 },
+    bounds: { swLat: 37.536748, swLng: 126.898643, neLat: 37.576748, neLng: 126.948643 },
   },
   {
     id: 'sinchon',
     name: '신촌',
     subwayLine: '2호선',
     center: { lat: 37.555153, lng: 126.936890 },
-    bounds: { swLat: 37.553153, swLng: 126.934890, neLat: 37.557153, neLng: 126.938890 },
+    bounds: { swLat: 37.535153, swLng: 126.911890, neLat: 37.575153, neLng: 126.961890 },
   },
 ];
 

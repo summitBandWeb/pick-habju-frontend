@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { expandBounds } from '../utils/mapQuery';
 import { useNavigate } from 'react-router-dom';
 
 // Components
@@ -40,7 +41,7 @@ const HomePage = () => {
 
   // 5. Event Handler: 검색 시작 (HeroArea에서 이미 full SearchParams 전달)
   const onSearch = (params: SearchParams) => {
-    setLastQuery(params);
+    setLastQuery({ ...params, bounds: expandBounds(params.bounds) });
     navigate(RoutePaths.MAP);
   };
 
