@@ -35,11 +35,11 @@ export type MapAvailabilityNormalized = {
  * - roomsById: biz_item_id → NormalizedRoom. O(1) 룸 조회용. 좌표 없는 지점은 제외.
  */
 const normalizeMapAvailability = (response: BookingAPIResponse): MapAvailabilityNormalized => {
-  const branches = response.result?.branches ?? [];
+  const allBranches = response.result?.branches ?? [];
+  const branches = allBranches.filter((b) => Number.isFinite(b.lat) && Number.isFinite(b.lng));
   const roomsById: Record<string, NormalizedRoom> = {};
 
   for (const branch of branches) {
-    if (!Number.isFinite(branch.lat) || !Number.isFinite(branch.lng)) continue;
     for (const room of branch.rooms ?? []) {
       if (!room.biz_item_id) continue;
       roomsById[room.biz_item_id] = {
