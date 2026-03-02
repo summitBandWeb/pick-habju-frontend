@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 
 type ModalOverlayProps = {
@@ -43,7 +44,7 @@ const ModalOverlay = ({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className={`fixed inset-0 z-50 flex items-center justify-center ${dimmedClassName} backdrop-blur-[2px]`}
@@ -63,7 +64,8 @@ const ModalOverlay = ({
       ) : (
         <div onClick={(e) => e.stopPropagation()}>{children}</div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
 
