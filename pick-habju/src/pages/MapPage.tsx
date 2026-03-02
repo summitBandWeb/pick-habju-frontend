@@ -91,7 +91,7 @@ const MapPage = () => {
   /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
   const handlePartialFilterToggle  = useCallback((isActive: boolean) => { setIsPartialFilterActive(isActive);  setLastChangedFilter('partial');  }, []);
   const handleFavoriteFilterToggle = useCallback((isActive: boolean) => { setIsFavoriteFilterActive(isActive); setLastChangedFilter('favorite'); }, []);
-  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text);                setLastChangedFilter('search');   }, []);
+  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text); if (text) setLastChangedFilter('search'); }, []);
 
   /**
    * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
