@@ -52,10 +52,10 @@ const SearchBar = ({
           className="flex-1 min-w-0 outline-none text-gray-600 placeholder:text-gray-300 font-modal-call disabled:cursor-not-allowed"
         />
         <div className="shrink-0 w-12 h-12 flex items-center justify-center">
-          {searchText.trim() && (
-            <SearchCloseIcon 
-              className="w-4 h-4 cursor-pointer text-gray-300" 
-              onClick={handleClearText} 
+          {searchText.trim() && !disabled && (
+            <SearchCloseIcon
+              className="w-4 h-4 cursor-pointer text-gray-300"
+              onClick={handleClearText}
             />
           )}
         </div>
