@@ -44,8 +44,7 @@ const MapPage = () => {
     handleViewportChange,
     handleSearchHere,
     roomsById,
-    results,
-    branchSummary,
+    branches,
     favoriteBizItemIds,
   } = useMapPageSearch();
 
@@ -53,14 +52,13 @@ const MapPage = () => {
   const markerViewModels = useMemo(
     () =>
       buildMarkerViewModels({
-        branchSummary,
-        results,
+        branches,
         isPartialFilterActive,
         isFavoriteFilterActive,
         favoriteBizItemIds,
         searchText,
       }),
-    [branchSummary, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, results, searchText]
+    [branches, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, searchText]
   );
 
   /**
@@ -78,7 +76,7 @@ const MapPage = () => {
     const roomIds = markerViewModels.flatMap((marker) => marker.rooms.map((room) => room.id));
 
     return [...new Set(roomIds)]
-      .map((roomId) => roomsById[roomId]?.room_detail)
+      .map((roomId) => roomsById[roomId])
       .filter((roomDetail): roomDetail is NonNullable<typeof roomDetail> => Boolean(roomDetail))
       .map((roomDetail) => ({
         name: roomDetail.name,
@@ -108,7 +106,7 @@ const MapPage = () => {
         setOpenedMarkerPopoverId(null);
       }
       if (isSameRoom) return;
-      const roomDetail = roomsById[id]?.room_detail;
+      const roomDetail = roomsById[id];
       if (!roomDetail) return;
       mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
     },

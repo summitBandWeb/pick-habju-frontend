@@ -6,48 +6,45 @@ export interface BaseResponse<T> {
   result: T;
 }
 
-// 2. 룸 상세 정보 (room_detail)
+// 2. 정책 경고 타입 (현재 JSON에서는 빈 배열이지만 구조 유지를 위해 정의)
+export interface PolicyWarning {
+  type: string;
+  message: string;
+}
+
+// 3. 룸 상세 정보
 export interface RoomDetail {
-  name: string;
-  branch: string;
-  business_id: string;
   biz_item_id: string;
+  name: string;
+  price_per_hour: number;
+  available: boolean;
+  // 시간대별 가능 여부 (예: "14:00": true)
+  available_slots: Record<string, boolean>;
+  estimated_price: number;
   image_urls: string[];
   max_capacity: number;
   recommend_capacity: number;
-  recommend_capacity_range: [number, number];
+  recommend_capacity_range: [number, number]; // 튜플 타입으로 정의
   base_capacity: number | null;
   extra_charge: number | null;
-  price_config: Record<string, unknown>;
   min_capacity: number;
   min_hours: number;
   max_hours: number | null;
+  standby_days: number | null;
+  policy_warnings: PolicyWarning[];
+}
+
+// 4. 지점 정보 (branches 배열의 아이템)
+export interface Branch {
+  business_id: string;
+  branch: string;
   lat: number;
   lng: number;
-  price_per_hour: number;
-  can_reserve_one_hour: boolean;
-  requires_call_on_sameday: boolean;
-  phoneNumber: string | null;
-  displayName: string | null;
-  openWaitRule: Record<string, unknown>;
-}
-
-// 3. 개별 룸 예약 가능 여부 (results 배열의 아이템)
-export interface RoomAvailabilityResult {
-  room_detail: RoomDetail;
-  available: boolean;
-  // 시간대별 가능 여부 (예: "13:00": true)
-  available_slots: Record<string, boolean>;
-  estimated_price: number;
-  policy_warnings: string[];
-}
-
-// 4. 지점 요약 정보 (branch_summary 값)
-export interface BranchSummaryInfo {
   min_price: number;
   available_count: number;
-  lat: number;
-  lng: number;
+  phone_number: string | null;
+  display_name: string | null;
+  rooms: RoomDetail[];
 }
 
 // 5. 메인 결과 데이터 (result)
@@ -57,9 +54,7 @@ export interface BookingSearchResult {
   end_hour: string;
   hour_slots: string[];
   available_biz_item_ids: string[];
-  results: RoomAvailabilityResult[];
-  // Key가 business_id(string)인 동적 객체
-  branch_summary: Record<string, BranchSummaryInfo>;
+  branches: Branch[];
 }
 
 // 6. 최종 API 응답 타입
