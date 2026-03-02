@@ -206,6 +206,17 @@ const MapPage = () => {
     setOpenedMarkerPopoverId(null);
   }, []);
 
+  /** "여기서 검색" 클릭 시: 선택 UI·필터·검색어를 초기화한 뒤 재검색. */
+  const handleSearchHereClick = useCallback(() => {
+    handleSearchHere(() => {
+      resetSelectionUiState();
+      setIsPartialFilterActive(false);
+      setIsFavoriteFilterActive(false);
+      setSearchText('');
+      setLastChangedFilter(null);
+    });
+  }, [handleSearchHere, resetSelectionUiState]);
+
   // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
     resetSelectionUiState();
@@ -312,13 +323,7 @@ const MapPage = () => {
             isCarouselOpen ? 'bottom-74' : 'bottom-6'
           }`}
         >
-          <SearchHereButton onClick={() => handleSearchHere(() => {
-            resetSelectionUiState();
-            setIsPartialFilterActive(false);
-            setIsFavoriteFilterActive(false);
-            setSearchText('');
-            setLastChangedFilter(null);
-          })} />
+          <SearchHereButton onClick={handleSearchHereClick} />
         </div>
       )}
     </div>
