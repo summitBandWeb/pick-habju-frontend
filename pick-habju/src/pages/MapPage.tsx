@@ -319,7 +319,7 @@ const MapPage = () => {
       )}
       {showSearchHereButton && (
         <div
-          className={`absolute left-1/2 z-[60] -translate-x-1/2 transition-all duration-300 ease-out ${
+          className={`absolute left-1/2 z-40 -translate-x-1/2 transition-all duration-300 ease-out ${
             isCarouselOpen ? 'bottom-74' : 'bottom-6'
           }`}
         >
