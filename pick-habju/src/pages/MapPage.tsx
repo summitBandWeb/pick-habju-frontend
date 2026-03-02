@@ -280,7 +280,7 @@ const MapPage = () => {
       />
 
       {/* 검색바 + 필터 — 지도 위 float 오버레이 */}
-      <div className="absolute left-0 right-0 top-0 z-10 flex flex-col gap-3 p-3">
+      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3">
         <SearchBar
           value={searchText}
           onSearchChange={handleSearchChange}
