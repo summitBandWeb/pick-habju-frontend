@@ -49,7 +49,7 @@ const SearchBar = ({
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           disabled={disabled}
-          className="flex-1 min-w-0 outline-none text-gray-600 placeholder:text-gray-300 font-modal-call disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 min-w-0 outline-none text-gray-600 placeholder:text-gray-300 font-modal-call disabled:cursor-not-allowed"
         />
         <div className="shrink-0 w-12 h-12 flex items-center justify-center">
           {searchText.trim() && (

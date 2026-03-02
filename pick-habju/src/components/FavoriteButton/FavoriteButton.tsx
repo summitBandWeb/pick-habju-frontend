@@ -11,7 +11,7 @@ const FavoriteButton = ({ isActive = false, onToggle, disabled = false }: Favori
     <button
       type="button"
       disabled={disabled}
-      className={`h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-1.25 items-center outline-none border border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`h-10 rounded-[6.25rem] shadow-filter px-4 py-2.5 flex gap-1.25 items-center outline-none border border-transparent transition-colors disabled:cursor-not-allowed ${
         isActive
           ? 'bg-yellow-700 text-primary-white [&_path]:fill-primary-white [&_path]:stroke-primary-white'
           : 'bg-primary-white text-gray-300 hover:bg-gray-200 [&_path]:fill-gray-300 [&_path]:stroke-gray-300'
