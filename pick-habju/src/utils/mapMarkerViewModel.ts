@@ -29,7 +29,7 @@ const toMarkerRoomItem = (room: RoomDetail, favoriteBizItemIds: Set<string>): Ma
   return {
     id: roomId,
     name: room.name,
-    priceText: formatPriceText(room.price_per_hour),
+    priceText: formatPriceText(room.estimated_price),
     isPartial,
     favorite: favoriteBizItemIds.has(roomId) ? 'on' : 'off',
   };
