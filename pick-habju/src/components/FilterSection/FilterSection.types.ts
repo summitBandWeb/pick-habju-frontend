@@ -11,4 +11,8 @@ export interface FilterSectionProps {
   onFavoriteFilterToggle?: (isActive: boolean) => void;
   /** '찜한 합주실만 보기' 필터 활성 여부 */
   isFavoriteFilterActive?: boolean;
+  /** partial 필터 버튼 비활성화 여부 */
+  partialDisabled?: boolean;
+  /** favorite 필터 버튼 비활성화 여부 */
+  favoriteDisabled?: boolean;
 }

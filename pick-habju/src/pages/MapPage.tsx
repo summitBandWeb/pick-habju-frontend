@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
+import ErrorNotice from '../components/ErrorNotice/ErrorNotice';
 import FilterSection from '../components/FilterSection/FilterSection';
+import MapLoadingSkeleton from '../components/Map/MapLoadingSkeleton/MapLoadingSkeleton';
 import NaverMap from '../components/Map/NaverMap';
 import SearchBar from '../components/SearchBar/SearchBar';
 import SearchHereButton from '../components/SearchHereButton/SearchHereButton';
@@ -38,11 +40,16 @@ const MapPage = () => {
   // ── 검색 텍스트 (브랜치명 필터) ──
   const [searchText, setSearchText] = useState('');
 
+  // ── noMatch 원인 추적 ──
+  /** 사용자가 마지막으로 변경한 필터·검색. noMatch 발생 시 원인 판별에 사용. */
+  const [lastChangedFilter, setLastChangedFilter] = useState<'partial' | 'favorite' | 'search' | null>(null);
+
   // ── 검색 결과 (hook) ──
   const {
     showSearchHereButton,
     handleViewportChange,
     handleSearchHere,
+    isLoading,
     roomsById,
     results,
     branchSummary,
@@ -62,6 +69,53 @@ const MapPage = () => {
       }),
     [branchSummary, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, results, searchText]
   );
+
+  /** API 결과 자체가 없음 (로딩 완료 후 results 빈 배열) */
+  const hasNoResults = !isLoading && results.length === 0;
+  /** 필터·검색으로 표시할 마커가 없음.
+   * - partial 필터 / 검색텍스트 → markerViewModels 자체가 비어 있음
+   * - 즐겨찾기 필터 → markerViewModels는 있지만 favorite 'on'인 마커가 하나도 없음 */
+  const hasNoMatch =
+    !isLoading &&
+    results.length > 0 &&
+    (markerViewModels.length === 0 ||
+      (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
+
+  /**
+   * noMatch의 실질적 원인 필터.
+   * lastChangedFilter가 여전히 유효한 원인이면 그것을 사용하고,
+   * 아니면 현재 활성 상태를 기반으로 fallback 원인을 반환.
+   */
+  const noMatchCause = useMemo(() => {
+    if (!hasNoMatch) return null;
+    const isEmptyMarkers = markerViewModels.length === 0;
+    if (
+      (lastChangedFilter === 'partial'  && isPartialFilterActive  && isEmptyMarkers) ||
+      (lastChangedFilter === 'favorite' && isFavoriteFilterActive && !isEmptyMarkers && markerViewModels.every((m) => m.favorite === 'off')) ||
+      (lastChangedFilter === 'search'   && !!searchText           && isEmptyMarkers)
+    ) {
+      return lastChangedFilter;
+    }
+    // fallback: 현재 활성화된 원인 중 하나를 반환
+    if (isEmptyMarkers) {
+      if (isPartialFilterActive) return 'partial';
+      if (searchText)            return 'search';
+    } else if (isFavoriteFilterActive) {
+      return 'favorite';
+    }
+    return null;
+  }, [hasNoMatch, lastChangedFilter, isPartialFilterActive, isFavoriteFilterActive, searchText, markerViewModels]);
+
+  /** noMatch ErrorNotice 자동 숨김 시: 원인 필터 해제. 검색어는 자동 초기화 안 함(사용자가 직접 지워야 함). */
+  const handleNoMatchAutoHide = useCallback(() => {
+    if (noMatchCause === 'partial')  setIsPartialFilterActive(false);
+    if (noMatchCause === 'favorite') setIsFavoriteFilterActive(false);
+  }, [noMatchCause]);
+
+  /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
+  const handlePartialFilterToggle  = useCallback((isActive: boolean) => { setIsPartialFilterActive(isActive);  setLastChangedFilter('partial');  }, []);
+  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => { setIsFavoriteFilterActive(isActive); setLastChangedFilter('favorite'); }, []);
+  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text);                setLastChangedFilter('search');   }, []);
 
   /**
    * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
@@ -223,6 +277,17 @@ const MapPage = () => {
 
   return (
     <div className="relative h-full w-full">
+      {isLoading && <MapLoadingSkeleton />}
+      {hasNoResults && (
+        <ErrorNotice type="noResults" onClose={() => navigate(-1)} />
+      )}
+      {hasNoMatch && (
+        <ErrorNotice
+          type="noMatch"
+          autoHideAfter={noMatchCause !== 'search' ? 6000 : undefined}
+          onAutoHide={noMatchCause !== 'search' ? handleNoMatchAutoHide : undefined}
+        />
+      )}
       <NaverMap
         ref={mapRef}
         initialCenter={lastQuery.center}
@@ -242,15 +307,18 @@ const MapPage = () => {
       <div className="absolute left-0 right-0 top-0 z-10 flex flex-col gap-3 p-3">
         <SearchBar
           value={searchText}
-          onSearchChange={setSearchText}
+          onSearchChange={handleSearchChange}
           searchCondition={searchCondition}
           onConditionClick={() => navigate(RoutePaths.HOME)}
+          disabled={hasNoMatch && noMatchCause !== 'search'}
         />
         <FilterSection
           isPartialFilterActive={isPartialFilterActive}
-          onPartialFilterToggle={setIsPartialFilterActive}
+          onPartialFilterToggle={handlePartialFilterToggle}
           isFavoriteFilterActive={isFavoriteFilterActive}
-          onFavoriteFilterToggle={setIsFavoriteFilterActive}
+          onFavoriteFilterToggle={handleFavoriteFilterToggle}
+          partialDisabled={hasNoMatch && noMatchCause !== 'partial'}
+          favoriteDisabled={hasNoMatch && noMatchCause !== 'favorite'}
         />
       </div>
 
