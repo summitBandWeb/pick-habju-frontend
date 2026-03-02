@@ -224,11 +224,7 @@ const MapPage = () => {
   // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
     resetSelectionUiState();
-  }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
-
-  useEffect(() => {
-    resetSelectionUiState();
-  }, [searchText, resetSelectionUiState]);
+  }, [isFavoriteFilterActive, isPartialFilterActive, searchText, resetSelectionUiState]);
 
   // lastQuery 없으면 홈으로 redirect (직접 URL 접근 방지)
   useEffect(() => {
