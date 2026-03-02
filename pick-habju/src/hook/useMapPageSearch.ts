@@ -1,41 +1,60 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { BookingAPIResponse, BranchSummaryInfo, RoomAvailabilityResult } from '../api/api.types';
+import type { BookingAPIResponse, Branch, RoomDetail } from '../api/api.types';
 import { useFavoritesQuery } from '../api/get/useFavoritesQueries';
 import { useRoomAvailabilityQuery } from '../api/get/useRoomQueries';
 import { useDeviceId } from './useDeviceId';
 import { useSearchStore } from '../store/search/searchStore';
 import type { MapViewport } from '../types/map';
-import {
-  buildRoomAvailabilityPayload,
-  isOutsideBaseBounds,
-  mergeViewportToLastQuery,
-} from '../utils/mapQuery';
+import { buildRoomAvailabilityPayload, isOutsideBaseBounds, mergeViewportToLastQuery } from '../utils/mapQuery';
 
-/** 지도 페이지 검색 결과를 정규화한 타입. 룸·지점 ID별 맵으로 제공. */
+/**
+ * Branch + RoomDetail 필드를 하나로 합친 정규화 룸 타입.
+ * 지도 페이지에서 O(1) 조회 및 마커 뷰모델 생성에 사용.
+ */
+export type NormalizedRoom = RoomDetail & {
+  /** 지점명 */
+  branch: string;
+  business_id: string;
+  lat: number;
+  lng: number;
+  phone_number: string | null;
+  display_name: string | null;
+};
+
+/** 지도 페이지 검색 결과를 정규화한 타입. */
 export type MapAvailabilityNormalized = {
-  results: RoomAvailabilityResult[];
-  branchSummary: Record<string, BranchSummaryInfo>;
-  roomsById: Record<string, RoomAvailabilityResult>;
+  /** 계층형 지점·룸 데이터 (마커 뷰모델 생성용) */
+  branches: Branch[];
+  /** biz_item_id → NormalizedRoom (O(1) 룸 조회용) */
+  roomsById: Record<string, NormalizedRoom>;
 };
 
 /**
  * 예약 API 응답을 지도 페이지용으로 정규화.
- * - roomsById: O(1) 룸 조회용 맵 생성. 좌표가 없는 룸은 제외.
+ * - branches: 계층형 지점·룸 데이터 (마커 뷰모델 생성용)
+ * - roomsById: biz_item_id → NormalizedRoom. O(1) 룸 조회용. 좌표 없는 지점은 제외.
  */
 const normalizeMapAvailability = (response: BookingAPIResponse): MapAvailabilityNormalized => {
-  const results = response.result?.results ?? [];
-  const branchSummary = response.result?.branch_summary ?? {};
-  const roomsById: Record<string, RoomAvailabilityResult> = {};
+  const allBranches = response.result?.branches ?? [];
+  const branches = allBranches.filter((b) => Number.isFinite(b.lat) && Number.isFinite(b.lng));
+  const roomsById: Record<string, NormalizedRoom> = {};
 
-  for (const item of results) {
-    const roomId = item.room_detail.biz_item_id;
-    if (!roomId || !Number.isFinite(item.room_detail.lat) || !Number.isFinite(item.room_detail.lng)) {
-      continue;
+  for (const branch of branches) {
+    for (const room of branch.rooms ?? []) {
+      if (!room.biz_item_id) continue;
+      roomsById[room.biz_item_id] = {
+        ...room,
+        branch: branch.branch,
+        business_id: branch.business_id,
+        lat: branch.lat,
+        lng: branch.lng,
+        phone_number: branch.phone_number,
+        display_name: branch.display_name,
+      };
     }
-    roomsById[roomId] = item;
   }
 
-  return { results, branchSummary, roomsById };
+  return { branches, roomsById };
 };
 
 /**
@@ -75,12 +94,15 @@ export const useMapPageSearch = () => {
   }, []);
 
   /** "여기서 검색" 클릭 시: draftViewport를 lastQuery에 반영 후 검색. onBeforeSearch는 검색 전 콜백(예: 캐러셀 닫기). */
-  const handleSearchHere = useCallback((onBeforeSearch?: () => void) => {
-    if (!lastQuery || !draftViewport) return;
-    onBeforeSearch?.();
-    setLastQuery(mergeViewportToLastQuery(lastQuery, draftViewport));
-    setDraftViewport(null);
-  }, [draftViewport, lastQuery, setLastQuery]);
+  const handleSearchHere = useCallback(
+    (onBeforeSearch?: () => void) => {
+      if (!lastQuery || !draftViewport) return;
+      onBeforeSearch?.();
+      setLastQuery(mergeViewportToLastQuery(lastQuery, draftViewport));
+      setDraftViewport(null);
+    },
+    [draftViewport, lastQuery, setLastQuery]
+  );
 
   /** 룸 가용성 조회 실패 시 사용자에게 보여줄 메시지. */
   const errorMessage = useMemo(() => {
@@ -90,10 +112,7 @@ export const useMapPageSearch = () => {
   }, [roomAvailabilityQuery.error]);
 
   /** 즐겨찾기된 biz_item_id Set. 마커/캐러셀에서 하트 표시 등에 사용. */
-  const favoriteBizItemIds = useMemo(
-    () => new Set<string>(favoritesQuery.data ?? []),
-    [favoritesQuery.data]
-  );
+  const favoriteBizItemIds = useMemo(() => new Set<string>(favoritesQuery.data ?? []), [favoritesQuery.data]);
 
   return {
     showSearchHereButton,
@@ -102,9 +121,7 @@ export const useMapPageSearch = () => {
     isLoading: roomAvailabilityQuery.isFetching,
     errorMessage,
     roomsById: roomAvailabilityQuery.data?.roomsById ?? {},
-    branchSummary: roomAvailabilityQuery.data?.branchSummary ?? {},
-    results: roomAvailabilityQuery.data?.results ?? [],
+    branches: roomAvailabilityQuery.data?.branches ?? [],
     favoriteBizItemIds,
   };
 };
-
