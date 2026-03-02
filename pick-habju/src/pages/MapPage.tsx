@@ -81,30 +81,8 @@ const MapPage = () => {
     (markerViewModels.length === 0 ||
       (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
 
-  /**
-   * noMatch의 실질적 원인 필터.
-   * lastChangedFilter가 여전히 유효한 원인이면 그것을 사용하고,
-   * 아니면 현재 활성 상태를 기반으로 fallback 원인을 반환.
-   */
-  const noMatchCause = useMemo(() => {
-    if (!hasNoMatch) return null;
-    const isEmptyMarkers = markerViewModels.length === 0;
-    if (
-      (lastChangedFilter === 'partial'  && isPartialFilterActive  && isEmptyMarkers) ||
-      (lastChangedFilter === 'favorite' && isFavoriteFilterActive && !isEmptyMarkers && markerViewModels.every((m) => m.favorite === 'off')) ||
-      (lastChangedFilter === 'search'   && !!searchText           && isEmptyMarkers)
-    ) {
-      return lastChangedFilter;
-    }
-    // fallback: 현재 활성화된 원인 중 하나를 반환
-    if (isEmptyMarkers) {
-      if (isPartialFilterActive) return 'partial';
-      if (searchText)            return 'search';
-    } else if (isFavoriteFilterActive) {
-      return 'favorite';
-    }
-    return null;
-  }, [hasNoMatch, lastChangedFilter, isPartialFilterActive, isFavoriteFilterActive, searchText, markerViewModels]);
+  /** noMatch 원인 필터. noMatch 중 다른 필터는 disabled되므로 lastChangedFilter가 항상 원인. */
+  const noMatchCause = hasNoMatch ? lastChangedFilter : null;
 
   /** noMatch ErrorNotice 자동 숨김 시: 원인 필터 해제. 검색어는 자동 초기화 안 함(사용자가 직접 지워야 함). */
   const handleNoMatchAutoHide = useCallback(() => {
@@ -336,7 +314,13 @@ const MapPage = () => {
             isCarouselOpen ? 'bottom-74' : 'bottom-6'
           }`}
         >
-          <SearchHereButton onClick={() => handleSearchHere(resetSelectionUiState)} />
+          <SearchHereButton onClick={() => handleSearchHere(() => {
+            resetSelectionUiState();
+            setIsPartialFilterActive(false);
+            setIsFavoriteFilterActive(false);
+            setSearchText('');
+            setLastChangedFilter(null);
+          })} />
         </div>
       )}
     </div>
