@@ -68,14 +68,18 @@ const MapPage = () => {
     [branches, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, searchText]
   );
 
-  /** API 결과 자체가 없음 (로딩 완료 후 branches 빈 배열) */
-  const hasNoResults = !isLoading && branches.length === 0;
-  /** 필터·검색으로 표시할 마커가 없음.
+  /** API 결과가 없거나, 필터 없이도 표시할 방이 없음 (모든 방이 일부 시간만 가능인 경우 포함) */
+  const hasNoResults =
+    !isLoading &&
+    (branches.length === 0 ||
+      (!isPartialFilterActive && !isFavoriteFilterActive && !searchText && markerViewModels.length === 0));
+  /** 필터·검색이 활성화된 상태에서 표시할 마커가 없음.
    * - partial 필터 / 검색텍스트 → markerViewModels 자체가 비어 있음
    * - 즐겨찾기 필터 → markerViewModels는 있지만 favorite 'on'인 마커가 하나도 없음 */
   const hasNoMatch =
     !isLoading &&
     branches.length > 0 &&
+    (isPartialFilterActive || isFavoriteFilterActive || !!searchText) &&
     (markerViewModels.length === 0 ||
       (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
 
