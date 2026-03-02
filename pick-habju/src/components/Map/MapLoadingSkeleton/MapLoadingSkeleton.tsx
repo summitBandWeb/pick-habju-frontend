@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import noteIcon from '../../assets/svg/noteIcon.svg';
+import noteIcon from '../../../assets/svg/noteIcon.svg';
 
 const TIP_MESSAGES = [
   '딱 맞는 시간이 없다면 일부만 예약하는 방법도 있어요',

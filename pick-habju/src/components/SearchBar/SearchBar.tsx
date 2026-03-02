@@ -6,11 +6,12 @@ import PersonIcon from '../../assets/svg/person.svg';
 import type { SearchBarProps } from './SearchBar.types';
 import { useDebounce } from '../../hook/useDebounce';
 
-const SearchBar = ({ 
-  value, 
-  onSearchChange, 
+const SearchBar = ({
+  value,
+  onSearchChange,
   searchCondition,
-  onConditionClick
+  onConditionClick,
+  disabled = false,
 }: SearchBarProps) => {
   const [searchText, setSearchText] = useState(value);
 
@@ -47,7 +48,8 @@ const SearchBar = ({
           placeholder="결과 내 합주실 검색"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="flex-1 min-w-0 outline-none text-gray-600 placeholder:text-gray-300 font-modal-call"
+          disabled={disabled}
+          className="flex-1 min-w-0 outline-none text-gray-600 placeholder:text-gray-300 font-modal-call disabled:cursor-not-allowed disabled:opacity-50"
         />
         <div className="shrink-0 w-12 h-12 flex items-center justify-center">
           {searchText.trim() && (

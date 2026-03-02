@@ -9,14 +9,14 @@ import NoLocationIcon from '../../assets/svg/NoLocation.svg';
 const ErrorNotice = ({
   type,
   onClose,
-  autoHideAfter = 6000,
+  autoHideAfter,
   onAutoHide,
 }: ErrorNoticeProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // noMatch 타입일 때 자동 숨김 타이머
+  // noMatch 타입이고 autoHideAfter가 지정된 경우에만 자동 숨김 타이머 실행
   useEffect(() => {
-    if (type === 'noMatch' && isVisible) {
+    if (type === 'noMatch' && isVisible && autoHideAfter != null) {
       const timer = setTimeout(() => {
         setIsVisible(false);
         onAutoHide?.();
