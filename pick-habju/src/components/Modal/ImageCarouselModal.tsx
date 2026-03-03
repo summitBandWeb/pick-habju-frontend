@@ -10,13 +10,9 @@ type ImageCarouselModalProps = {
   onClose: () => void;
 };
 
-const ImageCarouselModal = ({
-  images,
-  initialIndex = 0,
-  onClose,
-}: ImageCarouselModalProps) => {
+const ImageCarouselModal = ({ images, initialIndex = 0, onClose }: ImageCarouselModalProps) => {
   const [current, setCurrent] = useState(initialIndex);
-  
+
   useEffect(() => {
     setCurrent(initialIndex);
   }, [initialIndex]);
@@ -29,30 +25,24 @@ const ImageCarouselModal = ({
     current === 0 ? ChevronVariant.First : current === total - 1 ? ChevronVariant.Last : ChevronVariant.Middle;
 
   return (
-    <ModalOverlay onClose={onClose} dimmedClassName="bg-black/80" animateFromBottom={false} >
+    <ModalOverlay onClose={onClose} dimmedClassName="bg-black/80" blurClassName="" animateFromBottom={false}>
       {/* 1. 최상위 컨테이너: 너비를 고정하고 내부 그림자를 위해 overflow-visible 상태 유지 */}
-      <div className="w-[calc(100vw-2rem)] max-w-[25.125rem] relative">
-        
+      <div className="w-[min(25.125rem,calc(100vw-2rem))] relative">
         {/* 2. 슬라이드 윈도우: 여기서만 옆 이미지를 잘라냄 */}
         <div className="overflow-hidden w-full">
           <div
             className="flex items-center"
             style={{
-              // 이미지 너비(100%) + 간격(예: 40px) 만큼 이동하도록 설정
-              transform: `translateX(calc(-${current * 100}% - ${current * 40}px))`,
+              transform: `translateX(-${current * 100}%)`,
               transition: 'transform 0.35s ease-out',
-              gap: '40px', // 이미지 사이의 간격을 충분히 주어 옆 이미지가 안 보이게 함
             }}
           >
             {images.map((image, index) => (
-              <div 
-                key={index} 
-                className="w-full min-w-full flex-shrink-0 flex flex-col items-center"
-              >
+              <div key={index} className="w-full min-w-full flex-shrink-0 flex flex-col items-center">
                 {/* 3. 개별 이미지 컨테이너: 위쪽 여백 확보 */}
-                <div className="relative w-full mt-12 mb-4 px-3"> 
+                <div className="relative w-full mt-12 mb-4 px-3">
                   {/* px-3은 그림자가 잘리는 것 방지용 */}
-                  
+
                   {/* 닫기 버튼 */}
                   <div className="absolute bottom-full right-0 z-10">
                     <button
