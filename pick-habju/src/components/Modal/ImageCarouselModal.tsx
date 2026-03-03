@@ -31,7 +31,7 @@ const ImageCarouselModal = ({
   return (
     <ModalOverlay onClose={onClose} dimmedClassName="bg-black/80" animateFromBottom={false} >
       {/* 1. 최상위 컨테이너: 너비를 고정하고 내부 그림자를 위해 overflow-visible 상태 유지 */}
-      <div className="w-[25.125rem] relative">
+      <div className="w-[calc(100vw-2rem)] max-w-[25.125rem] relative">
         
         {/* 2. 슬라이드 윈도우: 여기서만 옆 이미지를 잘라냄 */}
         <div className="overflow-hidden w-full">
