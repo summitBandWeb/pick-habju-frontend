@@ -29,8 +29,8 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
 
         {/* 스크롤 영역: 헤더 제외 나머지 */}
         <div
-          className={`flex-1 flex flex-col scrollbar-stable ${
-            isMapPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden items-center'
+          className={`flex-1 flex flex-col ${
+            isMapPage ? 'overflow-hidden' : 'scrollbar-stable overflow-y-auto overflow-x-hidden items-center'
           }`}
         >
           <div className={`w-full flex flex-col items-center ${isMapPage ? 'h-full' : ''}`}>{children}</div>
