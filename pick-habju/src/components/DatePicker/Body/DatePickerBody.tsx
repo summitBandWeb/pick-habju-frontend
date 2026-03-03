@@ -31,7 +31,8 @@ function getDaysGrid(year: number, month: number): (Date | null)[] {
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
-  while (cells.length < 42) cells.push(null);
+  // 7의 배수로만 맞추기 (필요한 주 만큼만)
+  while (cells.length % 7 !== 0) cells.push(null);
   return cells;
 }
 
@@ -45,6 +46,7 @@ const DatePickerBody = ({
   const month = activeStartDate.getMonth();
   const monthKey = `${year}-${month}`;
   const daysGrid = useMemo(() => getDaysGrid(year, month), [year, month]);
+  const numRows = daysGrid.length / 7;
 
   return (
     <div className="w-full px-[1.19rem]">
@@ -58,7 +60,7 @@ const DatePickerBody = ({
       </div>
 
       {/* 슬라이드: 날짜 숫자 그리드 - 7열 40x40 셀, 패딩/간격 없음 */}
-      <div className="overflow-hidden relative w-full h-[15rem]">
+      <div className="overflow-hidden relative w-full" style={{ height: `${numRows * 2.5}rem` }}>
         <AnimatePresence initial={false} custom={slideDirection}>
           <motion.div
             key={monthKey}
@@ -68,7 +70,8 @@ const DatePickerBody = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="absolute inset-0 w-full grid grid-cols-7 grid-rows-6 place-items-center"
+            className="absolute inset-0 w-full grid grid-cols-7 place-items-center"
+            style={{ gridTemplateRows: `repeat(${numRows}, 2.5rem)` }}
           >
             {daysGrid.map((date, i) =>
               date ? (
