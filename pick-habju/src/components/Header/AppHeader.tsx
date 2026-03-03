@@ -18,7 +18,7 @@ const AppHeader = () => {
   return (
     <div className="flex w-full justify-center items-center relative">
       <GoogleFormToast />
-      <div className="flex flex-col w-full max-w-[25.9375rem]">
+      <div className="flex flex-col w-full max-w-100.5">
         {/* <SafeArea /> */}
         <LogoHeader />
       </div>
