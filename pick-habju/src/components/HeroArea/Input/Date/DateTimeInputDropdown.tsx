@@ -130,6 +130,18 @@ const DateTimeInputDropdown = ({
     }));
   }, [initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
 
+  // 선택된 날짜가 오늘인지 확인
+  const isToday = () => {
+    const selected = pickerState.selectedDates[0];
+    if (!selected) return false;
+    const today = new Date();
+    return (
+      selected.getFullYear() === today.getFullYear() &&
+      selected.getMonth() === today.getMonth() &&
+      selected.getDate() === today.getDate()
+    );
+  };
+
   // 바깥 클릭 + ESC로 닫기
   useEffect(() => {
     if (!isOpen) return;
@@ -180,6 +192,13 @@ const DateTimeInputDropdown = ({
                     initialSelectedDate={pickerState.selectedDates[0] ?? initialSelectedDate}
                     onChange={handleDateChange}
                   />
+                  {isToday() && (
+                    <div className="px-[23.5px] py-1.5">
+                      <p className="font-modal-calcdetail text-gray-300">
+                        당일 예약은 취소 시 전액 위약금이 발생합니다. 신중히 선택해주세요!
+                      </p>
+                    </div>
+                  )}
                   <PickerFooter onConfirm={handleDateStepConfirm} onCancel={handleDateStepCancel} confirmText="다음" />
                 </>
               ) : (
