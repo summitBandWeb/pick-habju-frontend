@@ -18,11 +18,9 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
       {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
-      {/* isWindows: 윈도우는 스크롤바 공간 확보 위해 max-w 26.875rem */}
+      {/* isWindows: 윈도우는 스크롤바 공간 확보 위해 max-w 25.9375rem */}
       <div
-        className={`w-full h-screen flex flex-col bg-primary-white ${
-          isWindows ? 'max-w-[26.875rem]' : 'max-w-[25.9375rem]'
-        }`}
+        className={`w-full h-screen flex flex-col bg-primary-white ${isWindows ? 'max-w-[25.9375rem]' : 'max-w-100.5'}`}
       >
         {/* 헤더(세이프 에어리어 + 로고 헤더) */}
         <AppHeader />
