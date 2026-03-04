@@ -14,7 +14,9 @@ const Footer = () => {
         >
           공지사항
         </a>
-        <span className="whitespace-nowrap">|</span>
+        <span className="whitespace-nowrap" aria-hidden="true">
+          |
+        </span>
         <a
           href="https://forms.gle/uea6mtKQSBoAN7fs6"
           target="_blank"
@@ -24,7 +26,9 @@ const Footer = () => {
         >
           서비스 피드백하기
         </a>
-        <span className="whitespace-nowrap">|</span>
+        <span className="whitespace-nowrap" aria-hidden="true">
+          |
+        </span>
         <a
           href="mailto:pickhabju@gmail.com"
           className="cursor-pointer hover:underline hover:text-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm transition-colors whitespace-nowrap"
