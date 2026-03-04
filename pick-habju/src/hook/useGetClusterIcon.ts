@@ -1,13 +1,5 @@
-// TODO: @types/navermaps 설치 후 NaverMapsLike 인터페이스를 제거하고,
-// useGetClusterIcon 파라미터 타입을 typeof naver.maps 로 변경할 것.
-/** useNavermaps() 훅이 반환하는 navermaps 객체에서 실제 사용하는 부분만 정의 */
-interface NaverMapsLike {
-  Size: new (width: number, height: number) => unknown;
-  Point: new (x: number, y: number) => unknown;
-}
-
 /**
- * 네이버 지도 마커 클러스터링에 사용되는 아이콘을 생성하는 훅
+ * 네이버 지도 마커 클러스터링에 사용되는 아이콘을 생성하는 함수.
  *
  * 클러스터 아이콘은 마커 개수에 따라 3단계로 구분됩니다:
  * - htmlMarker1: 1~5개 (50px → 호버 60px)
@@ -16,7 +8,7 @@ interface NaverMapsLike {
  *
  * 스타일은 src/index.css에 전역으로 정의되어 있습니다.
  *
- * @param navermaps - naver.maps 네임스페이스 객체 (useNavermaps() 반환값)
+ * @param navermaps - naver.maps 네임스페이스 객체
  * @returns 클러스터 아이콘 마커 설정 객체 3개
  */
 
@@ -39,7 +31,7 @@ const createClusterContent = (
   return `<div class="cluster-icon cluster-icon--${variant}" style="cursor:pointer;width:${size}px;height:${size}px;line-height:${size}px;font-size:18px;font-family:'Pretendard',sans-serif;font-weight:700;color:#fff;text-align:center;letter-spacing:0.54px;border-radius:50%;${opacityStyle}"></div>`;
 };
 
-export const useGetClusterIcon = (navermaps: NaverMapsLike) => {
+export const useGetClusterIcon = (navermaps: typeof naver.maps) => {
   const { small, medium, large } = CLUSTER_STYLES;
 
   const htmlMarker1 = {
@@ -62,3 +54,10 @@ export const useGetClusterIcon = (navermaps: NaverMapsLike) => {
 
   return { htmlMarker1, htmlMarker2, htmlMarker3 };
 };
+
+/**
+ * useGetClusterIcon의 별칭.
+ * useEffect 등 훅 컨텍스트 외부에서 호출할 때 사용.
+ * (내부에 React 훅을 사용하지 않으므로 어디서든 안전하게 호출 가능)
+ */
+export const getClusterIcons = useGetClusterIcon;

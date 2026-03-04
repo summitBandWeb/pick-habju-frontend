@@ -5,6 +5,7 @@ import PriceList from '../Price/PriceList/PriceList';
 import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
+import { getClusterIcons } from '../../hook/useGetClusterIcon';
 
 /** NaverMap 컴포넌트 Props. */
 type NaverMapProps = {
@@ -92,6 +93,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
     const markerListenersRef = useRef<naver.maps.MapEventListener[]>([]);
     const prevSelectedMarkerIdRef = useRef<string | null>(null);
+    /** MarkerClustering 인스턴스. markerViewModels 변경 시 재생성. */
+    const clusteringRef = useRef<MarkerClustering | null>(null);
     // 마커 클릭 핸들러에서 현재 openedMarkerPopoverId를 읽기 위한 ref.
     // 클로저 생성 시점의 값을 캡처하므로 직접 prop을 참조할 수 없음.
     const openedMarkerPopoverIdRef = useRef<string | null>(null);
@@ -200,6 +203,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       return () => {
         cancelled = true;
 
+        if (clusteringRef.current) {
+          clusteringRef.current.setMap(null);
+          clusteringRef.current = null;
+        }
+
         for (const listener of markerListenersRef.current) {
           naver.maps.Event.removeListener(listener);
         }
@@ -239,8 +247,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // markerViewModels 변경 시 마커 전체 재생성.
     // 단일 룸 마커: 클릭 시 바로 룸 선택.
     // 복수 룸 마커: 클릭 시 팝오버 토글.
+    // MarkerClustering이 로드된 경우 클러스터링 인스턴스도 재생성.
     useEffect(() => {
       if (!isMapReady) return;
+
+      // 이전 클러스터링 인스턴스 제거
+      if (clusteringRef.current) {
+        clusteringRef.current.setMap(null);
+        clusteringRef.current = null;
+      }
 
       for (const listener of markerListenersRef.current) {
         naver.maps.Event.removeListener(listener);
@@ -256,10 +271,13 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       if (!map) return;
 
       const models = markerViewModels ?? [];
+      const markerArray: naver.maps.Marker[] = [];
+
       for (const model of models) {
+        // MarkerClustering이 마커 가시성(setMap)을 관리하므로 map 속성 없이 생성.
+        // 클러스터링 미사용 폴백 시에는 아래에서 직접 setMap을 호출한다.
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(model.lat, model.lng),
-          map,
           zIndex: model.favorite === 'on' ? 1 : 0,
           icon: {
             content: renderToStaticMarkup(
@@ -275,6 +293,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           },
         });
 
+        markerArray.push(marker);
         markerInstancesRef.current.set(model.id, marker);
         markerListenersRef.current.push(
           naver.maps.Event.addListener(marker, 'click', () => {
@@ -303,6 +322,34 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             onMarkerClickRef.current?.(model.id);
           })
         );
+      }
+
+      // MarkerClustering 적용.
+      // 클러스터링 라이브러리가 로드된 경우 MarkerClustering 인스턴스를 생성하고
+      // 마커 가시성 관리를 위임한다. 미로드 시 마커를 직접 지도에 설정하여 폴백.
+      if (typeof MarkerClustering !== 'undefined' && markerArray.length > 0) {
+        const { htmlMarker1, htmlMarker2, htmlMarker3 } = getClusterIcons(naver.maps);
+        clusteringRef.current = new MarkerClustering({
+          map,
+          markers: markerArray,
+          minClusterSize: 2,
+          // 이 줌 레벨 이상에서는 클러스터를 해제하고 개별 마커를 표시
+          maxZoom: 14,
+          gridSize: 120,
+          disableClickZoom: false,
+          icons: [htmlMarker1, htmlMarker2, htmlMarker3],
+          // [5, 14] → 1~5개: htmlMarker1, 6~14개: htmlMarker2, 15개+: htmlMarker3
+          indexGenerator: [5, 14],
+          stylingFunction: (clusterMarker, count) => {
+            const el = clusterMarker.getElement()?.querySelector('div');
+            if (el) (el as HTMLElement).textContent = String(count);
+          },
+        });
+      } else {
+        // 폴백: MarkerClustering 없이 개별 마커를 지도에 직접 표시
+        for (const marker of markerArray) {
+          marker.setMap(map);
+        }
       }
     }, [isMapReady, markerViewModels]);
 
