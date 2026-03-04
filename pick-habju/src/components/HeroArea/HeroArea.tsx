@@ -21,7 +21,7 @@ import { useSearchStore } from '../../store/search/searchStore';
 import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
-import { getServiceableStations, SERVICEABLE_STATION_IDS } from '../../constants/serviceable_stations';
+import { getServiceableStations, DEFAULT_SERVICEABLE_STATION_ID } from '../../constants/serviceable_stations';
 
 const STATIONS = getServiceableStations();
 
@@ -31,7 +31,7 @@ const LOCATION_OPTIONS: LocationOption[] = STATIONS.map((station) => ({
   subwayLine: station.subwayLine,
 }));
 
-const DEFAULT_LOCATION_ID = SERVICEABLE_STATION_IDS[0];
+const DEFAULT_LOCATION_ID = DEFAULT_SERVICEABLE_STATION_ID;
 
 const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);

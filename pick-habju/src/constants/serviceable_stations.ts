@@ -2,6 +2,8 @@ import type { MapCenter, MapBounds } from '../types/map';
 
 export const SERVICEABLE_STATION_IDS = ['sadang', 'isu', 'heukseok', 'sangdo', 'hongdae', 'sinchon'] as const;
 
+export const DEFAULT_SERVICEABLE_STATION_ID = 'sadang' as const satisfies ServiceableStationId;
+
 export type ServiceableStationId = (typeof SERVICEABLE_STATION_IDS)[number];
 
 export interface ServiceableStation {
