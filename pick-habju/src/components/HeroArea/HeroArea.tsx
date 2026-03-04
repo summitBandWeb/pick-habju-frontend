@@ -186,7 +186,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               activeDropdown === 'dateTime'
                 ? -180
                 : activeDropdown === 'location'
-                  ? -150
+                  ? -175
                   : activeDropdown === 'person'
                     ? -40
                     : 0,
