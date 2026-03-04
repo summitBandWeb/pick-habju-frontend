@@ -186,7 +186,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
               activeDropdown === 'dateTime'
                 ? -180
                 : activeDropdown === 'location'
-                  ? -90
+                  ? -150
                   : activeDropdown === 'person'
                     ? -40
                     : 0,
@@ -277,8 +277,7 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
 
                   // UI 라벨 업데이트 보정
                   setDateTimeText(formatReservationLabel(dateIso, slots));
-                  const station =
-                    STATIONS.find((s) => s.id === selectedLocation.id) ?? STATIONS[0];
+                  const station = STATIONS.find((s) => s.id === selectedLocation.id) ?? STATIONS[0];
                   onSearch({
                     location: station.name,
                     stationId: station.id,
