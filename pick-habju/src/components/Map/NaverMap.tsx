@@ -5,7 +5,7 @@ import PriceList from '../Price/PriceList/PriceList';
 import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
-import { getClusterIcons } from '../../hook/useGetClusterIcon';
+import { getClusterIcons } from '../../hook/getClusterIcons';
 
 /** NaverMap 컴포넌트 Props. */
 type NaverMapProps = {

@@ -31,7 +31,7 @@ const createClusterContent = (
   return `<div class="cluster-icon cluster-icon--${variant}" style="cursor:pointer;width:${size}px;height:${size}px;line-height:${size}px;font-size:18px;font-family:'Pretendard',sans-serif;font-weight:700;color:#fff;text-align:center;letter-spacing:0.54px;border-radius:50%;${opacityStyle}"></div>`;
 };
 
-export const useGetClusterIcon = (navermaps: typeof naver.maps) => {
+export const getClusterIcons = (navermaps: typeof naver.maps) => {
   const { small, medium, large } = CLUSTER_STYLES;
 
   const htmlMarker1 = {
@@ -54,10 +54,3 @@ export const useGetClusterIcon = (navermaps: typeof naver.maps) => {
 
   return { htmlMarker1, htmlMarker2, htmlMarker3 };
 };
-
-/**
- * useGetClusterIcon의 별칭.
- * useEffect 등 훅 컨텍스트 외부에서 호출할 때 사용.
- * (내부에 React 훅을 사용하지 않으므로 어디서든 안전하게 호출 가능)
- */
-export const getClusterIcons = useGetClusterIcon;

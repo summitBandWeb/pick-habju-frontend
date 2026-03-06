@@ -3,8 +3,8 @@ const SCRIPT_BASE =
   'https://openapi.map.naver.com/openapi/v3/maps.js';
 
 const MARKER_CLUSTERING_SCRIPT_ID = 'naver-maps-clustering-script';
-const MARKER_CLUSTERING_SRC =
-  'https://cdn.jsdelivr.net/gh/navermaps/marker-tools.js@master/marker-clustering/src/MarkerClustering.js';
+// vendored: navermaps/marker-tools.js marker-clustering/src/MarkerClustering.js
+const MARKER_CLUSTERING_SRC = '/lib/naver/MarkerClustering.js';
 
 // 한 번 resolve된 이후 재설정되지 않는다 (의도적 설계).
 // MarkerClustering 로드 실패 시에도 warn 후 resolve하여 캐싱되므로,
