@@ -48,7 +48,7 @@ declare global {
 
   /**
    * 네이버 지도 MarkerClustering 유틸리티 라이브러리.
-   * CDN: https://cdn.jsdelivr.net/gh/navermaps/marker-tools.js@master/marker-clustering/src/MarkerClustering.js
+   * vendored: public/lib/naver/MarkerClustering.js
    */
   class MarkerClustering {
     constructor(options: MarkerClusteringOptions);
