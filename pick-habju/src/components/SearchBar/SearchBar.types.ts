@@ -11,4 +11,7 @@ export interface SearchBarProps {
   
   // 검색 조건 클릭 시 첫 화면으로 돌아가는 핸들러
   onConditionClick: () => void;
+
+  /** 검색 입력 비활성화 여부 (noMatch 화면 표시 중 필터가 원인일 때 상호작용 차단) */
+  disabled?: boolean;
 }

@@ -9,14 +9,14 @@ import NoLocationIcon from '../../assets/svg/NoLocation.svg';
 const ErrorNotice = ({
   type,
   onClose,
-  autoHideAfter = 6000,
+  autoHideAfter,
   onAutoHide,
 }: ErrorNoticeProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // noMatch 타입일 때 자동 숨김 타이머
+  // noMatch 타입이고 autoHideAfter가 지정된 경우에만 자동 숨김 타이머 실행
   useEffect(() => {
-    if (type === 'noMatch' && isVisible) {
+    if (type === 'noMatch' && isVisible && autoHideAfter != null) {
       const timer = setTimeout(() => {
         setIsVisible(false);
         onAutoHide?.();
@@ -78,7 +78,7 @@ const ErrorNotice = ({
   };
 
   return (
-    <div className="backdrop-blur-[3px] bg-[rgba(9,9,9,0.7)] flex flex-col items-center justify-center w-full h-full">
+    <div className="absolute inset-0 z-50 backdrop-blur-[3px] bg-[rgba(9,9,9,0.7)] flex flex-col items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-4 flex-1 w-full">
         {/* 아이콘 */}
         <div className="shrink-0">{getIcon()}</div>

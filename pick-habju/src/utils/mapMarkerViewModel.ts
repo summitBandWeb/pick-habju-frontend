@@ -81,7 +81,7 @@ export const buildMarkerViewModels = ({
       id: branch.business_id,
       lat: branch.lat,
       lng: branch.lng,
-      priceText: formatPriceText(branch.min_price),
+      priceText: formatPriceText(isPartialFilterActive ? branch.min_price_partial : branch.min_price_available),
       isPartial,
       favorite,
       isActive: false,

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
+import ErrorNotice from '../components/ErrorNotice/ErrorNotice';
 import FilterSection from '../components/FilterSection/FilterSection';
+import MapLoadingSkeleton from '../components/Map/MapLoadingSkeleton/MapLoadingSkeleton';
 import NaverMap from '../components/Map/NaverMap';
 import SearchBar from '../components/SearchBar/SearchBar';
 import SearchHereButton from '../components/SearchHereButton/SearchHereButton';
@@ -38,11 +40,16 @@ const MapPage = () => {
   // ── 검색 텍스트 (브랜치명 필터) ──
   const [searchText, setSearchText] = useState('');
 
+  // ── noMatch 원인 추적 ──
+  /** 사용자가 마지막으로 변경한 필터·검색. noMatch 발생 시 원인 판별에 사용. */
+  const [lastChangedFilter, setLastChangedFilter] = useState<'partial' | 'favorite' | 'search' | null>(null);
+
   // ── 검색 결과 (hook) ──
   const {
     showSearchHereButton,
     handleViewportChange,
     handleSearchHere,
+    isLoading,
     roomsById,
     branches,
     favoriteBizItemIds,
@@ -60,6 +67,35 @@ const MapPage = () => {
       }),
     [branches, favoriteBizItemIds, isPartialFilterActive, isFavoriteFilterActive, searchText]
   );
+
+  /** API 결과가 없거나, 필터 없이도 표시할 방이 없음 (모든 방이 일부 시간만 가능인 경우 포함) */
+  const hasNoResults =
+    !isLoading &&
+    (branches.length === 0 ||
+      (!isPartialFilterActive && !isFavoriteFilterActive && !searchText && markerViewModels.length === 0));
+  /** 필터·검색이 활성화된 상태에서 표시할 마커가 없음.
+   * - partial 필터 / 검색텍스트 → markerViewModels 자체가 비어 있음
+   * - 즐겨찾기 필터 → markerViewModels는 있지만 favorite 'on'인 마커가 하나도 없음 */
+  const hasNoMatch =
+    !isLoading &&
+    branches.length > 0 &&
+    (isPartialFilterActive || isFavoriteFilterActive || !!searchText) &&
+    (markerViewModels.length === 0 ||
+      (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
+
+  /** noMatch 원인 필터. noMatch 중 다른 필터는 disabled되므로 lastChangedFilter가 항상 원인. */
+  const noMatchCause = hasNoMatch ? lastChangedFilter : null;
+
+  /** noMatch ErrorNotice 자동 숨김 시: 원인 필터 해제. 검색어는 자동 초기화 안 함(사용자가 직접 지워야 함). */
+  const handleNoMatchAutoHide = useCallback(() => {
+    if (noMatchCause === 'partial')  setIsPartialFilterActive(false);
+    if (noMatchCause === 'favorite') setIsFavoriteFilterActive(false);
+  }, [noMatchCause]);
+
+  /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
+  const handlePartialFilterToggle  = useCallback((isActive: boolean) => { setIsPartialFilterActive(isActive);  setLastChangedFilter('partial');  }, []);
+  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => { setIsFavoriteFilterActive(isActive); setLastChangedFilter('favorite'); }, []);
+  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text); if (text) setLastChangedFilter('search'); }, []);
 
   /**
    * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
@@ -174,14 +210,21 @@ const MapPage = () => {
     setOpenedMarkerPopoverId(null);
   }, []);
 
+  /** "여기서 검색" 클릭 시: 선택 UI·필터·검색어를 초기화한 뒤 재검색. */
+  const handleSearchHereClick = useCallback(() => {
+    handleSearchHere(() => {
+      resetSelectionUiState();
+      setIsPartialFilterActive(false);
+      setIsFavoriteFilterActive(false);
+      setSearchText('');
+      setLastChangedFilter(null);
+    });
+  }, [handleSearchHere, resetSelectionUiState]);
+
   // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
     resetSelectionUiState();
-  }, [isFavoriteFilterActive, isPartialFilterActive, resetSelectionUiState]);
-
-  useEffect(() => {
-    resetSelectionUiState();
-  }, [searchText, resetSelectionUiState]);
+  }, [isFavoriteFilterActive, isPartialFilterActive, searchText, resetSelectionUiState]);
 
   // lastQuery 없으면 홈으로 redirect (직접 URL 접근 방지)
   useEffect(() => {
@@ -221,6 +264,17 @@ const MapPage = () => {
 
   return (
     <div className="relative h-full w-full">
+      {isLoading && <MapLoadingSkeleton />}
+      {hasNoResults && (
+        <ErrorNotice type="noResults" onClose={() => navigate(-1)} />
+      )}
+      {hasNoMatch && (
+        <ErrorNotice
+          type="noMatch"
+          autoHideAfter={noMatchCause !== 'search' ? 6000 : undefined}
+          onAutoHide={noMatchCause !== 'search' ? handleNoMatchAutoHide : undefined}
+        />
+      )}
       <NaverMap
         ref={mapRef}
         initialCenter={lastQuery.center}
@@ -237,18 +291,21 @@ const MapPage = () => {
       />
 
       {/* 검색바 + 필터 — 지도 위 float 오버레이 */}
-      <div className="absolute left-0 right-0 top-0 z-10 flex flex-col gap-3 p-3">
+      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3">
         <SearchBar
           value={searchText}
-          onSearchChange={setSearchText}
+          onSearchChange={handleSearchChange}
           searchCondition={searchCondition}
           onConditionClick={() => navigate(RoutePaths.HOME)}
+          disabled={hasNoMatch && noMatchCause !== 'search'}
         />
         <FilterSection
           isPartialFilterActive={isPartialFilterActive}
-          onPartialFilterToggle={setIsPartialFilterActive}
+          onPartialFilterToggle={handlePartialFilterToggle}
           isFavoriteFilterActive={isFavoriteFilterActive}
-          onFavoriteFilterToggle={setIsFavoriteFilterActive}
+          onFavoriteFilterToggle={handleFavoriteFilterToggle}
+          partialDisabled={hasNoMatch && noMatchCause !== 'partial'}
+          favoriteDisabled={hasNoMatch && noMatchCause !== 'favorite'}
         />
       </div>
 
@@ -262,11 +319,11 @@ const MapPage = () => {
       )}
       {showSearchHereButton && (
         <div
-          className={`absolute left-1/2 z-[60] -translate-x-1/2 transition-all duration-300 ease-out ${
+          className={`absolute left-1/2 z-40 -translate-x-1/2 transition-all duration-300 ease-out ${
             isCarouselOpen ? 'bottom-74' : 'bottom-6'
           }`}
         >
-          <SearchHereButton onClick={() => handleSearchHere(resetSelectionUiState)} />
+          <SearchHereButton onClick={handleSearchHereClick} />
         </div>
       )}
     </div>

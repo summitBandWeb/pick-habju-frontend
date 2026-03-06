@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import noteIcon from '../../assets/svg/noteIcon.svg';
+import noteIcon from '../../../assets/svg/noteIcon.svg';
 
 const TIP_MESSAGES = [
   '딱 맞는 시간이 없다면 일부만 예약하는 방법도 있어요',
@@ -53,7 +53,7 @@ const MapLoadingSkeleton = () => {
 
           {/* 도움말 메시지 */}
           <div className="flex flex-wrap items-center justify-center px-2.5 py-[5px] w-full">
-            <p className="font-modal-default text-primary-black text-center whitespace-pre-wrap">
+            <p className="font-modal-default text-primary-black text-center whitespace-nowrap">
               {tipMessage}
             </p>
           </div>
