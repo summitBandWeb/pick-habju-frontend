@@ -6,9 +6,11 @@ export interface BaseResponse<T> {
   result: T;
 }
 
-// 2. 정책 경고 타입 (현재 JSON에서는 빈 배열이지만 구조 유지를 위해 정의)
+// 2. 정책 경고 타입
+export type PolicyWarningType = 'call_required_today' | 'call_required_1h' | 'chat_required_1h';
+
 export interface PolicyWarning {
-  type: string;
+  type: PolicyWarningType;
   message: string;
 }
 

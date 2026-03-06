@@ -14,8 +14,31 @@ import { useSearchStore } from '../store/search/searchStore';
 import type { NaverMapHandle } from '../types/map';
 import { formatSearchConditionDateTime } from '../utils/dateTimeLabel';
 import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
+import ModalOverlay from '../components/Modal/ModalOverlay';
+import PartialReservationConfirmModal from '../components/Modal/Portion/PartialReservationConfirmModal';
+import OneHourCallReservationNoticeModal from '../components/Modal/OneHour/OneHourCallReservationNoticeModal';
+import OneHourChatReservationNoticeModal from '../components/Modal/OneHour/OneHourChatReservationNoticeModal';
+import CallReservationNoticeModal from '../components/Modal/Call/CallReservationNoticeModal';
+import type { ModalType } from '../utils/modalFlowLogic';
+import { formatAvailableTimeRange, formatTimeRangeForCard } from '../utils/availableTimeFormatter';
+import { getBookingUrl } from '../utils/bookingUrl';
+import type { PolicyWarning } from '../api/api.types';
+import BookModalStepper from '../components/Modal/Book/BookModal';
 
 const DEFAULT_MAP_ZOOM = 16;
+
+/**
+ * policy_warnings 배열로 어떤 모달을 열지 결정.
+ * partial 분기는 호출부에서 isPartialFilterActive로 먼저 처리한 뒤 이 함수를 호출.
+ * 우선순위: chat_required_1h > call_required_1h > call_required_today > book
+ */
+function resolveModalFromWarnings(warnings: PolicyWarning[]): Exclude<ModalType, 'partial'> {
+  const types = warnings.map((w) => w.type);
+  if (types.includes('chat_required_1h')) return 'oneHourChat';
+  if (types.includes('call_required_1h')) return 'oneHourCall';
+  if (types.includes('call_required_today')) return 'sameDayCall';
+  return 'book';
+}
 
 /**
  * 지도 기반 합주실 검색 페이지.
@@ -43,6 +66,16 @@ const MapPage = () => {
   // ── noMatch 원인 추적 ──
   /** 사용자가 마지막으로 변경한 필터·검색. noMatch 발생 시 원인 판별에 사용. */
   const [lastChangedFilter, setLastChangedFilter] = useState<'partial' | 'favorite' | 'search' | null>(null);
+
+  // ── 모달 상태 ──
+  const [currentModal, setCurrentModal] = useState<{
+    type: Exclude<ModalType, 'book'>;
+    bizItemId: string;
+    availableTime?: string;
+    studioName?: string;
+    phoneNumber?: string;
+  } | null>(null);
+  const [bookModal, setBookModal] = useState<{ bizItemId: string } | null>(null);
 
   // ── 검색 결과 (hook) ──
   const {
@@ -122,8 +155,11 @@ const MapPage = () => {
         imageUrls: roomDetail.image_urls,
         recommendCapacity: roomDetail.recommend_capacity,
         pricePerHour: roomDetail.price_per_hour,
+        availableTimeRange: isPartialFilterActive
+          ? formatTimeRangeForCard(formatAvailableTimeRange(roomDetail.available_slots))
+          : undefined,
       }));
-  }, [markerViewModels, roomsById]);
+  }, [isPartialFilterActive, markerViewModels, roomsById]);
 
   /**
    * 룸 선택 핸들러. 캐러셀을 열고 팝오버를 닫으며, 다른 룸으로 이동할 때만 panTo 실행.
@@ -203,12 +239,49 @@ const MapPage = () => {
     }
   }, [openedMarkerPopoverId]);
 
-  /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버를 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
+  /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
     setSelectedRoomId(null);
     setIsCarouselOpen(false);
     setOpenedMarkerPopoverId(null);
+    setCurrentModal(null);
+    setBookModal(null);
   }, []);
+
+  /**
+   * 예약하기 버튼 클릭 핸들러.
+   * - partial 필터 활성 시: PartialReservationConfirmModal
+   * - policy_warnings 기반: oneHourChat / oneHourCall / sameDayCall 모달
+   * - 그 외(일반 예약): 예약 URL 직접 오픈 (BookModalStepper는 추후 리팩토링 예정)
+   */
+  const handleBookClick = useCallback(
+    (bizItemId: string) => {
+      if (!lastQuery) return;
+      const roomDetail = roomsById[bizItemId];
+      if (!roomDetail) return;
+
+      if (isPartialFilterActive) {
+        const availableTime = formatAvailableTimeRange(roomDetail.available_slots);
+        if (!availableTime) return;
+        setCurrentModal({ type: 'partial', bizItemId, availableTime });
+        return;
+      }
+
+      const modalType = resolveModalFromWarnings(roomDetail.policy_warnings);
+      if (modalType === 'book') {
+        setBookModal({ bizItemId });
+        return;
+      }
+
+      setCurrentModal({
+        type: modalType,
+        bizItemId,
+        studioName: roomDetail.display_name ?? roomDetail.branch,
+        phoneNumber: roomDetail.phone_number ?? '',
+      });
+    },
+    [isPartialFilterActive, lastQuery, roomsById]
+  );
 
   /** "여기서 검색" 클릭 시: 선택 UI·필터·검색어를 초기화한 뒤 재검색. */
   const handleSearchHereClick = useCallback(() => {
@@ -315,8 +388,110 @@ const MapPage = () => {
           selectedRoomId={selectedRoomId}
           isOpen={isCarouselOpen}
           onCardChange={handleCardChange}
+          onBookClick={handleBookClick}
         />
       )}
+
+      {/* 예약 모달 */}
+      {currentModal && lastQuery && (() => {
+        const roomDetail = roomsById[currentModal.bizItemId];
+        const closeModal = () => setCurrentModal(null);
+        const studioName = currentModal.studioName ?? '';
+        const phoneNumber = currentModal.phoneNumber ?? '';
+
+        switch (currentModal.type) {
+          case 'partial':
+            return (
+              <PartialReservationConfirmModal
+                open
+                onClose={closeModal}
+                availableTime={currentModal.availableTime ?? ''}
+                onConfirm={() => {
+                  if (!roomDetail) { closeModal(); return; }
+                  const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
+                  if (nextType === 'book') {
+                    closeModal();
+                    setBookModal({ bizItemId: currentModal.bizItemId });
+                  } else {
+                    setCurrentModal({
+                      type: nextType,
+                      bizItemId: currentModal.bizItemId,
+                      studioName: roomDetail.display_name ?? roomDetail.branch,
+                      phoneNumber: roomDetail.phone_number ?? '',
+                    });
+                  }
+                }}
+              />
+            );
+
+          case 'oneHourCall':
+            return (
+              <OneHourCallReservationNoticeModal
+                open
+                onClose={closeModal}
+                studioName={studioName}
+                phoneNumber={phoneNumber}
+                onConfirm={() => {
+                  if (!roomDetail) { closeModal(); return; }
+                  window.open(
+                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
+                    '_blank'
+                  );
+                  closeModal();
+                }}
+              />
+            );
+
+          case 'oneHourChat':
+            return (
+              <OneHourChatReservationNoticeModal
+                open
+                onClose={closeModal}
+                onConfirm={() => {
+                  if (!roomDetail) { closeModal(); return; }
+                  window.open(
+                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
+                    '_blank'
+                  );
+                  closeModal();
+                }}
+              />
+            );
+
+          case 'sameDayCall':
+            return (
+              <ModalOverlay open onClose={closeModal}>
+                <CallReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  studioName={studioName}
+                  phoneNumber={phoneNumber}
+                />
+              </ModalOverlay>
+            );
+
+          default:
+            return null;
+        }
+      })()}
+
+      {/* 일반 예약 모달 (2단계) */}
+      {bookModal && lastQuery && (() => {
+        const room = roomsById[bookModal.bizItemId];
+        if (!room) return null;
+        return (
+          <BookModalStepper
+            open
+            room={room}
+            dateIso={lastQuery.date}
+            hourSlots={lastQuery.hour_slots}
+            peopleCount={lastQuery.peopleCount}
+            onConfirm={() => setBookModal(null)}
+            onClose={() => setBookModal(null)}
+          />
+        );
+      })()}
+
       {showSearchHereButton && (
         <div
           className={`absolute left-1/2 z-40 -translate-x-1/2 transition-all duration-300 ease-out ${
