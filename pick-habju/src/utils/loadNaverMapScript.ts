@@ -6,6 +6,9 @@ const MARKER_CLUSTERING_SCRIPT_ID = 'naver-maps-clustering-script';
 const MARKER_CLUSTERING_SRC =
   'https://cdn.jsdelivr.net/gh/navermaps/marker-tools.js@master/marker-clustering/src/MarkerClustering.js';
 
+// 한 번 resolve된 이후 재설정되지 않는다 (의도적 설계).
+// MarkerClustering 로드 실패 시에도 warn 후 resolve하여 캐싱되므로,
+// 실패 후 재시도는 지원하지 않는다. 필요 시 페이지 새로고침으로 재시도.
 let loadPromise: Promise<typeof naver> | null = null;
 
 /**
@@ -54,6 +57,9 @@ export function loadNaverMapScript(): Promise<typeof naver> {
   if (typeof window === 'undefined') {
     return Promise.reject(new Error('Naver Map is not available in SSR'));
   }
+  // loadPromise가 없는 상태에서 두 스크립트가 외부(예: index.html)에 의해
+  // 이미 로드된 경우 loadPromise 생성 없이 즉시 반환.
+  // loadPromise가 이미 존재하면 아래의 캐시 반환에서 처리되므로 이 분기는 실행되지 않는다.
   if (window.naver?.maps && window.MarkerClustering) {
     return Promise.resolve(window.naver);
   }
