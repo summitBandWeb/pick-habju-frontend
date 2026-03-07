@@ -54,7 +54,7 @@ const HomePage = () => {
     <>
       <SEO {...SEO_METADATA.home} url={DEFAULT_SEO.siteUrl} />
       <div className="w-full flex flex-col items-center">
-        <div className="flex w-full max-w-[25.9375rem] flex-col justify-center items-center bg-yellow-300">
+        <div className="flex w-full max-w-[25.125rem] flex-col justify-center items-center bg-yellow-300">
           {/* Hero Area: 날짜, 시간, 인원 선택 */}
           <HeroArea
             key={heroResetCounter}
