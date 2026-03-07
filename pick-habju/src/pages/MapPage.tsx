@@ -140,8 +140,8 @@ const MapPage = () => {
         businessId: roomDetail.business_id,
         bizItemId: roomDetail.biz_item_id,
         imageUrls: roomDetail.image_urls,
-        recommendCapacity: roomDetail.recommend_capacity,
-        pricePerHour: roomDetail.price_per_hour,
+        recommendCapacityRange: roomDetail.recommend_capacity_range,
+        estimatedPrice: roomDetail.estimated_price,
         availableTimeRange: isPartialFilterActive
           ? formatTimeRangeForCard(formatAvailableTimeRange(roomDetail.available_slots))
           : undefined,

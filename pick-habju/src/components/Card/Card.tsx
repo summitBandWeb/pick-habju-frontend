@@ -205,13 +205,13 @@ const Card = ({
           {booked ? (
             <span className={classNames('font-card-price-num', 'text-gray-300')}>N원</span>
           ) : (
-            <span className={classNames('font-card-price-num', 'text-primary-black')}>{price.toLocaleString()}원</span>
+            <span className={classNames('font-card-price-num', 'text-primary-black')}>{price != null ? price.toLocaleString() : '-'}원</span>
           )}
         </div>
       ) : (
         <div className="flex items-center space-x-2">
           <span className="font-card-info text-gray-400">시간당</span>
-          <span className="font-card-price-num text-primary-black">{price.toLocaleString()}원</span>
+          <span className="font-card-price-num text-primary-black">{price != null ? price.toLocaleString() : '-'}원</span>
         </div>
       )}
 

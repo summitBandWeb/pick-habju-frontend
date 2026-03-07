@@ -10,10 +10,10 @@ export interface CardCarouselRoom {
   bizItemId: string;
   /** 룸 이미지 URL 목록 */
   imageUrls: string[];
-  /** 권장 인원 수 */
-  recommendCapacity: number;
-  /** 시간당 가격 (원) */
-  pricePerHour: number;
+  /** 권장 인원 범위 [최소, 최대] */
+  recommendCapacityRange: [number, number];
+  /** 예상 결제 금액 (원) */
+  estimatedPrice: number;
   /** 부분 가능 시간 범위 텍스트 (예: "14:00~16:00"). partial 룸일 때만 존재. */
   availableTimeRange?: string;
 }
