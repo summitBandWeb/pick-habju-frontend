@@ -397,8 +397,11 @@ const MapPage = () => {
                   if (!roomDetail) { closeModal(); return; }
                   const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
                   if (nextType === 'book') {
+                    window.open(
+                      getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
+                      '_blank'
+                    );
                     closeModal();
-                    setBookModal({ bizItemId: currentModal.bizItemId });
                   } else {
                     setCurrentModal({
                       type: nextType,
