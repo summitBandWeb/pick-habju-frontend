@@ -68,7 +68,7 @@ const HomePage = () => {
           />
 
           {/* Modal: 과거 시간 선택 시 갱신 유도 */}
-          <PastTimeUpdateModal onHeroReset={() => setHeroResetCounter((c) => c + 1)} />
+          <PastTimeUpdateModal onConfirm={() => setHeroResetCounter((c) => c + 1)} />
         </div>
       </div>
     </>

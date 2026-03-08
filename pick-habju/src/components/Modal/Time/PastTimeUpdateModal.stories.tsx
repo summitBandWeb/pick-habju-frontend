@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import PastTimeUpdateModal from './PastTimeUpdateModal';
 import { useEffect } from 'react';
-import { useSearchStore } from '../../../store/search/searchStore';
-import { SearchPhase } from '../../../store/search/searchStore.types';
+import PastTimeUpdateModal from './PastTimeUpdateModal';
+import useReservationStore from '../../../store/dateTime/reservationStore';
 
 const meta = {
   title: 'Modal/PastTimeUpdateModal',
@@ -21,7 +20,7 @@ const meta = {
     docs: {
       description: {
         component:
-          '검색 결과(Default) 노출 중 시작 시간이 현재를 지나 과거가 되면 표시되는 안내 모달입니다. "네,검색하기" 클릭 시 기본값을 다음 정시부터 2시간으로 보정하도록 홈 영역을 리셋합니다.',
+          '시작 시간이 현재 시각을 지나면 표시되는 안내 모달입니다. "네, 검색할게요" 클릭 시 onConfirm이 호출됩니다.',
       },
     },
   },
@@ -33,42 +32,31 @@ const meta = {
     ),
   ],
   argTypes: {
-    onHeroReset: { action: 'onHeroReset' },
+    onConfirm: { action: 'onConfirm' },
   },
 } satisfies Meta<typeof PastTimeUpdateModal>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 스토리에서 모달이 즉시 나타나도록, lastQuery의 시작 시간이 이미 지난 상태로 세팅
+// 모달이 즉시 나타나도록 reservationStore에 1시간 전 시간을 세팅
 const Setup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
-    const setPhase = useSearchStore.getState().setPhase;
-    const setLastQuery = useSearchStore.getState().setLastQuery;
-
-    // 현재 시각 기준 1시간 전을 시작 슬롯으로 설정
     const now = new Date();
-    const hour = (now.getHours() + 23) % 24; // 한 시간 전
-    const dateIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const slot = `${String(hour).padStart(2, '0')}:00`;
+    const oneHourAgo = new Date(now);
+    oneHourAgo.setHours(now.getHours() - 1);
 
-    setLastQuery({
-      location: '사당',
-      stationId: 'sadang',
-      center: { lat: 37.476550, lng: 126.981688 },
-      bounds: { swLat: 37.47, swLng: 126.974, neLat: 37.483, neLng: 126.989 },
-      date: dateIso,
-      hour_slots: [slot],
-      peopleCount: 12,
-    });
-    setPhase(SearchPhase.Default);
+    const dateIso = `${oneHourAgo.getFullYear()}-${String(oneHourAgo.getMonth() + 1).padStart(2, '0')}-${String(oneHourAgo.getDate()).padStart(2, '0')}`;
+    const slot = `${String(oneHourAgo.getHours()).padStart(2, '0')}:00`;
+
+    useReservationStore.setState({ formattedDate: dateIso, hourSlots: [slot] });
   }, []);
   return <>{children}</>;
 };
 
 export const Default: Story = {
   args: {
-    onHeroReset: action('onHeroReset'),
+    onConfirm: action('onConfirm'),
   },
   render: (args) => (
     <Setup>
