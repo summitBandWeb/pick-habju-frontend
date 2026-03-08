@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ModalOverlay from '../ModalOverlay';
 import Button from '../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
-import { useReservationState } from '../../../hook/useReservationStore';
+import { useReservationActions, useReservationState } from '../../../hook/useReservationStore';
 
 type PastTimeUpdateModalProps = {
   onConfirm: () => void;
@@ -13,6 +13,7 @@ const PastTimeUpdateModal = ({ onConfirm }: PastTimeUpdateModalProps) => {
   const [open, setOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
   const { formattedDate, hourSlots } = useReservationState();
+  const reservationActions = useReservationActions();
 
   const startDateTime = useMemo(() => {
     if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
@@ -68,6 +69,7 @@ const PastTimeUpdateModal = ({ onConfirm }: PastTimeUpdateModalProps) => {
           <Button
             label="네, 검색할게요"
             onClick={() => {
+              reservationActions.reset();
               setOpen(false);
               onConfirm();
             }}
