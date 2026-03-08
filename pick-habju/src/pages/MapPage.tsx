@@ -14,7 +14,6 @@ import { useSearchStore } from '../store/search/searchStore';
 import type { NaverMapHandle } from '../types/map';
 import { formatSearchConditionDateTime } from '../utils/dateTimeLabel';
 import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
-import ModalOverlay from '../components/Modal/ModalOverlay';
 import PartialReservationConfirmModal from '../components/Modal/Portion/PartialReservationConfirmModal';
 import OneHourCallReservationNoticeModal from '../components/Modal/OneHour/OneHourCallReservationNoticeModal';
 import OneHourChatReservationNoticeModal from '../components/Modal/OneHour/OneHourChatReservationNoticeModal';
@@ -450,14 +449,12 @@ const MapPage = () => {
 
           case 'sameDayCall':
             return (
-              <ModalOverlay open onClose={closeModal}>
-                <CallReservationNoticeModal
-                  open
-                  onClose={closeModal}
-                  studioName={studioName}
-                  phoneNumber={phoneNumber}
-                />
-              </ModalOverlay>
+              <CallReservationNoticeModal
+                open
+                onClose={closeModal}
+                studioName={studioName}
+                phoneNumber={phoneNumber}
+              />
             );
 
           default:
