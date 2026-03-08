@@ -1,4 +1,4 @@
-import ChatImg from '../../../assets/svg/ChatImg.svg';
+import ChatImg from '../../../assets/svg/ChatImg.svg?react';
 import Button from '../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
 import type { ShareReservationMessageModalProps } from './ShareReservationMessageModal.types';
@@ -8,8 +8,7 @@ const ShareReservationMessageModal = ({
   onSkip,
 }: ShareReservationMessageModalProps) => {
   return (
-    <div className="w-full max-w-[25.9375rem] flex flex-col items-center">
-      <div className="w-full max-w-[22.5rem] rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-7 px-7">
+    <div className="w-90 rounded-[0.5rem] bg-primary-white flex flex-col items-center gap-4 py-7 px-7">
         {/* 헤더: 제목 + 3 of 3 */}
         <div className="flex w-full justify-between items-start">
           <h2 className="flex-1 font-modal-default text-primary-black">
@@ -24,7 +23,7 @@ const ShareReservationMessageModal = ({
         <div className="w-full h-px bg-gray-100" />
 
         {/* 채팅 이미지 */}
-        <img src={ChatImg} alt="예약 공유 채팅" className="w-full max-w-[18rem] pb-[8px]" />
+        <ChatImg className="w-full max-w-[18rem] pb-[8px]" />
 
         {/* 버튼 영역 (세로 배치) */}
         <div className="flex w-full max-w-[18.375rem] flex-col items-center gap-1.5">
@@ -43,7 +42,6 @@ const ShareReservationMessageModal = ({
             className="w-full"
           />
         </div>
-      </div>
     </div>
   );
 };
