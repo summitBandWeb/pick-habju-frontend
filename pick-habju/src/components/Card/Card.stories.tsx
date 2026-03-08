@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import Card from './Card';
 import image1 from '../../assets/images/1.png';
 import image2 from '../../assets/images/2.png';
