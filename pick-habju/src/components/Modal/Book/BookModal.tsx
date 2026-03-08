@@ -8,6 +8,7 @@ import { formatDateKoreanWithWeekday, formatTimeRangeFromSlots } from '../../../
 import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
 import { pushGtmEvent } from '../../../utils/gtm';
 import ModalOverlay from '../ModalOverlay';
+import ShareReservationMessageModal from '../Share/ShareReservationMessageModal';
 
 export interface BookModalStepperProps {
   open?: boolean;
@@ -28,7 +29,7 @@ const BookModalStepper = ({
   onConfirm,
   onClose,
 }: BookModalStepperProps) => {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 'share'>(1);
   const incrementBookModalOpen = useSessionAnalyticsStore((s) => s.incrementBookModalOpen);
   const markEnterStep1 = useSessionAnalyticsStore((s) => s.markEnterStep1);
   const markEnterStep2 = useSessionAnalyticsStore((s) => s.markEnterStep2);
@@ -49,11 +50,16 @@ const BookModalStepper = ({
     pushGtmEvent('book_modal_open');
   }, [incrementBookModalOpen, markEnterStep1]);
 
+  const navigateToBooking = () => {
+    const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      window.location.href = url;
+    }
+  };
+
   return (
-    <ModalOverlay
-      open={open}
-      onClose={close}
-    >
+    <ModalOverlay open={open} onClose={close}>
       <div className="w-full max-w-[25.9375rem]">
         {step === 1 && (
           <BookStepCalculationModal
@@ -79,13 +85,20 @@ const BookModalStepper = ({
             peopleCount={peopleCount}
             amount={room.estimated_price}
             onConfirm={() => {
-              const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
-              const newWindow = window.open(url, '_blank');
-              if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                window.location.href = url;
-              }
               markStep2Confirm();
               pushGtmEvent('book_modal_step2_confirm');
+              setStep('share');
+            }}
+          />
+        )}
+        {step === 'share' && (
+          <ShareReservationMessageModal
+            onShare={() => {
+              navigateToBooking();
+              onConfirm();
+            }}
+            onSkip={() => {
+              navigateToBooking();
               onConfirm();
             }}
           />
