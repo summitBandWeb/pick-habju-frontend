@@ -23,6 +23,7 @@ import type { ModalType } from '../utils/modalFlowLogic';
 import { formatAvailableTimeRange, formatTimeRangeForCard } from '../utils/availableTimeFormatter';
 import { getBookingUrl } from '../utils/bookingUrl';
 import BookModalStepper from '../components/Modal/Book/BookModal';
+import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 
 const DEFAULT_MAP_ZOOM = 16;
 
@@ -478,6 +479,9 @@ const MapPage = () => {
           />
         );
       })()}
+
+      {/* 과거 시간 경과 모달 */}
+      <PastTimeUpdateModal onConfirm={() => navigate(RoutePaths.HOME)} />
 
       {showSearchHereButton && (
         <div
