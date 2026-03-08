@@ -14,6 +14,10 @@ export interface CardCarouselRoom {
   recommendCapacityRange: [number, number];
   /** 예상 결제 금액 (원) */
   estimatedPrice: number;
+  /** 시간당 가격 (원) */
+  pricePerHour: number;
+  /** 일부 시간만 가능한 룸 여부 */
+  partialAvailable: boolean;
   /** 부분 가능 시간 범위 텍스트 (예: "14:00~16:00"). partial 룸일 때만 존재. */
   availableTimeRange?: string;
 }
