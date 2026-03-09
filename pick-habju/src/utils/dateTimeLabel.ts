@@ -1,4 +1,5 @@
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const;
+const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
 
 /**
  * Date 객체에서 한국어 요일 문자열을 반환.
@@ -26,10 +27,9 @@ export function formatDateKoreanWithWeekday(dateIso: string): string {
 export function formatSearchConditionDateTime(date: string, hourSlots: string[]): string {
   if (!hourSlots || hourSlots.length === 0) return '';
   const [, month, day] = date.split('-');
-  const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
   const startHour = parseHour(hourSlots[0]);
   const lastHour = parseHour(hourSlots[hourSlots.length - 1]);
-  const endHour = (lastHour + 1) % 24 || 24;
+  const endHour = (lastHour + 1) % 24 === 0 ? 24 : (lastHour + 1) % 24;
   const startStr = String(startHour).padStart(2, '0');
   const endStr = String(endHour).padStart(2, '0');
   return `${month}/${day} ${startStr}-${endStr}시`;
@@ -42,7 +42,6 @@ export function formatSearchConditionDateTime(date: string, hourSlots: string[])
  */
 export function formatTimeRangeFromSlots(hourSlots: string[]): string {
   if (!hourSlots || hourSlots.length === 0) return '';
-  const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
   const start = parseHour(hourSlots[0]);
   const last = parseHour(hourSlots[hourSlots.length - 1]);
   const end = (last + 1) % 24;

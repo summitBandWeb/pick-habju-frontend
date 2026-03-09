@@ -148,7 +148,8 @@ const HeroArea = ({
           return isNaN(h) ? 9 : h;
         };
         const start24 = parseHour(slots[0]);
-        const end24 = (start24 + slots.length) % 24;
+        const last24 = parseHour(slots[slots.length - 1]);
+        const end24 = (last24 + 1) % 24;
         const to12 = (h24: number): { hour: number; period: TimePeriod } => {
           if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
           if (h24 < 12) return { hour: h24, period: TimePeriod.AM };
