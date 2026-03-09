@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { parseISO } from 'date-fns';
 import CardCarousel from '../components/CardCarousel/CardCarousel';
 import type { CardCarouselRoom } from '../components/CardCarousel/CardCarousel.types';
 import ErrorNotice from '../components/ErrorNotice/ErrorNotice';
@@ -11,6 +12,7 @@ import SearchHereButton from '../components/SearchHereButton/SearchHereButton';
 import { useMapPageSearch } from '../hook/useMapPageSearch';
 import RoutePaths from '../router/routePaths';
 import { useSearchStore } from '../store/search/searchStore';
+import useReservationStore from '../store/dateTime/reservationStore';
 import type { NaverMapHandle } from '../types/map';
 import { formatSearchConditionDateTime } from '../utils/dateTimeLabel';
 import { buildMarkerViewModels } from '../utils/mapMarkerViewModel';
@@ -80,22 +82,30 @@ const MapPage = () => {
     !isLoading &&
     branches.length > 0 &&
     (isPartialFilterActive || isFavoriteFilterActive || !!searchText) &&
-    (markerViewModels.length === 0 ||
-      (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
+    (markerViewModels.length === 0 || (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
 
   /** noMatch 원인 필터. noMatch 중 다른 필터는 disabled되므로 lastChangedFilter가 항상 원인. */
   const noMatchCause = hasNoMatch ? lastChangedFilter : null;
 
   /** noMatch ErrorNotice 자동 숨김 시: 원인 필터 해제. 검색어는 자동 초기화 안 함(사용자가 직접 지워야 함). */
   const handleNoMatchAutoHide = useCallback(() => {
-    if (noMatchCause === 'partial')  setIsPartialFilterActive(false);
+    if (noMatchCause === 'partial') setIsPartialFilterActive(false);
     if (noMatchCause === 'favorite') setIsFavoriteFilterActive(false);
   }, [noMatchCause]);
 
   /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
-  const handlePartialFilterToggle  = useCallback((isActive: boolean) => { setIsPartialFilterActive(isActive);  setLastChangedFilter('partial');  }, []);
-  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => { setIsFavoriteFilterActive(isActive); setLastChangedFilter('favorite'); }, []);
-  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text); if (text) setLastChangedFilter('search'); }, []);
+  const handlePartialFilterToggle = useCallback((isActive: boolean) => {
+    setIsPartialFilterActive(isActive);
+    setLastChangedFilter('partial');
+  }, []);
+  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => {
+    setIsFavoriteFilterActive(isActive);
+    setLastChangedFilter('favorite');
+  }, []);
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchText(text);
+    if (text) setLastChangedFilter('search');
+  }, []);
 
   /**
    * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
@@ -195,7 +205,6 @@ const MapPage = () => {
     [handleSelectRoom]
   );
 
-
   /** 지도 드래그·줌 시작 시 열린 팝오버를 닫는다. */
   const handleMapInteractionStart = useCallback(() => {
     if (openedMarkerPopoverId !== null) {
@@ -265,9 +274,7 @@ const MapPage = () => {
   return (
     <div className="relative h-full w-full">
       {isLoading && <MapLoadingSkeleton />}
-      {hasNoResults && (
-        <ErrorNotice type="noResults" onClose={() => navigate(-1)} />
-      )}
+      {hasNoResults && <ErrorNotice type="noResults" onClose={() => navigate(-1)} />}
       {hasNoMatch && (
         <ErrorNotice
           type="noMatch"
@@ -296,7 +303,15 @@ const MapPage = () => {
           value={searchText}
           onSearchChange={handleSearchChange}
           searchCondition={searchCondition}
-          onConditionClick={() => navigate(RoutePaths.HOME)}
+          onConditionClick={() => {
+            // DatePicker가 lastQuery 날짜를 초기값으로 표시하도록 store에 미리 세팅
+            if (lastQuery) {
+              const { actions } = useReservationStore.getState();
+              actions.setDate([parseISO(lastQuery.date)]);
+              actions.setHourSlotsRaw(lastQuery.hour_slots);
+            }
+            navigate(RoutePaths.HOME);
+          }}
           disabled={hasNoMatch && noMatchCause !== 'search'}
         />
         <FilterSection
