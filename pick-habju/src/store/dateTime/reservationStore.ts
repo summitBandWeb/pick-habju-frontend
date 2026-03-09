@@ -32,7 +32,7 @@ const useReservationStore = create<ReservationStoreState>()(
           }),
         setHourSlotsRaw: (slots) =>
           set((state) => {
-            state.hourSlots = slots;
+            state.hourSlots = [...slots];
           }),
 
         openDatePicker: () =>

@@ -37,6 +37,7 @@ const DEFAULT_MAP_ZOOM = 16;
  */
 const MapPage = () => {
   const lastQuery = useSearchStore((s) => s.lastQuery);
+  const reservationActions = useReservationStore((s) => s.actions);
   const navigate = useNavigate();
   const mapRef = useRef<NaverMapHandle | null>(null);
 
@@ -368,9 +369,8 @@ const MapPage = () => {
           onConditionClick={() => {
             // DatePicker가 lastQuery 날짜를 초기값으로 표시하도록 store에 미리 세팅
             if (lastQuery) {
-              const { actions } = useReservationStore.getState();
-              actions.setDate([parseISO(lastQuery.date)]);
-              actions.setHourSlotsRaw(lastQuery.hour_slots);
+              reservationActions.setDate([parseISO(lastQuery.date)]);
+              reservationActions.setHourSlotsRaw(lastQuery.hour_slots);
             }
             navigate(RoutePaths.HOME);
           }}
@@ -397,105 +397,127 @@ const MapPage = () => {
       )}
 
       {/* 예약 모달 */}
-      {currentModal && lastQuery && (() => {
-        const roomDetail = roomsById[currentModal.bizItemId];
-        const closeModal = () => setCurrentModal(null);
-        const studioName = currentModal.studioName ?? '';
-        const phoneNumber = currentModal.phoneNumber ?? '';
+      {currentModal &&
+        lastQuery &&
+        (() => {
+          const roomDetail = roomsById[currentModal.bizItemId];
+          const closeModal = () => setCurrentModal(null);
+          const studioName = currentModal.studioName ?? '';
+          const phoneNumber = currentModal.phoneNumber ?? '';
 
-        switch (currentModal.type) {
-          case 'partial':
-            return (
-              <PartialReservationConfirmModal
-                open
-                onClose={closeModal}
-                availableTime={currentModal.availableTime ?? ''}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
-                  if (nextType === 'book') {
+          switch (currentModal.type) {
+            case 'partial':
+              return (
+                <PartialReservationConfirmModal
+                  open
+                  onClose={closeModal}
+                  availableTime={currentModal.availableTime ?? ''}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
+                    const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
+                    if (nextType === 'book') {
+                      window.open(
+                        getBookingUrl(
+                          { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                          lastQuery.date
+                        ),
+                        '_blank'
+                      );
+                      closeModal();
+                    } else {
+                      setCurrentModal({
+                        type: nextType,
+                        bizItemId: currentModal.bizItemId,
+                        studioName: roomDetail.display_name ?? roomDetail.branch,
+                        phoneNumber: roomDetail.phone_number ?? '',
+                      });
+                    }
+                  }}
+                />
+              );
+
+            case 'oneHourCall':
+              return (
+                <OneHourCallReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  studioName={studioName}
+                  phoneNumber={phoneNumber}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
                     window.open(
-                      getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
+                      getBookingUrl(
+                        { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                        lastQuery.date
+                      ),
                       '_blank'
                     );
                     closeModal();
-                  } else {
-                    setCurrentModal({
-                      type: nextType,
-                      bizItemId: currentModal.bizItemId,
-                      studioName: roomDetail.display_name ?? roomDetail.branch,
-                      phoneNumber: roomDetail.phone_number ?? '',
-                    });
-                  }
-                }}
-              />
-            );
+                  }}
+                />
+              );
 
-          case 'oneHourCall':
-            return (
-              <OneHourCallReservationNoticeModal
-                open
-                onClose={closeModal}
-                studioName={studioName}
-                phoneNumber={phoneNumber}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  window.open(
-                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
-                    '_blank'
-                  );
-                  closeModal();
-                }}
-              />
-            );
+            case 'oneHourChat':
+              return (
+                <OneHourChatReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
+                    window.open(
+                      getBookingUrl(
+                        { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                        lastQuery.date
+                      ),
+                      '_blank'
+                    );
+                    closeModal();
+                  }}
+                />
+              );
 
-          case 'oneHourChat':
-            return (
-              <OneHourChatReservationNoticeModal
-                open
-                onClose={closeModal}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  window.open(
-                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
-                    '_blank'
-                  );
-                  closeModal();
-                }}
-              />
-            );
+            case 'sameDayCall':
+              return (
+                <CallReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  studioName={studioName}
+                  phoneNumber={phoneNumber}
+                />
+              );
 
-          case 'sameDayCall':
-            return (
-              <CallReservationNoticeModal
-                open
-                onClose={closeModal}
-                studioName={studioName}
-                phoneNumber={phoneNumber}
-              />
-            );
-
-          default:
-            return null;
-        }
-      })()}
+            default:
+              return null;
+          }
+        })()}
 
       {/* 일반 예약 모달 (2단계) */}
-      {bookModal && lastQuery && (() => {
-        const room = roomsById[bookModal.bizItemId];
-        if (!room) return null;
-        return (
-          <BookModalStepper
-            open
-            room={room}
-            dateIso={lastQuery.date}
-            hourSlots={lastQuery.hour_slots}
-            peopleCount={lastQuery.peopleCount}
-            onConfirm={() => setBookModal(null)}
-            onClose={() => setBookModal(null)}
-          />
-        );
-      })()}
+      {bookModal &&
+        lastQuery &&
+        (() => {
+          const room = roomsById[bookModal.bizItemId];
+          if (!room) return null;
+          return (
+            <BookModalStepper
+              open
+              room={room}
+              dateIso={lastQuery.date}
+              hourSlots={lastQuery.hour_slots}
+              peopleCount={lastQuery.peopleCount}
+              onConfirm={() => setBookModal(null)}
+              onClose={() => setBookModal(null)}
+            />
+          );
+        })()}
 
       {/* 과거 시간 경과 모달 */}
       <PastTimeUpdateModal onConfirm={() => navigate(RoutePaths.HOME)} />
