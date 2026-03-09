@@ -35,8 +35,8 @@ const SERVICEABLE_STATIONS: ServiceableStation[] = [
     id: 'sangdo',
     name: '상도',
     subwayLine: '7호선',
-    center: { lat: 37.4963, lng: 126.9556 },
-    bounds: { swLat: 37.4913, swLng: 126.9496, neLat: 37.5013, neLng: 126.9616 },
+    center: { lat: 37.5028, lng: 126.9479 },
+    bounds: { swLat: 37.4978, swLng: 126.9419, neLat: 37.5078, neLng: 126.9539 },
   },
   {
     id: 'sinchon',
