@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { expandBounds } from '../utils/mapQuery';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
 // Stores & Types
 import { useGoogleFormToastStore } from '../store/googleFormToast/googleFormToastStore';
 import { useSearchStore } from '../store/search/searchStore';
+import useReservationStore from '../store/dateTime/reservationStore';
 
 // Constants
 import { SEO_METADATA, DEFAULT_SEO } from '../constants/seo';
@@ -41,6 +42,7 @@ const HomePage = () => {
   const { showToast } = useGoogleFormToastStore();
   const setLastQuery = useSearchStore((s) => s.setLastQuery);
   const lastQuery = useSearchStore((s) => s.lastQuery);
+  const reservationActions = useReservationStore((s) => s.actions);
 
   // 3. 초기 데이터 — 이전 검색 조건 복원 여부에 따라 HeroArea 초기값 결정
   const { defaultDateIso, defaultSlots, defaultDateTimeLabel, defaultPeopleCount } = useDefaultDateTime();
@@ -48,13 +50,17 @@ const HomePage = () => {
   /** 이전 검색 조건이 있고, 시간 만료 리셋이 아닐 때만 이전 조건으로 복원 */
   const shouldRestoreLastSearch = !!lastQuery && !isExpiredReset;
 
-  const heroDateTime = shouldRestoreLastSearch
-    ? {
-        label: formatReservationLabel(lastQuery.date, lastQuery.hour_slots),
-        date: lastQuery.date,
-        hour_slots: lastQuery.hour_slots,
-      }
-    : { label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots };
+  const heroDateTime = useMemo(
+    () =>
+      shouldRestoreLastSearch
+        ? {
+            label: formatReservationLabel(lastQuery.date, lastQuery.hour_slots),
+            date: lastQuery.date,
+            hour_slots: lastQuery.hour_slots,
+          }
+        : { label: defaultDateTimeLabel, date: defaultDateIso, hour_slots: defaultSlots },
+    [defaultDateIso, defaultDateTimeLabel, defaultSlots, lastQuery, shouldRestoreLastSearch]
+  );
 
   const heroPeopleCount = shouldRestoreLastSearch ? lastQuery.peopleCount : defaultPeopleCount;
 
@@ -83,13 +89,14 @@ const HomePage = () => {
             key={heroResetCounter}
             dateTime={heroDateTime}
             peopleCount={heroPeopleCount}
-            initialLocationId={lastQuery?.stationId}
+            initialLocationId={shouldRestoreLastSearch ? lastQuery.stationId : undefined}
             onSearch={onSearch}
           />
 
           {/* Modal: 과거 시간 선택 시 갱신 유도 */}
           <PastTimeUpdateModal
             onConfirm={() => {
+              reservationActions.reset();
               setIsExpiredReset(true);
               setHeroResetCounter((c) => c + 1);
             }}
