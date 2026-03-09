@@ -100,22 +100,30 @@ const MapPage = () => {
     !isLoading &&
     branches.length > 0 &&
     (isPartialFilterActive || isFavoriteFilterActive || !!searchText) &&
-    (markerViewModels.length === 0 ||
-      (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
+    (markerViewModels.length === 0 || (isFavoriteFilterActive && markerViewModels.every((m) => m.favorite === 'off')));
 
   /** noMatch 원인 필터. noMatch 중 다른 필터는 disabled되므로 lastChangedFilter가 항상 원인. */
   const noMatchCause = hasNoMatch ? lastChangedFilter : null;
 
   /** noMatch ErrorNotice 자동 숨김 시: 원인 필터 해제. 검색어는 자동 초기화 안 함(사용자가 직접 지워야 함). */
   const handleNoMatchAutoHide = useCallback(() => {
-    if (noMatchCause === 'partial')  setIsPartialFilterActive(false);
+    if (noMatchCause === 'partial') setIsPartialFilterActive(false);
     if (noMatchCause === 'favorite') setIsFavoriteFilterActive(false);
   }, [noMatchCause]);
 
   /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
-  const handlePartialFilterToggle  = useCallback((isActive: boolean) => { setIsPartialFilterActive(isActive);  setLastChangedFilter('partial');  }, []);
-  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => { setIsFavoriteFilterActive(isActive); setLastChangedFilter('favorite'); }, []);
-  const handleSearchChange         = useCallback((text: string)       => { setSearchText(text); if (text) setLastChangedFilter('search'); }, []);
+  const handlePartialFilterToggle = useCallback((isActive: boolean) => {
+    setIsPartialFilterActive(isActive);
+    setLastChangedFilter('partial');
+  }, []);
+  const handleFavoriteFilterToggle = useCallback((isActive: boolean) => {
+    setIsFavoriteFilterActive(isActive);
+    setLastChangedFilter('favorite');
+  }, []);
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchText(text);
+    if (text) setLastChangedFilter('search');
+  }, []);
 
   /**
    * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
@@ -219,7 +227,6 @@ const MapPage = () => {
     },
     [handleSelectRoom]
   );
-
 
   /** 지도 드래그·줌 시작 시 열린 팝오버를 닫는다. */
   const handleMapInteractionStart = useCallback(() => {
@@ -327,9 +334,7 @@ const MapPage = () => {
   return (
     <div className="relative h-full w-full">
       {isLoading && <MapLoadingSkeleton />}
-      {hasNoResults && (
-        <ErrorNotice type="noResults" onClose={() => navigate(-1)} />
-      )}
+      {hasNoResults && <ErrorNotice type="noResults" onClose={() => navigate(-1)} />}
       {hasNoMatch && (
         <ErrorNotice
           type="noMatch"
@@ -382,105 +387,127 @@ const MapPage = () => {
       )}
 
       {/* 예약 모달 */}
-      {currentModal && lastQuery && (() => {
-        const roomDetail = roomsById[currentModal.bizItemId];
-        const closeModal = () => setCurrentModal(null);
-        const studioName = currentModal.studioName ?? '';
-        const phoneNumber = currentModal.phoneNumber ?? '';
+      {currentModal &&
+        lastQuery &&
+        (() => {
+          const roomDetail = roomsById[currentModal.bizItemId];
+          const closeModal = () => setCurrentModal(null);
+          const studioName = currentModal.studioName ?? '';
+          const phoneNumber = currentModal.phoneNumber ?? '';
 
-        switch (currentModal.type) {
-          case 'partial':
-            return (
-              <PartialReservationConfirmModal
-                open
-                onClose={closeModal}
-                availableTime={currentModal.availableTime ?? ''}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
-                  if (nextType === 'book') {
+          switch (currentModal.type) {
+            case 'partial':
+              return (
+                <PartialReservationConfirmModal
+                  open
+                  onClose={closeModal}
+                  availableTime={currentModal.availableTime ?? ''}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
+                    const nextType = resolveModalFromWarnings(roomDetail.policy_warnings);
+                    if (nextType === 'book') {
+                      window.open(
+                        getBookingUrl(
+                          { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                          lastQuery.date
+                        ),
+                        '_blank'
+                      );
+                      closeModal();
+                    } else {
+                      setCurrentModal({
+                        type: nextType,
+                        bizItemId: currentModal.bizItemId,
+                        studioName: roomDetail.display_name ?? roomDetail.branch,
+                        phoneNumber: roomDetail.phone_number ?? '',
+                      });
+                    }
+                  }}
+                />
+              );
+
+            case 'oneHourCall':
+              return (
+                <OneHourCallReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  studioName={studioName}
+                  phoneNumber={phoneNumber}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
                     window.open(
-                      getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
+                      getBookingUrl(
+                        { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                        lastQuery.date
+                      ),
                       '_blank'
                     );
                     closeModal();
-                  } else {
-                    setCurrentModal({
-                      type: nextType,
-                      bizItemId: currentModal.bizItemId,
-                      studioName: roomDetail.display_name ?? roomDetail.branch,
-                      phoneNumber: roomDetail.phone_number ?? '',
-                    });
-                  }
-                }}
-              />
-            );
+                  }}
+                />
+              );
 
-          case 'oneHourCall':
-            return (
-              <OneHourCallReservationNoticeModal
-                open
-                onClose={closeModal}
-                studioName={studioName}
-                phoneNumber={phoneNumber}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  window.open(
-                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
-                    '_blank'
-                  );
-                  closeModal();
-                }}
-              />
-            );
+            case 'oneHourChat':
+              return (
+                <OneHourChatReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  onConfirm={() => {
+                    if (!roomDetail) {
+                      closeModal();
+                      return;
+                    }
+                    window.open(
+                      getBookingUrl(
+                        { businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id },
+                        lastQuery.date
+                      ),
+                      '_blank'
+                    );
+                    closeModal();
+                  }}
+                />
+              );
 
-          case 'oneHourChat':
-            return (
-              <OneHourChatReservationNoticeModal
-                open
-                onClose={closeModal}
-                onConfirm={() => {
-                  if (!roomDetail) { closeModal(); return; }
-                  window.open(
-                    getBookingUrl({ businessId: roomDetail.business_id, bizItemId: roomDetail.biz_item_id }, lastQuery.date),
-                    '_blank'
-                  );
-                  closeModal();
-                }}
-              />
-            );
+            case 'sameDayCall':
+              return (
+                <CallReservationNoticeModal
+                  open
+                  onClose={closeModal}
+                  studioName={studioName}
+                  phoneNumber={phoneNumber}
+                />
+              );
 
-          case 'sameDayCall':
-            return (
-              <CallReservationNoticeModal
-                open
-                onClose={closeModal}
-                studioName={studioName}
-                phoneNumber={phoneNumber}
-              />
-            );
-
-          default:
-            return null;
-        }
-      })()}
+            default:
+              return null;
+          }
+        })()}
 
       {/* 일반 예약 모달 (2단계) */}
-      {bookModal && lastQuery && (() => {
-        const room = roomsById[bookModal.bizItemId];
-        if (!room) return null;
-        return (
-          <BookModalStepper
-            open
-            room={room}
-            dateIso={lastQuery.date}
-            hourSlots={lastQuery.hour_slots}
-            peopleCount={lastQuery.peopleCount}
-            onConfirm={() => setBookModal(null)}
-            onClose={() => setBookModal(null)}
-          />
-        );
-      })()}
+      {bookModal &&
+        lastQuery &&
+        (() => {
+          const room = roomsById[bookModal.bizItemId];
+          if (!room) return null;
+          return (
+            <BookModalStepper
+              open
+              room={room}
+              dateIso={lastQuery.date}
+              hourSlots={lastQuery.hour_slots}
+              peopleCount={lastQuery.peopleCount}
+              onConfirm={() => setBookModal(null)}
+              onClose={() => setBookModal(null)}
+            />
+          );
+        })()}
 
       {/* 과거 시간 경과 모달 */}
       <PastTimeUpdateModal onConfirm={() => navigate(RoutePaths.HOME)} />
