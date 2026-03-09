@@ -205,13 +205,13 @@ const Card = ({
           {booked ? (
             <span className={classNames('font-card-price-num', 'text-gray-300')}>N원</span>
           ) : (
-            <span className={classNames('font-card-price-num', 'text-primary-black')}>{price.toLocaleString()}원</span>
+            <span className={classNames('font-card-price-num', 'text-primary-black')}>{price != null ? price.toLocaleString() : '-'}원</span>
           )}
         </div>
       ) : (
         <div className="flex items-center space-x-2">
           <span className="font-card-info text-gray-400">시간당</span>
-          <span className="font-card-price-num text-primary-black">{price.toLocaleString()}원</span>
+          <span className="font-card-price-num text-primary-black">{price != null ? price.toLocaleString() : '-'}원</span>
         </div>
       )}
 
@@ -228,7 +228,7 @@ const Card = ({
           <span>권장 인원 {booked ? 'N인' : capacity}</span>
         </div>
 
-        {partialAvailable && availableTimeRange && (
+        {availableTimeRange && (
           <div className="flex items-center space-x-1 font-card-info whitespace-nowrap">
             <TimeIcon className="w-3 h-3 text-blue-500" />
             <span className="text-blue-500">{availableTimeRange}</span>
@@ -241,10 +241,10 @@ const Card = ({
   /** 예약하기 / 추천시간 / 오픈대기 버튼 (booked면 비활성 + 오픈대기) */
   const renderAction = () => (
     <Button
-      label={booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기'}
+      label={booked ? '오픈대기' : '예약하기'}
       variant={ButtonVariant.Main}
       onClick={() => {
-        const actionType = booked ? '오픈대기' : partialAvailable ? '추천시간' : '예약하기';
+        const actionType = booked ? '오픈대기' : '예약하기';
         pushGtmEvent('card_action_click', { action_type: actionType });
         onBookClick?.();
       }}

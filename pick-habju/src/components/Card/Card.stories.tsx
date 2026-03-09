@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Card from './Card';
 import image1 from '../../assets/images/1.png';
 import image2 from '../../assets/images/2.png';
@@ -6,10 +7,19 @@ import image3 from '../../assets/images/3.png';
 import type { CardProps } from './Card.types';
 import { BtnSizeVariant } from '../Button/ButtonEnums';
 
+const queryClient = new QueryClient();
+
 const meta: Meta<CardProps> = {
   title: 'Components/Card',
   component: Card,
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
   parameters: {
     layout: 'centered',
     backgrounds: {

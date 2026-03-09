@@ -44,11 +44,13 @@ function CarouselSlideContent({
   isActive,
   isMobile,
   isDesktop,
+  onBookClick,
 }: {
   room: CardCarouselRoom;
   isActive: boolean;
   isMobile: boolean;
   isDesktop: boolean;
+  onBookClick: (bizItemId: string) => void;
 }) {
   const shouldScale = isMobile && isActive;
 
@@ -56,10 +58,13 @@ function CarouselSlideContent({
     images: room.imageUrls,
     title: room.branch,
     subtitle: room.name,
-    price: room.pricePerHour,
-    capacity: `${room.recommendCapacity}인`,
+    price: room.partialAvailable ? room.pricePerHour : room.estimatedPrice,
+    partialAvailable: room.partialAvailable,
+    capacity: `${room.recommendCapacityRange[0]}~${room.recommendCapacityRange[1]}인`,
     bizItemId: room.bizItemId,
     businessId: room.businessId,
+    availableTimeRange: room.availableTimeRange,
+    onBookClick: () => onBookClick(room.bizItemId),
   };
 
   return (
@@ -77,7 +82,7 @@ function CarouselSlideContent({
  * - 사용자 스와이프 시 onCardChange로 선택 룸 ID를 상위에 전달.
  * - isOpen / rooms.length에 따라 AnimatePresence로 슬라이드 인·아웃 처리.
  */
-const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice }: CardCarouselProps) => {
+const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, onBookClick, forceDevice }: CardCarouselProps) => {
   const detectedMobile = useMobileDetect();
   const isMobile = forceDevice ? forceDevice === 'mobile' : detectedMobile;
   const isDesktop = !isMobile;
@@ -176,7 +181,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, forceDevice
                   // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
                   <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
                     {({ isActive }: { isActive: boolean }) => (
-                      <CarouselSlideContent room={room} isActive={isActive} isMobile={isMobile} isDesktop={isDesktop} />
+                      <CarouselSlideContent room={room} isActive={isActive} isMobile={isMobile} isDesktop={isDesktop} onBookClick={onBookClick} />
                     )}
                   </SwiperSlide>
                 ))}

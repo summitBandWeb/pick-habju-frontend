@@ -2,45 +2,25 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ModalOverlay from '../ModalOverlay';
 import Button from '../../Button/Button';
 import { BtnSizeVariant, ButtonVariant } from '../../Button/ButtonEnums';
-import { useSearchStore } from '../../../store/search/searchStore';
-import { SearchPhase } from '../../../store/search/searchStore.types';
 import { useReservationActions, useReservationState } from '../../../hook/useReservationStore';
 
 type PastTimeUpdateModalProps = {
-  onHeroReset: () => void;
+  onConfirm: () => void;
 };
 
-// 검색 결과(Default) 상태에서, 시작 시간이 현재 시각을 지나는 순간을 감지하여 모달을 띄운다
-const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
-  const phase = useSearchStore((s) => s.phase);
-  const lastQuery = useSearchStore((s) => s.lastQuery);
-  const setPhase = useSearchStore((s) => s.setPhase);
-  const reservationActions = useReservationActions();
+// 시작 시간이 현재 시각을 지나는 순간을 감지하여 모달을 띄운다
+const PastTimeUpdateModal = ({ onConfirm }: PastTimeUpdateModalProps) => {
   const [open, setOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
   const { formattedDate, hourSlots } = useReservationState();
+  const reservationActions = useReservationActions();
 
   const startDateTime = useMemo(() => {
-    try {
-      // 1) 사용자가 선택한 값이 있으면(검색 전 포함) 그 값을 기준으로 감지
-      if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
-        return new Date(`${formattedDate}T${hourSlots[0]}`);
-      }
-
-      // 2) 선택값이 없고 Default 상태라면 직전 검색 조건을 기준으로 감지
-      if (
-        phase === SearchPhase.Default &&
-        lastQuery &&
-        Array.isArray(lastQuery.hour_slots) &&
-        lastQuery.hour_slots.length > 0
-      ) {
-        return new Date(`${lastQuery.date}T${lastQuery.hour_slots[0]}`);
-      }
-    } catch {
-      // fallthrough
+    if (formattedDate && Array.isArray(hourSlots) && hourSlots.length > 0) {
+      return new Date(`${formattedDate}T${hourSlots[0]}`);
     }
     return null;
-  }, [formattedDate, hourSlots, phase, lastQuery]);
+  }, [formattedDate, hourSlots]);
 
   useEffect(() => {
     if (!startDateTime || Number.isNaN(startDateTime.getTime())) {
@@ -89,11 +69,9 @@ const PastTimeUpdateModal = ({ onHeroReset }: PastTimeUpdateModalProps) => {
           <Button
             label="네, 검색할게요"
             onClick={() => {
-              // 상태 초기화 및 HeroArea 기본값 재계산을 유도
               reservationActions.reset();
-              setPhase(SearchPhase.BeforeSearch);
-              onHeroReset();
               setOpen(false);
+              onConfirm();
             }}
             variant={ButtonVariant.Main}
             size={BtnSizeVariant.MD}

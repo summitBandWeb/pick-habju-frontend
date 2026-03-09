@@ -3,7 +3,17 @@ import CardCarousel from './CardCarousel';
 import { ROOMS } from '../../constants/data';
 import type { CardCarouselRoom } from './CardCarousel.types';
 
-const rooms: CardCarouselRoom[] = ROOMS;
+const rooms: CardCarouselRoom[] = ROOMS.map((r) => ({
+  name: r.name,
+  branch: r.branch,
+  businessId: r.businessId,
+  bizItemId: r.bizItemId,
+  imageUrls: r.imageUrls,
+  recommendCapacityRange: [Math.max(1, r.recommendCapacity - 2), r.recommendCapacity] as [number, number],
+  estimatedPrice: r.pricePerHour * 2,
+  pricePerHour: r.pricePerHour,
+  partialAvailable: false,
+}));
 
 const meta = {
   title: 'Components/CardCarousel',
@@ -25,6 +35,7 @@ const meta = {
     selectedRoomId: rooms[0]?.bizItemId ?? null,
     isOpen: true,
     onCardChange: () => {},
+    onBookClick: () => {},
   },
   argTypes: {
     onCardChange: { action: 'cardChange' },

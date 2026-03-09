@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ShareReservationMessageModal from './ShareReservationMessageModal';
+import ModalOverlay from '../ModalOverlay';
 
 const meta: Meta<typeof ShareReservationMessageModal> = {
   title: 'Modal/ShareReservationMessageModal',
@@ -22,14 +23,12 @@ const meta: Meta<typeof ShareReservationMessageModal> = {
   },
   decorators: [
     (Story) => (
-      <div style={{ minHeight: '100vh' }}>
+      <ModalOverlay open onClose={() => {}} dimmedClassName="bg-black/80">
         <Story />
-      </div>
+      </ModalOverlay>
     ),
   ],
   argTypes: {
-    open: { control: 'boolean' },
-    onClose: { action: 'onClose' },
     onShare: { action: 'onShare' },
     onSkip: { action: 'onSkip' },
   },
@@ -40,7 +39,5 @@ export default meta;
 type Story = StoryObj<typeof ShareReservationMessageModal>;
 
 export const Playground: Story = {
-  args: {
-    open: true,
-  },
+  args: {},
 };

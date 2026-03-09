@@ -10,10 +10,16 @@ export interface CardCarouselRoom {
   bizItemId: string;
   /** 룸 이미지 URL 목록 */
   imageUrls: string[];
-  /** 권장 인원 수 */
-  recommendCapacity: number;
+  /** 권장 인원 범위 [최소, 최대] */
+  recommendCapacityRange: [number, number];
+  /** 예상 결제 금액 (원) */
+  estimatedPrice: number;
   /** 시간당 가격 (원) */
   pricePerHour: number;
+  /** 일부 시간만 가능한 룸 여부 */
+  partialAvailable: boolean;
+  /** 부분 가능 시간 범위 텍스트 (예: "14:00~16:00"). partial 룸일 때만 존재. */
+  availableTimeRange?: string;
 }
 
 /**
@@ -29,6 +35,8 @@ export interface CardCarouselProps {
   isOpen: boolean;
   /** 스와이프 또는 마커 선택으로 활성 슬라이드가 변경될 때 호출. bizItemId를 전달. */
   onCardChange: (id: string) => void;
+  /** 예약하기 버튼 클릭 시 호출. bizItemId를 전달. */
+  onBookClick: (bizItemId: string) => void;
   /** 강제 디바이스 모드 (Storybook 등 테스트용). 미설정 시 자동 감지. */
   forceDevice?: 'mobile' | 'desktop';
 }

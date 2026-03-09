@@ -14,7 +14,10 @@ const CUSTOM_BOOKING_URL_BY_BUSINESS_ID: Record<string, string> = {
  * - 커스텀 매핑에 존재하면 해당 URL 반환
  * - 그 외엔 네이버 예약 기본 패턴을 사용
  */
-export function getBookingUrl(room: RoomMetadata, dateIso: string): string {
+export function getBookingUrl(
+  room: RoomMetadata | { businessId: string; bizItemId: string },
+  dateIso: string
+): string {
   const custom = CUSTOM_BOOKING_URL_BY_BUSINESS_ID[room.businessId];
   if (custom) return custom;
 
