@@ -10,6 +10,18 @@ export function getKoreanWeekday(date: Date): string {
 }
 
 /**
+ * ISO 날짜 문자열을 M/D(요일) 형식으로 포맷. (공유 메시지용)
+ * @param dateIso 'YYYY-MM-DD'
+ * @returns 예: '2/6(금)'
+ */
+export function formatDateShortWithWeekday(dateIso: string): string {
+  const [y, m, d] = dateIso.split('-').map((x) => parseInt(x, 10));
+  if (!y || !m || !d) return dateIso;
+  const dt = new Date(y, m - 1, d);
+  return `${m}/${d}(${WEEKDAYS[dt.getDay()]})`;
+}
+
+/**
  * ISO 날짜 문자열을 한국어 날짜 + 요일 형식으로 포맷.
  * 파싱 실패 시 입력값 그대로 반환.
  * @param dateIso 'YYYY-MM-DD' 형식 날짜 문자열
