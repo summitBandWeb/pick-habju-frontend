@@ -4,7 +4,7 @@ import BookStepCalculationModal from './StepOne/BookStepCalculationModal';
 import type { NormalizedRoom } from '../../../hook/useMapPageSearch';
 import { getPriceBreakdown, getRoomLocationLine } from '../../../utils/calcTotalPrice';
 import { getBookingUrl } from '../../../utils/bookingUrl';
-import { formatDateKoreanWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
+import { formatDateKoreanWithWeekday, formatDateShortWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
 import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
 import { pushGtmEvent } from '../../../utils/gtm';
 import ModalOverlay from '../ModalOverlay';
@@ -50,13 +50,45 @@ const BookModalStepper = ({
     pushGtmEvent('book_modal_open');
   }, [incrementBookModalOpen, markEnterStep1]);
 
-  const navigateToBooking = () => {
+  const navigateToBooking = useCallback(() => {
     const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
     const newWindow = window.open(url, '_blank');
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
       window.location.href = url;
     }
-  };
+  }, [room.business_id, room.biz_item_id, dateIso]);
+
+  const handleShare = useCallback(async () => {
+    if (!navigator.share) {
+      // 데스크탑 폴백: 바로 예약 이동
+      navigateToBooking();
+      onConfirm();
+      return;
+    }
+
+    const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
+    const start = parseHour(hourSlots[0]);
+    const last = parseHour(hourSlots[hourSlots.length - 1]);
+    const end = ((last + 1) % 24) || 24;
+    const text = [
+      `[시간] ${formatDateShortWithWeekday(dateIso)} ${start}-${end}시`,
+      `[장소] ${getRoomLocationLine(room)}`,
+      `[금액] ${room.estimated_price.toLocaleString('ko-KR')}원 (인당 ${Math.round(room.estimated_price / peopleCount).toLocaleString('ko-KR')}원)`,
+    ].join('\n');
+
+    try {
+      await navigator.share({
+        title: '픽합주 합주실 예약',
+        text,
+        url: getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso),
+      });
+      // 공유 성공 → 예약 페이지 이동
+      navigateToBooking();
+      onConfirm();
+    } catch {
+      // 공유 취소 → 모달 유지
+    }
+  }, [room, dateIso, hourSlots, peopleCount, navigateToBooking, onConfirm]);
 
   return (
     <ModalOverlay open={open} onClose={close}>
@@ -93,10 +125,7 @@ const BookModalStepper = ({
         )}
         {step === 'share' && (
           <ShareReservationMessageModal
-            onShare={() => {
-              navigateToBooking();
-              onConfirm();
-            }}
+            onShare={handleShare}
             onSkip={() => {
               navigateToBooking();
               onConfirm();
