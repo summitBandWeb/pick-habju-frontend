@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/map",
+      "destination": "/",
+      "permanent": false
+    }
+  ]
+}
