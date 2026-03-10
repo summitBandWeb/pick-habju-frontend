@@ -231,13 +231,6 @@ const MapPage = () => {
     [handleSelectRoom]
   );
 
-  /** 지도 드래그·줌 시작 시 열린 팝오버를 닫는다. */
-  const handleMapInteractionStart = useCallback(() => {
-    if (openedMarkerPopoverId !== null) {
-      setOpenedMarkerPopoverId(null);
-    }
-  }, [openedMarkerPopoverId]);
-
   /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
     setSelectedRoomId(null);
@@ -355,7 +348,6 @@ const MapPage = () => {
         onMarkerClick={handleMarkerClick}
         onMarkerRoomClick={handleMarkerRoomClick}
         onViewportChange={handleViewportChange}
-        onMapInteractionStart={handleMapInteractionStart}
         onMapEmptyClick={resetSelectionUiState}
         className="h-full w-full"
       />
