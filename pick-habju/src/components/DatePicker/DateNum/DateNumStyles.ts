@@ -4,7 +4,7 @@ export const dateNumVariants = {
   empty: 'text-gray-300 cursor-default',
   selected: 'bg-yellow-900 text-primary-black',
   today:
-    'text-primary-black border border-gray-600 [@media(hover:hover)]:hover:border-none [@media(hover:hover)]:hover:bg-yellow-700',
+    'text-primary-black border border-gray-600 [@media(hover:hover)_and_(pointer:fine)]:hover:border-none [@media(hover:hover)_and_(pointer:fine)]:hover:bg-yellow-700',
   past: 'text-gray-300 cursor-not-allowed',
-  available: 'text-primary-black [@media(hover:hover)]:hover:bg-yellow-700 cursor-pointer',
+  available: 'text-primary-black [@media(hover:hover)_and_(pointer:fine)]:hover:bg-yellow-700 cursor-pointer',
 };
