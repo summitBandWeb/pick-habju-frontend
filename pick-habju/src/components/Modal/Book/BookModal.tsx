@@ -70,17 +70,18 @@ const BookModalStepper = ({
     const start = parseHour(hourSlots[0]);
     const last = parseHour(hourSlots[hourSlots.length - 1]);
     const end = ((last + 1) % 24) || 24;
+    const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
     const text = [
       `[시간] ${formatDateShortWithWeekday(dateIso)} ${start}-${end}시`,
       `[장소] ${getRoomLocationLine(room)}`,
       `[금액] ${room.estimated_price.toLocaleString('ko-KR')}원 (인당 ${Math.round(room.estimated_price / peopleCount).toLocaleString('ko-KR')}원)`,
+      url,
     ].join('\n');
 
     try {
       await navigator.share({
         title: '픽합주 합주실 예약',
         text,
-        url: getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso),
       });
       // 공유 성공 → 예약 페이지 이동
       navigateToBooking();
