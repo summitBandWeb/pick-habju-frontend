@@ -337,7 +337,7 @@ const MapPage = () => {
   return (
     <div className="relative h-full w-full">
       {isLoading && <MapLoadingSkeleton />}
-      {hasNoResults && <ErrorNotice type="noResults" onClose={() => navigate(-1)} />}
+      {hasNoResults && <ErrorNotice type="noResults" onClose={() => navigate(-1)} autoHideAfter={6000} />}
       {hasNoMatch && (
         <ErrorNotice
           type="noMatch"
