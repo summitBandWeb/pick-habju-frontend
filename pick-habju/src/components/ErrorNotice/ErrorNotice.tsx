@@ -6,25 +6,25 @@ import WarningIcon from '../../assets/svg/warningIcon.svg';
 import LoadingSpinner from '../../assets/svg/loadingSpinner.svg';
 import NoLocationIcon from '../../assets/svg/NoLocation.svg';
 
-const ErrorNotice = ({
-  type,
-  onClose,
-  autoHideAfter,
-  onAutoHide,
-}: ErrorNoticeProps) => {
+const ErrorNotice = ({ type, onClose, autoHideAfter, onAutoHide }: ErrorNoticeProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  // noMatch 타입이고 autoHideAfter가 지정된 경우에만 자동 숨김 타이머 실행
+  // autoHideAfter가 지정된 경우 자동 숨김 타이머 실행
+  // noMatch: onAutoHide 호출 / noResults: onClose 호출
   useEffect(() => {
-    if (type === 'noMatch' && isVisible && autoHideAfter != null) {
+    if (isVisible && autoHideAfter != null) {
       const timer = setTimeout(() => {
         setIsVisible(false);
-        onAutoHide?.();
+        if (type === 'noMatch') {
+          onAutoHide?.();
+        } else if (type === 'noResults') {
+          onClose?.();
+        }
       }, autoHideAfter);
 
       return () => clearTimeout(timer);
     }
-  }, [type, autoHideAfter, onAutoHide, isVisible]);
+  }, [type, autoHideAfter, onAutoHide, onClose, isVisible]);
 
   if (!isVisible) return null;
 
@@ -34,13 +34,7 @@ const ErrorNotice = ({
       case 'noResults':
         return <img src={WarningIcon} alt="warning" className="w-17 h-17 p-2" />;
       case 'loading':
-        return (
-          <img
-            src={LoadingSpinner}
-            alt="loading"
-            className="w-17 h-17 animate-spin"
-          />
-        );
+        return <img src={LoadingSpinner} alt="loading" className="w-17 h-17 animate-spin" />;
       case 'noMatch':
         return <img src={NoLocationIcon} alt="no location" className="w-17 h-19.25" />;
       default:
@@ -90,11 +84,7 @@ const ErrorNotice = ({
 
         {/* 돌아가기 버튼 (noResults 타입에서만 표시) */}
         {type === 'noResults' && onClose && (
-          <Button
-            label="돌아가기"
-            variant={ButtonVariant.GrayText}
-            onClick={onClose}
-          />
+          <Button label="돌아가기" variant={ButtonVariant.GrayText} onClick={onClose} className="cursor-pointer" />
         )}
       </div>
     </div>
