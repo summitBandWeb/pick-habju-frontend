@@ -114,6 +114,11 @@ const MapPage = () => {
     if (noMatchCause === 'favorite') setIsFavoriteFilterActive(false);
   }, [noMatchCause]);
 
+  /** noResults ErrorNotice 닫기(돌아가기·자동 숨김 공용). stable reference 유지를 위해 memoize. */
+  const handleNoResultsClose = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   /** 필터·검색 변경 핸들러 — lastChangedFilter 갱신 포함 */
   const handlePartialFilterToggle = useCallback((isActive: boolean) => {
     setIsPartialFilterActive(isActive);
@@ -337,7 +342,7 @@ const MapPage = () => {
   return (
     <div className="relative h-full w-full">
       {isLoading && <MapLoadingSkeleton />}
-      {hasNoResults && <ErrorNotice type="noResults" onClose={() => navigate(-1)} autoHideAfter={6000} />}
+      {hasNoResults && <ErrorNotice type="noResults" onClose={handleNoResultsClose} autoHideAfter={6000} />}
       {hasNoMatch && (
         <ErrorNotice
           type="noMatch"
