@@ -1,6 +1,7 @@
 import { TimePeriod } from '../components/TimePicker/TimePickerEnums';
 import { convertTo24Hour } from './formatDate';
 import { ReservationToastKey } from '../components/ToastMessage/ToastMessageEnums';
+import { getReservationDurationHours } from './timeDuration';
 
 export function validateReservationTime(
   date: Date | null,
@@ -11,9 +12,7 @@ export function validateReservationTime(
 ): ReservationToastKey | null {
   const start24 = convertTo24Hour(startHour, startPeriod);
   const end24 = convertTo24Hour(endHour, endPeriod);
-
-  const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
-  const duration = adjustedEnd - start24;
+  const duration = getReservationDurationHours(startHour, startPeriod, endHour, endPeriod);
 
   const candidates: ReservationToastKey[] = [];
 

@@ -5,7 +5,7 @@ import DatePicker from '../../../DatePicker/DatePicker';
 import PickerFooter from '../../../PickerFooter/PickerFooter';
 import { TimePickerBody } from '../../../TimePicker/TimPickerBody/TimePickerBody';
 import { TimePeriod } from '../../../TimePicker/TimePickerEnums';
-import { convertTo24Hour } from '../../../../utils/formatDate';
+import { getReservationDurationHours } from '../../../../utils/timeDuration';
 import DateTimeInput from './DateTimeInput';
 import TimePickerBodyTimeInfo from './TimePickerBodyTimeInfo';
 
@@ -112,13 +112,12 @@ const DateTimeInputDropdown = ({
     setPickerState((s) => ({ ...s, step: 'DATE' }));
   }, []);
 
-  const selectedDurationHours = (() => {
-    const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
-    const start24 = convertTo24Hour(startHour, startPeriod);
-    const end24 = convertTo24Hour(endHour, endPeriod);
-    const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
-    return adjustedEnd - start24;
-  })();
+  const selectedDurationHours = getReservationDurationHours(
+    pickerState.time.startHour,
+    pickerState.time.startPeriod,
+    pickerState.time.endHour,
+    pickerState.time.endPeriod
+  );
 
   // initialSelectedDate가 바뀌면 selectedDates 동기화
   useEffect(() => {
