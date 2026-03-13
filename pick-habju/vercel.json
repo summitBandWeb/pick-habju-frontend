@@ -1,9 +1,8 @@
 {
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/map",
-      "destination": "/",
-      "permanent": false
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
