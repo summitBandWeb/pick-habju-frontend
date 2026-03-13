@@ -9,6 +9,9 @@ export const getReservationDurationHours = (
 ): number => {
   const start24 = convertTo24Hour(startHour, startPeriod);
   const end24 = convertTo24Hour(endHour, endPeriod);
-  const adjustedEnd = end24 <= start24 ? end24 + 24 : end24;
+  if (end24 === start24) {
+    return 0;
+  }
+  const adjustedEnd = end24 < start24 ? end24 + 24 : end24;
   return adjustedEnd - start24;
 };
