@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { CardCarouselProps, CardCarouselRoom } from './CardCarousel.types';
 import type { CardProps } from '../Card/Card.types';
 import { useMobileDetect } from '../../hook/useMobileDetect';
-import { useVisualViewportBottom } from '../../hook/useVisualViewportBottom';
 import Card from '../Card/Card';
 import Chevron from '../Chevron/Chevron';
 import { ChevronVariant } from '../Chevron/ChevronEnums';
@@ -87,8 +86,6 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, onBookClick
   const detectedMobile = useMobileDetect();
   const isMobile = forceDevice ? forceDevice === 'mobile' : detectedMobile;
   const isDesktop = !isMobile;
-  const viewportBottomOffset = useVisualViewportBottom();
-
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
   /** Swiper loop 초기화 중 발생하는 spurious onSlideChange를 무시하기 위한 flag.
@@ -139,7 +136,7 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, onBookClick
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="absolute left-0 right-0 z-50 w-full pb-2 pointer-events-none"
-            style={{ bottom: `calc(${viewportBottomOffset}px + env(safe-area-inset-bottom, 0px))` }}
+            style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}
           >
             {/* [L3] 카드 영역 프레임: 데스크탑 1장 폭 + 그림자 들어갈 간격 (w-92.5), 모바일 풀폭. relative로 Chevron 기준점 제공 */}
             <div
