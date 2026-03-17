@@ -45,8 +45,16 @@ const PersonCountInputDropdown = ({
   }, [guestCount, onConfirm, onOpenChange]);
 
   const handleCancel = useCallback(() => {
-    onOpenChange(false);
-  }, [onOpenChange]);
+    handleConfirm();
+  }, [handleConfirm]);
+
+  const handleGuestCountChange = useCallback(
+    (nextCount: number) => {
+      setGuestCount(nextCount);
+      onConfirm(nextCount);
+    },
+    [onConfirm]
+  );
 
   useEffect(() => {
     if (isOpen) setGuestCount(count);
@@ -91,7 +99,7 @@ const PersonCountInputDropdown = ({
             className="origin-top"
           >
             <div className="flex flex-col bg-primary-white gap-4 py-4 px-3.5 items-center">
-              <GuestCounter value={guestCount} onChange={setGuestCount} min={min} max={max} />
+              <GuestCounter value={guestCount} onChange={handleGuestCountChange} min={min} max={max} />
               <Button
                 label="확인"
                 variant={ButtonVariant.Main}
