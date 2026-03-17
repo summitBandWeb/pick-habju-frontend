@@ -66,6 +66,9 @@ const HeroArea = ({
   // 각 필드의 열기/닫기 요청 핸들러
   const handleDateTimeOpenChange = useCallback((open: boolean) => {
     setActiveDropdown(open ? 'dateTime' : null);
+    // DateTime 드롭다운이 닫히는 경우(취소 등 커밋 없이 닫힘 포함)에도 차단 상태를 해제해야
+    // 검색/다른 드롭다운이 영구적으로 막히지 않는다.
+    if (!open) setIsDateTimeCloseBlocked(false);
     if (open) setIsDateTimeCloseBlocked(false);
   }, []);
 

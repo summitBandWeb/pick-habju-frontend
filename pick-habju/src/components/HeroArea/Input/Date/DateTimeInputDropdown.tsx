@@ -50,20 +50,6 @@ const DateTimeInputDropdown = ({
   commitRequestId = 0,
   onCommitResult,
 }: DateTimeInputDropdownProps) => {
-  const resetDraft = useCallback(() => {
-    setPickerState({
-      step: 'DATE',
-      selectedDates: initialSelectedDate ? [initialSelectedDate] : [new Date()],
-      tempDate: null,
-      time: {
-        startHour: initialStartHour,
-        startPeriod: initialStartPeriod,
-        endHour: initialEndHour,
-        endPeriod: initialEndPeriod,
-      },
-    });
-  }, [initialSelectedDate, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
-
   const [pickerState, setPickerState] = useState<{
     step: 'DATE' | 'TIME';
     selectedDates: Date[];
@@ -85,6 +71,19 @@ const DateTimeInputDropdown = ({
       endPeriod: initialEndPeriod,
     },
   });
+  const resetDraft = useCallback(() => {
+    setPickerState({
+      step: 'DATE',
+      selectedDates: initialSelectedDate ? [initialSelectedDate] : [new Date()],
+      tempDate: null,
+      time: {
+        startHour: initialStartHour,
+        startPeriod: initialStartPeriod,
+        endHour: initialEndHour,
+        endPeriod: initialEndPeriod,
+      },
+    });
+  }, [initialSelectedDate, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = useCallback(() => {
