@@ -107,7 +107,6 @@ const HeroArea = ({
   const handleDateTimeConfirm = useCallback(
     (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod, options?: { commit?: boolean }): boolean => {
       const commit = options?.commit ?? true;
-      if (commit) setIsDateTimeCloseBlocked(false);
       const key = validateReservationTime(date, sh, sp, eh, ep);
       if (key) {
         const severity = ReservationToastSeverity[key as ReservationToastKey];
