@@ -6,6 +6,7 @@ import { getPriceBreakdown, getRoomLocationLine } from '../../../utils/calcTotal
 import { getBookingUrl } from '../../../utils/bookingUrl';
 import { formatDateKoreanWithWeekday, formatDateShortWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
 import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
+import { useToastStore } from '../../../store/toast/toastStore';
 import { pushGtmEvent } from '../../../utils/gtm';
 import ModalOverlay from '../ModalOverlay';
 import ShareReservationMessageModal from '../Share/ShareReservationMessageModal';
@@ -50,6 +51,8 @@ const BookModalStepper = ({
     pushGtmEvent('book_modal_open');
   }, [incrementBookModalOpen, markEnterStep1]);
 
+  const { showToast } = useToastStore();
+
   const navigateToBooking = useCallback(() => {
     const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
     const newWindow = window.open(url, '_blank');
@@ -59,13 +62,6 @@ const BookModalStepper = ({
   }, [room.business_id, room.biz_item_id, dateIso]);
 
   const handleShare = useCallback(async () => {
-    if (!navigator.share) {
-      // 데스크탑 폴백: 바로 예약 이동
-      navigateToBooking();
-      onConfirm();
-      return;
-    }
-
     const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
     const start = parseHour(hourSlots[0]);
     const last = parseHour(hourSlots[hourSlots.length - 1]);
@@ -78,18 +74,13 @@ const BookModalStepper = ({
       url,
     ].join('\n');
 
-    try {
-      await navigator.share({
-        title: '픽합주 합주실 예약',
-        text,
-      });
-      // 공유 성공 → 예약 페이지 이동
+    await navigator.clipboard.writeText(text);
+    showToast('공지 내용을 복사했습니다!', 'warning');
+    setTimeout(() => {
       navigateToBooking();
       onConfirm();
-    } catch {
-      // 공유 취소 → 모달 유지
-    }
-  }, [room, dateIso, hourSlots, peopleCount, navigateToBooking, onConfirm]);
+    }, 1000);
+  }, [room, dateIso, hourSlots, peopleCount, showToast, navigateToBooking, onConfirm]);
 
   return (
     <ModalOverlay open={open} onClose={close}>
