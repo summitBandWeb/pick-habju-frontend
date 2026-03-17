@@ -33,13 +33,21 @@ const LOCATION_OPTIONS: LocationOption[] = STATIONS.map((station) => ({
 
 const DEFAULT_LOCATION_ID = DEFAULT_SERVICEABLE_STATION_ID;
 
-const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange, onSearch }: HeroAreaProps) => {
+const HeroArea = ({
+  dateTime,
+  peopleCount,
+  initialLocationId,
+  onDateTimeChange,
+  onPersonCountChange,
+  onSearch,
+}: HeroAreaProps) => {
   const [dateTimeText, setDateTimeText] = useState<string>(dateTime.label);
   const [peopleCountText, setPeopleCountText] = useState<number>(peopleCount);
 
-  // 초기 지역 선택: 상수 ID로 안전하게 찾고, 없으면 배열 첫번째로 폴백
+  // 초기 지역 선택: initialLocationId prop이 있으면 우선, 없으면 DEFAULT_LOCATION_ID
+  // (LOCATION_OPTIONS와 STATIONS가 동일 소스이므로 find는 항상 값을 반환하지만, TS 타입상 방어 코드로 LOCATION_OPTIONS[0] 폴백)
   const [selectedLocation, setSelectedLocation] = useState<LocationOption>(
-    LOCATION_OPTIONS.find((loc) => loc.id === DEFAULT_LOCATION_ID) ?? LOCATION_OPTIONS[0]
+    LOCATION_OPTIONS.find((loc) => loc.id === (initialLocationId ?? DEFAULT_LOCATION_ID)) ?? LOCATION_OPTIONS[0]
   );
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
@@ -140,7 +148,8 @@ const HeroArea = ({ dateTime, peopleCount, onDateTimeChange, onPersonCountChange
           return isNaN(h) ? 9 : h;
         };
         const start24 = parseHour(slots[0]);
-        const end24 = (start24 + slots.length) % 24;
+        const last24 = parseHour(slots[slots.length - 1]);
+        const end24 = (last24 + 1) % 24;
         const to12 = (h24: number): { hour: number; period: TimePeriod } => {
           if (h24 === 0) return { hour: 12, period: TimePeriod.AM };
           if (h24 < 12) return { hour: h24, period: TimePeriod.AM };

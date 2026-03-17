@@ -39,7 +39,7 @@ const Footer = () => {
       </div>
 
       <div className="flex justify-center items-center gap-[0.625rem] px-[0.625rem] py-[0.25rem]">
-        <span className="text-gray-400 font-footer-copyright">Copyright 2025. PICKHAPJU Co. All rights reserved.</span>
+        <span className="whitespace-nowrap text-gray-400 font-footer-copyright">Copyright 2025. PICKHABJU Co. All rights reserved.</span>
       </div>
     </div>
   );

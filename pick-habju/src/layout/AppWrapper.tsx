@@ -16,11 +16,11 @@ const AppWrapper = ({ children }: AppWrapperProps) => {
   const isMapPage = pathname === RoutePaths.MAP;
   const showFooter = !isMapPage;
   return (
-    <div className="min-h-screen w-full overflow-x-hidden flex justify-center bg-primary-white">
+    <div className="min-h-dvh w-full overflow-x-hidden flex justify-center bg-primary-white">
       {/* 컨테이너: 모바일은 100% 폭, 넓은 화면에서는 중앙 정렬 최대폭 */}
       {/* isWindows: 윈도우는 스크롤바 공간 확보 위해 max-w 26.0625rem (417px) */}
       <div
-        className={`w-full h-screen flex flex-col bg-primary-white ${isWindows ? 'max-w-[26.0625rem]' : 'max-w-[25.125rem]'}`}
+        className={`w-full h-dvh flex flex-col bg-primary-white ${isWindows ? 'max-w-[26.0625rem]' : 'max-w-[25.125rem]'}`}
       >
         {/* 헤더(세이프 에어리어 + 로고 헤더) */}
         <AppHeader />

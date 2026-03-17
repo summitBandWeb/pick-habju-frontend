@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import RoutePaths from './routePaths';
 import HomePage from '../pages/HomePage';
 import MapPage from '../pages/MapPage';
@@ -17,6 +17,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: RoutePaths.MAP, element: <MapPage /> },
+      { path: '*', element: <Navigate to={RoutePaths.HOME} replace /> },
     ],
   },
 ]);

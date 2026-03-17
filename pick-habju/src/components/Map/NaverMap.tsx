@@ -27,8 +27,6 @@ type NaverMapProps = {
   onLoad?: (map: naver.maps.Map) => void;
   /** idle 이벤트마다 호출. 현재 뷰포트(center + bounds)를 전달. */
   onViewportChange?: (viewport: MapViewport) => void;
-  /** 드래그·줌 시작 시 호출 — 팝오버 닫기 등 외부 상태 초기화용. */
-  onMapInteractionStart?: () => void;
   /** 마커가 없는 빈 지도 영역 클릭 시 호출. */
   onMapEmptyClick?: () => void;
   className?: string;
@@ -64,7 +62,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onMarkerRoomClick,
       onLoad,
       onViewportChange,
-      onMapInteractionStart,
       onMapEmptyClick,
       className,
     },
@@ -73,11 +70,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // ── DOM 및 Naver Maps 인스턴스 refs ──
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<naver.maps.Map | null>(null);
+    /** 팝오버 div ref. rAF 루프에서 React state 없이 위치를 직접 업데이트하는 데 사용. */
+    const popoverDomRef = useRef<HTMLDivElement>(null);
 
     // ── 지도 이벤트 리스너 refs (cleanup 시 removeListener에 사용) ──
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
-    const dragStartListenerRef = useRef<naver.maps.MapEventListener | null>(null);
-    const zoomChangedListenerRef = useRef<naver.maps.MapEventListener | null>(null);
     const mapClickListenerRef = useRef<naver.maps.MapEventListener | null>(null);
 
     // ── 콜백 안정화 refs ──
@@ -85,7 +82,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // props 콜백이 바뀌어도 항상 최신값을 참조할 수 있도록 ref에 동기화한다.
     const onLoadRef = useRef(onLoad);
     const onViewportChangeRef = useRef(onViewportChange);
-    const onMapInteractionStartRef = useRef(onMapInteractionStart);
     const onMapEmptyClickRef = useRef(onMapEmptyClick);
     const onMarkerClickRef = useRef(onMarkerClick);
 
@@ -136,10 +132,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     }, [onViewportChange]);
 
     useEffect(() => {
-      onMapInteractionStartRef.current = onMapInteractionStart;
-    }, [onMapInteractionStart]);
-
-    useEffect(() => {
       onMapEmptyClickRef.current = onMapEmptyClick;
     }, [onMapEmptyClick]);
 
@@ -183,13 +175,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             if (viewportCb) viewportCb(getViewportFromMap(map));
           });
 
-          dragStartListenerRef.current = naver.maps.Event.addListener(map, 'dragstart', () => {
-            onMapInteractionStartRef.current?.();
-          });
-          zoomChangedListenerRef.current = naver.maps.Event.addListener(map, 'zoom_changed', () => {
-            onMapInteractionStartRef.current?.();
-          });
-
           mapClickListenerRef.current = naver.maps.Event.addListener(map, 'click', () => {
             onMapEmptyClickRef.current?.();
           });
@@ -221,14 +206,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         if (idleListenerRef.current) {
           naver.maps.Event.removeListener(idleListenerRef.current);
           idleListenerRef.current = null;
-        }
-        if (dragStartListenerRef.current) {
-          naver.maps.Event.removeListener(dragStartListenerRef.current);
-          dragStartListenerRef.current = null;
-        }
-        if (zoomChangedListenerRef.current) {
-          naver.maps.Event.removeListener(zoomChangedListenerRef.current);
-          zoomChangedListenerRef.current = null;
         }
         if (mapClickListenerRef.current) {
           naver.maps.Event.removeListener(mapClickListenerRef.current);
@@ -403,6 +380,30 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       }
     }, [isMapReady, selectedMarkerId, markerViewModels]);
 
+    // 팝오버가 열린 동안 rAF 루프로 마커 DOM 위치를 매 프레임 추적해 팝오버 좌표를 갱신.
+    // Naver Maps SDK는 패닝·줌 시 마커 DOM을 직접 이동시키므로
+    // getBoundingClientRect()는 항상 현재 화면 위치를 정확히 반환한다.
+    // → 팝오버가 마커를 따라 움직여 지도 이동 중에도 닫히지 않는다.
+    useEffect(() => {
+      if (!openedMarkerPopoverId) return;
+      let animFrameId: number;
+
+      const track = () => {
+        const markerEl = markerInstancesRef.current.get(openedMarkerPopoverId)?.getElement();
+        if (markerEl && mapContainerRef.current && popoverDomRef.current) {
+          const markerRect = markerEl.getBoundingClientRect();
+          const containerRect = mapContainerRef.current.getBoundingClientRect();
+          // React state/리렌더 없이 DOM에 직접 write → 같은 프레임 안에 반영되어 지연 없음
+          popoverDomRef.current.style.left = `${markerRect.left - containerRect.left + MARKER_WIDTH_PX / 2}px`;
+          popoverDomRef.current.style.top = `${markerRect.top - containerRect.top}px`;
+        }
+        animFrameId = requestAnimationFrame(track);
+      };
+
+      animFrameId = requestAnimationFrame(track);
+      return () => cancelAnimationFrame(animFrameId);
+    }, [openedMarkerPopoverId]);
+
     // openedMarkerPopoverId 동기화 및 팝오버 닫기.
     // - ref 동기화: 마커 클릭 핸들러에서 현재값을 읽기 위함 (클로저 stale 방지).
     // - null로 변경 시 팝오버 닫기: 필터 변경·룸 선택 등 외부에서 팝오버를 닫을 때 호출됨.
@@ -436,6 +437,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             stopPropagation → 팝오버 위 터치·클릭이 지도 이벤트로 전파되지 않도록 차단. */}
         {reactPopover && (
           <div
+            ref={popoverDomRef}
             className="absolute z-30"
             style={{
               left: reactPopover.left,

@@ -5,7 +5,9 @@ import DatePicker from '../../../DatePicker/DatePicker';
 import PickerFooter from '../../../PickerFooter/PickerFooter';
 import { TimePickerBody } from '../../../TimePicker/TimPickerBody/TimePickerBody';
 import { TimePeriod } from '../../../TimePicker/TimePickerEnums';
+import { getReservationDurationHours } from '../../../../utils/timeDuration';
 import DateTimeInput from './DateTimeInput';
+import TimePickerBodyTimeInfo from './TimePickerBodyTimeInfo';
 
 export interface DateTimeInputDropdownProps {
   dateTime: string;
@@ -110,6 +112,13 @@ const DateTimeInputDropdown = ({
     setPickerState((s) => ({ ...s, step: 'DATE' }));
   }, []);
 
+  const selectedDurationHours = getReservationDurationHours(
+    pickerState.time.startHour,
+    pickerState.time.startPeriod,
+    pickerState.time.endHour,
+    pickerState.time.endPeriod
+  );
+
   // initialSelectedDate가 바뀌면 selectedDates 동기화
   useEffect(() => {
     if (initialSelectedDate) {
@@ -211,6 +220,7 @@ const DateTimeInputDropdown = ({
                     onChange={handleTimeDraftChange}
                     disabled={disabled}
                   />
+                  <TimePickerBodyTimeInfo selectedDurationHours={selectedDurationHours} />
                   <PickerFooter
                     onConfirm={handleTimeConfirm}
                     onCancel={handleTimeCancel}
