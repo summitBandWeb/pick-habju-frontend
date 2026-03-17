@@ -109,17 +109,17 @@ const DateTimeInputDropdown = ({
   }, []);
 
   const commitCurrentSelection = useCallback(() => {
-    const date = pickerState.tempDate ?? pickerState.selectedDates[0];
+    const date = pickerState.step === 'TIME' ? (pickerState.tempDate ?? pickerState.selectedDates[0]) : pickerState.selectedDates[0];
     if (!date) return false;
     const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
     const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod, { commit: true });
     return shouldClose !== false;
-  }, [onConfirm, pickerState.selectedDates, pickerState.tempDate, pickerState.time]);
+  }, [onConfirm, pickerState.selectedDates, pickerState.step, pickerState.tempDate, pickerState.time]);
 
   const closeAfterCommit = useCallback(() => {
     if (!commitCurrentSelection()) return;
     onOpenChange(false);
-    setPickerState((s) => ({ ...s, step: 'DATE' }));
+    setPickerState((s) => ({ ...s, step: 'DATE', tempDate: null }));
   }, [commitCurrentSelection, onOpenChange]);
 
   const handleDateStepCancel = useCallback(() => {
@@ -132,7 +132,7 @@ const DateTimeInputDropdown = ({
   }, [closeAfterCommit]);
 
   const handleTimeCancel = useCallback(() => {
-    setPickerState((s) => ({ ...s, step: 'DATE' }));
+    setPickerState((s) => ({ ...s, step: 'DATE', tempDate: null }));
   }, []);
 
   const selectedDurationHours = getReservationDurationHours(
