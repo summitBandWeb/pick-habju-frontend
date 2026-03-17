@@ -103,7 +103,7 @@ const HeroArea = ({
         if (commit) {
           showToastByKey(key);
         }
-        if (severity === 'error') return false;
+        if (severity === 'error') return commit ? false : true;
         const dateKey = date.toDateString();
         const start24 = convertTo24Hour(sh, sp);
         const end24 = convertTo24Hour(eh, ep);
@@ -115,6 +115,8 @@ const HeroArea = ({
           }
         }
       }
+      if (!commit) return true;
+
       actions.setDate([date]);
       actions.setHourSlots(sh, sp, eh, ep);
       setLastWarningKey(null);
