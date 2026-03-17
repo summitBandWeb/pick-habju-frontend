@@ -51,6 +51,7 @@ const HeroArea = ({
   );
   const [isSearchClickLocked, setIsSearchClickLocked] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
+  const [isDateTimeCloseBlocked, setIsDateTimeCloseBlocked] = useState<boolean>(false);
 
   // GoogleForm Toast Store
   const { incrementSearchCount, showToast } = useGoogleFormToastStore();
@@ -63,15 +64,24 @@ const HeroArea = ({
   // 각 필드의 열기/닫기 요청 핸들러
   const handleDateTimeOpenChange = useCallback((open: boolean) => {
     setActiveDropdown(open ? 'dateTime' : null);
+    if (open) setIsDateTimeCloseBlocked(false);
   }, []);
 
-  const handleLocationOpenChange = useCallback((open: boolean) => {
-    setActiveDropdown(open ? 'location' : null);
-  }, []);
+  const handleLocationOpenChange = useCallback(
+    (open: boolean) => {
+      if (open && activeDropdown === 'dateTime' && isDateTimeCloseBlocked) return;
+      setActiveDropdown(open ? 'location' : null);
+    },
+    [activeDropdown, isDateTimeCloseBlocked]
+  );
 
-  const handlePersonOpenChange = useCallback((open: boolean) => {
-    setActiveDropdown(open ? 'person' : null);
-  }, []);
+  const handlePersonOpenChange = useCallback(
+    (open: boolean) => {
+      if (open && activeDropdown === 'dateTime' && isDateTimeCloseBlocked) return;
+      setActiveDropdown(open ? 'person' : null);
+    },
+    [activeDropdown, isDateTimeCloseBlocked]
+  );
 
   const handlePersonCountConfirm = useCallback(
     (val: number) => {
@@ -97,13 +107,17 @@ const HeroArea = ({
   const handleDateTimeConfirm = useCallback(
     (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod, options?: { commit?: boolean }): boolean => {
       const commit = options?.commit ?? true;
+      if (commit) setIsDateTimeCloseBlocked(false);
       const key = validateReservationTime(date, sh, sp, eh, ep);
       if (key) {
         const severity = ReservationToastSeverity[key as ReservationToastKey];
         if (commit) {
           showToastByKey(key);
         }
-        if (severity === 'error') return commit ? false : true;
+        if (severity === 'error') {
+          if (commit) setIsDateTimeCloseBlocked(true);
+          return commit ? false : true;
+        }
         const dateKey = date.toDateString();
         const start24 = convertTo24Hour(sh, sp);
         const end24 = convertTo24Hour(eh, ep);
@@ -111,6 +125,7 @@ const HeroArea = ({
         if (commit) {
           if (lastWarningKey !== selectionKey) {
             setLastWarningKey(selectionKey);
+            setIsDateTimeCloseBlocked(true);
             return false;
           }
         }
@@ -120,6 +135,7 @@ const HeroArea = ({
       actions.setDate([date]);
       actions.setHourSlots(sh, sp, eh, ep);
       setLastWarningKey(null);
+      setIsDateTimeCloseBlocked(false);
 
       const dateIso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const start24 = convertTo24Hour(sh, sp);
@@ -200,7 +216,7 @@ const HeroArea = ({
           animate={{
             y:
               activeDropdown === 'dateTime'
-                ? -180
+                ? -170
                 : activeDropdown === 'location'
                   ? -175
                   : activeDropdown === 'person'
