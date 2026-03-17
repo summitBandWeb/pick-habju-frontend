@@ -30,19 +30,22 @@ const PersonCountInputDropdown = ({
   const [guestCount, setGuestCount] = useState(count);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = useCallback(() => {
-    if (!isOpen) {
-      setGuestCount(count);
-    }
-    onOpenChange(!isOpen);
-  }, [isOpen, onOpenChange, count]);
-
   const handleConfirm = useCallback(() => {
     const shouldClose = onConfirm(guestCount);
     if (shouldClose !== false) {
       onOpenChange(false);
     }
   }, [guestCount, onConfirm, onOpenChange]);
+
+  const handleToggle = useCallback(() => {
+    if (isOpen) {
+      // 드롭다운을 닫으려는 액션은 커밋(확정)을 시도한다.
+      handleConfirm();
+      return;
+    }
+    setGuestCount(count);
+    onOpenChange(true);
+  }, [count, handleConfirm, isOpen, onOpenChange]);
 
   const handleCancel = useCallback(() => {
     handleConfirm();
