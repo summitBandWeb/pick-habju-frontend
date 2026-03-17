@@ -22,6 +22,7 @@ import { trackSearchButtonClick } from '../../utils/analytics';
 import { useGoogleFormToastStore } from '../../store/googleFormToast/googleFormToastStore';
 import { useAnalyticsCycleStore } from '../../store/analytics/analyticsStore';
 import { getServiceableStations, DEFAULT_SERVICEABLE_STATION_ID } from '../../constants/serviceable_stations';
+import useReservationStore from '../../store/dateTime/reservationStore';
 
 const STATIONS = getServiceableStations();
 
@@ -66,10 +67,9 @@ const HeroArea = ({
   // 각 필드의 열기/닫기 요청 핸들러
   const handleDateTimeOpenChange = useCallback((open: boolean) => {
     setActiveDropdown(open ? 'dateTime' : null);
-    // DateTime 드롭다운이 닫히는 경우(취소 등 커밋 없이 닫힘 포함)에도 차단 상태를 해제해야
-    // 검색/다른 드롭다운이 영구적으로 막히지 않는다.
-    if (!open) setIsDateTimeCloseBlocked(false);
-    if (open) setIsDateTimeCloseBlocked(false);
+    // 열림/닫힘과 무관하게 차단 상태를 초기화한다.
+    // (취소 등 커밋 없이 닫힘 포함) 검색/다른 드롭다운이 영구적으로 막히는 상태를 방지.
+    setIsDateTimeCloseBlocked(false);
   }, []);
 
   const handleLocationOpenChange = useCallback(
@@ -198,18 +198,23 @@ const HeroArea = ({
     setIsSearchClickLocked(true);
     setTimeout(() => setIsSearchClickLocked(false), 600);
 
+    // 커밋 직후에도 최신 값을 보장하기 위해 스토어에서 직접 조회
+    const { selectedDate: latestSelectedDate, hourSlots: latestHourSlots } = useReservationStore.getState();
+
     // 스토어에 값이 없으면 props의 기본값 사용
     let dateIso: string;
     let slots: string[];
 
-    if (selectedDate) {
-      dateIso = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    if (latestSelectedDate) {
+      dateIso = `${latestSelectedDate.getFullYear()}-${String(latestSelectedDate.getMonth() + 1).padStart(2, '0')}-${String(
+        latestSelectedDate.getDate()
+      ).padStart(2, '0')}`;
     } else {
       dateIso = dateTime.date;
     }
 
-    if (hourSlots && hourSlots.length > 0) {
-      slots = hourSlots;
+    if (latestHourSlots && latestHourSlots.length > 0) {
+      slots = latestHourSlots;
     } else {
       slots = dateTime.hour_slots;
     }
@@ -251,12 +256,10 @@ const HeroArea = ({
   }, [
     dateTime.date,
     dateTime.hour_slots,
-    hourSlots,
     incrementSearchCount,
     isSearchClickLocked,
     onSearch,
     peopleCountText,
-    selectedDate,
     selectedLocation.id,
     showToast,
     setDateTimeText,
