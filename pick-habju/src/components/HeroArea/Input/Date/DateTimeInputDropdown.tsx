@@ -30,6 +30,10 @@ export interface DateTimeInputDropdownProps {
   isOpen: boolean;
   /** 드롭다운 열림/닫힘 요청 */
   onOpenChange: (open: boolean) => void;
+  /** 외부(검색 버튼 등)에서 커밋을 요청할 때 증가시키는 값 */
+  commitRequestId?: number;
+  /** 외부 커밋 요청 처리 결과 */
+  onCommitResult?: (didClose: boolean) => void;
 }
 
 const DateTimeInputDropdown = ({
@@ -43,6 +47,8 @@ const DateTimeInputDropdown = ({
   disabled = false,
   isOpen,
   onOpenChange,
+  commitRequestId = 0,
+  onCommitResult,
 }: DateTimeInputDropdownProps) => {
   const resetDraft = useCallback(() => {
     setPickerState({
@@ -120,6 +126,22 @@ const DateTimeInputDropdown = ({
     onOpenChange(false);
     setPickerState((s) => ({ ...s, step: 'DATE', tempDate: null }));
   }, [commitCurrentSelection, onOpenChange]);
+
+  const lastCommitRequestIdRef = useRef<number>(commitRequestId);
+  useEffect(() => {
+    if (!isOpen) {
+      lastCommitRequestIdRef.current = commitRequestId;
+      return;
+    }
+    if (commitRequestId === lastCommitRequestIdRef.current) return;
+    lastCommitRequestIdRef.current = commitRequestId;
+
+    const didClose = commitCurrentSelection();
+    onCommitResult?.(didClose);
+    if (!didClose) return;
+    onOpenChange(false);
+    setPickerState((s) => ({ ...s, step: 'DATE', tempDate: null }));
+  }, [commitCurrentSelection, commitRequestId, isOpen, onCommitResult, onOpenChange]);
 
   const handleDateStepCancel = useCallback(() => {
     onOpenChange(false);
