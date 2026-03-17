@@ -45,6 +45,20 @@ const DateTimeInputDropdown = ({
   isOpen,
   onOpenChange,
 }: DateTimeInputDropdownProps) => {
+  const resetDraft = useCallback(() => {
+    setPickerState({
+      step: 'DATE',
+      selectedDates: initialSelectedDate ? [initialSelectedDate] : [new Date()],
+      tempDate: null,
+      time: {
+        startHour: initialStartHour,
+        startPeriod: initialStartPeriod,
+        endHour: initialEndHour,
+        endPeriod: initialEndPeriod,
+      },
+    });
+  }, [initialSelectedDate, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
+
   const [pickerState, setPickerState] = useState<{
     step: 'DATE' | 'TIME';
     selectedDates: Date[];
@@ -77,13 +91,7 @@ const DateTimeInputDropdown = ({
 
   const handleDateChange = useCallback((dates: Date[]) => {
     setPickerState((s) => ({ ...s, selectedDates: dates }));
-
-    const nextDate = dates[0];
-    if (!nextDate) return;
-
-    const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
-    onConfirm(nextDate, startHour, startPeriod, endHour, endPeriod, { commit: false });
-  }, [onConfirm, pickerState.time]);
+  }, []);
 
   const handleDateStepConfirm = useCallback(() => {
     setPickerState((s) => {
@@ -98,11 +106,7 @@ const DateTimeInputDropdown = ({
       ...s,
       time: { startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep },
     }));
-
-    const date = pickerState.tempDate ?? pickerState.selectedDates[0];
-    if (!date) return;
-    onConfirm(date, sh, sp, eh, ep, { commit: false });
-  }, [onConfirm, pickerState.selectedDates, pickerState.tempDate]);
+  }, []);
 
   const commitCurrentSelection = useCallback(() => {
     const date = pickerState.tempDate ?? pickerState.selectedDates[0];
@@ -119,8 +123,9 @@ const DateTimeInputDropdown = ({
   }, [commitCurrentSelection, onOpenChange]);
 
   const handleDateStepCancel = useCallback(() => {
-    closeAfterCommit();
-  }, [closeAfterCommit]);
+    onOpenChange(false);
+    resetDraft();
+  }, [onOpenChange, resetDraft]);
 
   const handleTimeConfirm = useCallback(() => {
     closeAfterCommit();
@@ -177,7 +182,7 @@ const DateTimeInputDropdown = ({
         if (pickerState.step === 'TIME') {
           handleTimeConfirm();
         } else {
-          handleDateStepCancel();
+          closeAfterCommit();
         }
       }
     };
@@ -187,7 +192,7 @@ const DateTimeInputDropdown = ({
         if (pickerState.step === 'TIME') {
           setPickerState((s) => ({ ...s, step: 'DATE' }));
         } else {
-          handleDateStepCancel();
+          closeAfterCommit();
         }
       }
     };
@@ -197,7 +202,7 @@ const DateTimeInputDropdown = ({
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, pickerState.step, handleDateStepCancel, handleTimeConfirm]);
+  }, [isOpen, pickerState.step, closeAfterCommit, handleTimeConfirm]);
 
   return (
     <div
