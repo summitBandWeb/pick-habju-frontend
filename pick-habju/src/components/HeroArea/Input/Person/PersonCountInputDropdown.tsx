@@ -51,9 +51,8 @@ const PersonCountInputDropdown = ({
   const handleGuestCountChange = useCallback(
     (nextCount: number) => {
       setGuestCount(nextCount);
-      onConfirm(nextCount);
     },
-    [onConfirm]
+    []
   );
 
   useEffect(() => {
