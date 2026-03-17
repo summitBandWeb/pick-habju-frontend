@@ -105,32 +105,25 @@ const HeroArea = ({
   }, []);
 
   const handleDateTimeConfirm = useCallback(
-    (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod, options?: { commit?: boolean }): boolean => {
-      const commit = options?.commit ?? true;
+    (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
       const key = validateReservationTime(date, sh, sp, eh, ep);
       if (key) {
         const severity = ReservationToastSeverity[key as ReservationToastKey];
-        if (commit) {
-          showToastByKey(key);
-        }
+        showToastByKey(key);
         if (severity === 'error') {
-          if (commit) setIsDateTimeCloseBlocked(true);
-          return commit ? false : true;
+          setIsDateTimeCloseBlocked(true);
+          return false;
         }
         const dateKey = date.toDateString();
         const start24 = convertTo24Hour(sh, sp);
         const end24 = convertTo24Hour(eh, ep);
         const selectionKey = `${dateKey}|${start24}-${end24}`;
-        if (commit) {
-          if (lastWarningKey !== selectionKey) {
-            setLastWarningKey(selectionKey);
-            setIsDateTimeCloseBlocked(true);
-            return false;
-          }
+        if (lastWarningKey !== selectionKey) {
+          setLastWarningKey(selectionKey);
+          setIsDateTimeCloseBlocked(true);
+          return false;
         }
       }
-      if (!commit) return true;
-
       actions.setDate([date]);
       actions.setHourSlots(sh, sp, eh, ep);
       setLastWarningKey(null);

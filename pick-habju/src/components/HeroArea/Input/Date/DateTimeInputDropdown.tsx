@@ -23,8 +23,7 @@ export interface DateTimeInputDropdownProps {
     startHour: number,
     startPeriod: TimePeriod,
     endHour: number,
-    endPeriod: TimePeriod,
-    options?: { commit?: boolean }
+    endPeriod: TimePeriod
   ) => boolean | void;
   disabled?: boolean;
   /** 드롭다운 열림 상태 (부모에서 제어) */
@@ -112,7 +111,7 @@ const DateTimeInputDropdown = ({
     const date = pickerState.step === 'TIME' ? (pickerState.tempDate ?? pickerState.selectedDates[0]) : pickerState.selectedDates[0];
     if (!date) return false;
     const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
-    const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod, { commit: true });
+    const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod);
     return shouldClose !== false;
   }, [onConfirm, pickerState.selectedDates, pickerState.step, pickerState.tempDate, pickerState.time]);
 
