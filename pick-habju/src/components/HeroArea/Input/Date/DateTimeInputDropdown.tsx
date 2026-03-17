@@ -23,7 +23,8 @@ export interface DateTimeInputDropdownProps {
     startHour: number,
     startPeriod: TimePeriod,
     endHour: number,
-    endPeriod: TimePeriod
+    endPeriod: TimePeriod,
+    options?: { commit?: boolean }
   ) => boolean | void;
   disabled?: boolean;
   /** 드롭다운 열림 상태 (부모에서 제어) */
@@ -76,7 +77,13 @@ const DateTimeInputDropdown = ({
 
   const handleDateChange = useCallback((dates: Date[]) => {
     setPickerState((s) => ({ ...s, selectedDates: dates }));
-  }, []);
+
+    const nextDate = dates[0];
+    if (!nextDate) return;
+
+    const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
+    onConfirm(nextDate, startHour, startPeriod, endHour, endPeriod, { commit: false });
+  }, [onConfirm, pickerState.time]);
 
   const handleDateStepConfirm = useCallback(() => {
     setPickerState((s) => {
@@ -86,27 +93,38 @@ const DateTimeInputDropdown = ({
     });
   }, []);
 
-  const handleDateStepCancel = useCallback(() => {
-    onOpenChange(false);
-  }, [onOpenChange]);
-
   const handleTimeDraftChange = useCallback((sh: number, sp: TimePeriod, eh: number, ep: TimePeriod) => {
     setPickerState((s) => ({
       ...s,
       time: { startHour: sh, startPeriod: sp, endHour: eh, endPeriod: ep },
     }));
-  }, []);
 
-  const handleTimeConfirm = useCallback(() => {
     const date = pickerState.tempDate ?? pickerState.selectedDates[0];
     if (!date) return;
+    onConfirm(date, sh, sp, eh, ep, { commit: false });
+  }, [onConfirm, pickerState.selectedDates, pickerState.tempDate]);
+
+  const commitCurrentSelection = useCallback(() => {
+    const date = pickerState.tempDate ?? pickerState.selectedDates[0];
+    if (!date) return false;
     const { startHour, startPeriod, endHour, endPeriod } = pickerState.time;
-    const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod);
-    if (shouldClose !== false) {
-      onOpenChange(false);
-      setPickerState((s) => ({ ...s, step: 'DATE' }));
-    }
-  }, [pickerState, onConfirm, onOpenChange]);
+    const shouldClose = onConfirm(date, startHour, startPeriod, endHour, endPeriod, { commit: true });
+    return shouldClose !== false;
+  }, [onConfirm, pickerState.selectedDates, pickerState.tempDate, pickerState.time]);
+
+  const closeAfterCommit = useCallback(() => {
+    if (!commitCurrentSelection()) return;
+    onOpenChange(false);
+    setPickerState((s) => ({ ...s, step: 'DATE' }));
+  }, [commitCurrentSelection, onOpenChange]);
+
+  const handleDateStepCancel = useCallback(() => {
+    closeAfterCommit();
+  }, [closeAfterCommit]);
+
+  const handleTimeConfirm = useCallback(() => {
+    closeAfterCommit();
+  }, [closeAfterCommit]);
 
   const handleTimeCancel = useCallback(() => {
     setPickerState((s) => ({ ...s, step: 'DATE' }));
@@ -156,7 +174,11 @@ const DateTimeInputDropdown = ({
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        handleDateStepCancel();
+        if (pickerState.step === 'TIME') {
+          handleTimeConfirm();
+        } else {
+          handleDateStepCancel();
+        }
       }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -175,7 +197,7 @@ const DateTimeInputDropdown = ({
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, pickerState.step, handleDateStepCancel]);
+  }, [isOpen, pickerState.step, handleDateStepCancel, handleTimeConfirm]);
 
   return (
     <div

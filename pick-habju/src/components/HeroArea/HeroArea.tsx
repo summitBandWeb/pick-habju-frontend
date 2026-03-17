@@ -95,19 +95,24 @@ const HeroArea = ({
   }, []);
 
   const handleDateTimeConfirm = useCallback(
-    (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod): boolean => {
+    (date: Date, sh: number, sp: TimePeriod, eh: number, ep: TimePeriod, options?: { commit?: boolean }): boolean => {
+      const commit = options?.commit ?? true;
       const key = validateReservationTime(date, sh, sp, eh, ep);
       if (key) {
         const severity = ReservationToastSeverity[key as ReservationToastKey];
-        showToastByKey(key);
+        if (commit) {
+          showToastByKey(key);
+        }
         if (severity === 'error') return false;
         const dateKey = date.toDateString();
         const start24 = convertTo24Hour(sh, sp);
         const end24 = convertTo24Hour(eh, ep);
         const selectionKey = `${dateKey}|${start24}-${end24}`;
-        if (lastWarningKey !== selectionKey) {
-          setLastWarningKey(selectionKey);
-          return false;
+        if (commit) {
+          if (lastWarningKey !== selectionKey) {
+            setLastWarningKey(selectionKey);
+            return false;
+          }
         }
       }
       actions.setDate([date]);
