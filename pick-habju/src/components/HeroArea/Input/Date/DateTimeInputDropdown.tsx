@@ -86,13 +86,6 @@ const DateTimeInputDropdown = ({
   }, [initialSelectedDate, initialStartHour, initialStartPeriod, initialEndHour, initialEndPeriod]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = useCallback(() => {
-    if (!isOpen) {
-      setPickerState((s) => ({ ...s, step: 'DATE' }));
-    }
-    onOpenChange(!isOpen);
-  }, [isOpen, onOpenChange]);
-
   const handleDateChange = useCallback((dates: Date[]) => {
     setPickerState((s) => ({ ...s, selectedDates: dates }));
   }, []);
@@ -125,6 +118,16 @@ const DateTimeInputDropdown = ({
     onOpenChange(false);
     setPickerState((s) => ({ ...s, step: 'DATE', tempDate: null }));
   }, [commitCurrentSelection, onOpenChange]);
+
+  const handleToggle = useCallback(() => {
+    if (isOpen) {
+      // 드롭다운을 닫으려는 액션은 바깥 클릭과 동일하게 커밋을 시도한다.
+      closeAfterCommit();
+      return;
+    }
+    setPickerState((s) => ({ ...s, step: 'DATE' }));
+    onOpenChange(true);
+  }, [closeAfterCommit, isOpen, onOpenChange]);
 
   const lastCommitRequestIdRef = useRef<number>(commitRequestId);
   useEffect(() => {
