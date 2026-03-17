@@ -26,6 +26,7 @@ import { formatAvailableTimeRange, formatTimeRangeForCard } from '../utils/avail
 import { getBookingUrl } from '../utils/bookingUrl';
 import BookModalStepper from '../components/Modal/Book/BookModal';
 import PastTimeUpdateModal from '../components/Modal/Time/PastTimeUpdateModal';
+import ToastMessage from '../components/ToastMessage/ToastMessage';
 
 const DEFAULT_MAP_ZOOM = 16;
 
@@ -488,6 +489,11 @@ const MapPage = () => {
 
       {/* 과거 시간 경과 모달 */}
       <PastTimeUpdateModal onConfirm={() => navigate(RoutePaths.HOME)} />
+
+      {/* 토스트 (모달 위에 표시되도록 z-[80]) */}
+      <div className="fixed top-24 left-0 right-0 z-[80] flex justify-center pointer-events-none">
+        <ToastMessage />
+      </div>
 
       {showSearchHereButton && (
         <div
