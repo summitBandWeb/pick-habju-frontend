@@ -48,8 +48,8 @@ const ErrorNotice = ({ type, onClose, autoHideAfter, onAutoHide }: ErrorNoticePr
       case 'noResults':
         return (
           <>
-            <p className="w-full">조건에 맞는 합주실이 없어요.</p>
-            <p className="w-full">검색 조건을 다시 설정해주세요.</p>
+            <p className="w-full">예약 가능한 합주실을 찾지 못했어요.</p>
+            <p className="w-full">시간이나 지역을 변경하여 다시 검색해 볼까요?</p>
           </>
         );
       case 'loading':
