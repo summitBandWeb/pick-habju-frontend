@@ -316,7 +316,6 @@ const MapPage = () => {
     <div className="relative h-full w-full">
       {isLoading && <MapLoadingSkeleton />}
       {hasNoResults && <ErrorNotice type="noResults" onClose={handleNoResultsClose} autoHideAfter={6000} />}
-
       <NaverMap
         ref={mapRef}
         initialCenter={lastQuery.center}
