@@ -97,7 +97,7 @@ const BookModalStepper = ({
         onConfirm();
       }, 1000);
     } catch {
-      showToast('복사에 실패했습니다. 다시 시도해 주세요.', 'error');
+      showToast('복사에 실패했습니다.', 'warning');
     }
   }, [room, dateIso, hourSlots, peopleCount, showToast, navigateToBooking, onConfirm]);
 
