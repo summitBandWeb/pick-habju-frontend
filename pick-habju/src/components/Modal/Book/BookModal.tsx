@@ -4,7 +4,11 @@ import BookStepCalculationModal from './StepOne/BookStepCalculationModal';
 import type { NormalizedRoom } from '../../../hook/useMapPageSearch';
 import { getPriceBreakdown, getRoomLocationLine } from '../../../utils/calcTotalPrice';
 import { getBookingUrl } from '../../../utils/bookingUrl';
-import { formatDateKoreanWithWeekday, formatDateMonthDayWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
+import {
+  formatDateKoreanWithWeekday,
+  formatDateMonthDayWithWeekday,
+  formatTimeRangeFromSlots,
+} from '../../../utils/dateTimeLabel';
 import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
 import { useToastStore } from '../../../store/toast/toastStore';
 import { pushGtmEvent } from '../../../utils/gtm';
@@ -65,7 +69,7 @@ const BookModalStepper = ({
     const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
     const start = parseHour(hourSlots[0]);
     const last = parseHour(hourSlots[hourSlots.length - 1]);
-    const end = ((last + 1) % 24) || 24;
+    const end = (last + 1) % 24 || 24;
 
     const dateLine = formatDateMonthDayWithWeekday(dateIso);
     const startStr = `${String(start).padStart(2, '0')}:00`;
@@ -85,12 +89,16 @@ const BookModalStepper = ({
       url,
     ].join('\n');
 
-    await navigator.clipboard.writeText(text);
-    showToast('공지 내용을 복사했습니다!', 'warning');
-    setTimeout(() => {
-      navigateToBooking();
-      onConfirm();
-    }, 1000);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('공지 내용을 복사했습니다!', 'warning');
+      setTimeout(() => {
+        navigateToBooking();
+        onConfirm();
+      }, 1000);
+    } catch {
+      showToast('복사에 실패했습니다. 다시 시도해 주세요.', 'error');
+    }
   }, [room, dateIso, hourSlots, peopleCount, showToast, navigateToBooking, onConfirm]);
 
   return (
