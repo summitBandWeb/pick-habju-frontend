@@ -28,7 +28,7 @@ const ShareReservationMessageModal = ({
         {/* 버튼 영역 (세로 배치) */}
         <div className="flex w-full max-w-[18.375rem] flex-col items-center gap-1.5">
           <Button
-            label="공유하고 바로 예약하기"
+            label="복사하고 바로 예약하기"
             variant={ButtonVariant.Main}
             size={BtnSizeVariant.LG}
             onClick={onShare}
