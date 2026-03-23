@@ -491,7 +491,10 @@ const MapPage = () => {
       <PastTimeUpdateModal onConfirm={() => navigate(RoutePaths.HOME)} />
 
       {/* 토스트 (모달 위에 표시되도록 z-[80]) */}
-      <div className="fixed top-24 left-0 right-0 z-[80] flex justify-center pointer-events-none">
+      <div
+        className="fixed left-0 right-0 z-[80] flex justify-center pointer-events-none"
+        style={{ bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <ToastMessage />
       </div>
 

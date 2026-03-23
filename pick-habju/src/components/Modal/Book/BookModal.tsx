@@ -4,7 +4,7 @@ import BookStepCalculationModal from './StepOne/BookStepCalculationModal';
 import type { NormalizedRoom } from '../../../hook/useMapPageSearch';
 import { getPriceBreakdown, getRoomLocationLine } from '../../../utils/calcTotalPrice';
 import { getBookingUrl } from '../../../utils/bookingUrl';
-import { formatDateKoreanWithWeekday, formatDateShortWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
+import { formatDateKoreanWithWeekday, formatDateMonthDayWithWeekday, formatTimeRangeFromSlots } from '../../../utils/dateTimeLabel';
 import { useSessionAnalyticsStore } from '../../../store/analytics/sessionStore';
 import { useToastStore } from '../../../store/toast/toastStore';
 import { pushGtmEvent } from '../../../utils/gtm';
@@ -66,11 +66,22 @@ const BookModalStepper = ({
     const start = parseHour(hourSlots[0]);
     const last = parseHour(hourSlots[hourSlots.length - 1]);
     const end = ((last + 1) % 24) || 24;
+
+    const dateLine = formatDateMonthDayWithWeekday(dateIso);
+    const startStr = `${String(start).padStart(2, '0')}:00`;
+    const endStr = `${String(end).padStart(2, '0')}:00`;
+
     const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
+    const perPerson = Math.round(room.estimated_price / peopleCount);
     const text = [
-      `[시간] ${formatDateShortWithWeekday(dateIso)} ${start}-${end}시`,
-      `[장소] ${getRoomLocationLine(room)}`,
-      `[금액] ${room.estimated_price.toLocaleString('ko-KR')}원 (인당 ${Math.round(room.estimated_price / peopleCount).toLocaleString('ko-KR')}원)`,
+      '🎸 [픽합주] 합주실 예약 공지',
+      '',
+      `📍 ${getRoomLocationLine(room)}`,
+      `🗓 ${dateLine}`,
+      `⏰ ${startStr} ~ ${endStr}`,
+      `💰 ${room.estimated_price.toLocaleString('ko-KR')}원 (인당 ${perPerson.toLocaleString('ko-KR')}원)`,
+      '',
+      '📍 위치 보기',
       url,
     ].join('\n');
 
