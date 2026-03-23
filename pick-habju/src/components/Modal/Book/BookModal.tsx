@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import BookStepInfoCheck from './StepTwo/BookStepInfoModal';
 import BookStepCalculationModal from './StepOne/BookStepCalculationModal';
 import type { NormalizedRoom } from '../../../hook/useMapPageSearch';
@@ -56,6 +56,7 @@ const BookModalStepper = ({
   }, [incrementBookModalOpen, markEnterStep1]);
 
   const { showToast } = useToastStore();
+  const isSharingRef = useRef(false);
 
   const navigateToBooking = useCallback(() => {
     const url = getBookingUrl({ businessId: room.business_id, bizItemId: room.biz_item_id }, dateIso);
@@ -66,6 +67,9 @@ const BookModalStepper = ({
   }, [room.business_id, room.biz_item_id, dateIso]);
 
   const handleShare = useCallback(async () => {
+    if (isSharingRef.current) return;
+    isSharingRef.current = true;
+
     const parseHour = (s: string) => parseInt(s.split(':')[0], 10) || 0;
     const start = parseHour(hourSlots[0]);
     const last = parseHour(hourSlots[hourSlots.length - 1]);
@@ -98,6 +102,7 @@ const BookModalStepper = ({
       }, 1000);
     } catch {
       showToast('복사에 실패했습니다.', 'warning');
+      isSharingRef.current = false;
     }
   }, [room, dateIso, hourSlots, peopleCount, showToast, navigateToBooking, onConfirm]);
 
