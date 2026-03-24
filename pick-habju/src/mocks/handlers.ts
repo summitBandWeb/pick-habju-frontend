@@ -89,7 +89,7 @@ const buildBranches = (
       rooms,
       min_price_available: availableRooms.length
         ? Math.min(...availableRooms.map((r) => r.estimated_price))
-        : 0,
+        : null,
       min_price_partial: partialRooms.length
         ? Math.min(...partialRooms.map((r) => r.estimated_price))
         : null,
