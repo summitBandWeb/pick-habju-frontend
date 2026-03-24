@@ -32,7 +32,6 @@ export interface RoomDetail {
   min_capacity: number;
   min_hours: number;
   max_hours: number | null;
-  standby_days: number | null;
   policy_warnings: PolicyWarning[];
 }
 
