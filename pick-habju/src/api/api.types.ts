@@ -41,8 +41,8 @@ export interface Branch {
   branch: string;
   lat: number;
   lng: number;
-  min_price_available: number;
-  min_price_partial: number;
+  min_price_available: number | null;
+  min_price_partial: number | null;
   available_count: number;
   phone_number: string | null;
   display_name: string | null;
