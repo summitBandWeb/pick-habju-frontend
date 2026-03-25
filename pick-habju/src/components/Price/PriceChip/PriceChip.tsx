@@ -7,10 +7,10 @@ import type { PriceChipProps } from './PriceChip.types';
 const PriceChip = ({ count, isActive = false, className = '' }: PriceChipProps) => {
   return (
     <div
-      className={`bg-gray-300 text-primary-white rounded-full w-5 h-5 p-[0.3125rem] flex items-center justify-center shrink-0 transition-all group-hover/price:w-[1.5625rem] group-hover/price:h-[1.5625rem] ${isActive ? 'w-[1.5625rem] h-[1.5625rem]' : ''} ${className}`}
+      className={`bg-gray-300 text-primary-white rounded-full ${isActive ? 'size-5' : 'size-[0.9375rem]'} p-[0.3125rem] flex items-center justify-center shrink-0 transition-all shadow-price ${className}`}
     >
       <span
-        className={`text-sm font-semibold leading-none tracking-[0.03em] transition-all group-hover/price:text-[1.1875rem] ${isActive ? 'text-[1.1875rem]' : ''}`}
+        className={`font-semibold leading-none tracking-[0.03em] transition-all ${isActive ? 'text-[1.1875rem]' : 'text-sm'}`}
       >
         {count}
       </span>
