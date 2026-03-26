@@ -167,6 +167,16 @@
     --letter-spacing-price-chip: 0.03em;
     --font-price-chip-hover-size: 19px;
 
+    --font-roomlist-name-weight: 600;
+    --font-roomlist-name-size: 12px;
+    --line-height-roomlist-name: 1.2;
+    --letter-spacing-roomlist-name: 0.02em;
+
+    --font-roomlist-price-weight: 600;
+    --font-roomlist-price-size: 13px;
+    --line-height-roomlist-price: normal;
+    --letter-spacing-roomlist-price: 0.02em;
+
     --font-cluster-weight: 700;
     --font-cluster-size: 18px;
     --line-height-cluster: 24px;
@@ -300,6 +310,26 @@
   }
   .font-price-chip:hover {
     font-size: var(--font-price-chip-hover-size);
+  }
+  .font-roomlist-name {
+    font-family: var(--font-sans);
+    font-weight: var(--font-roomlist-name-weight);
+    font-size: var(--font-roomlist-name-size);
+    line-height: var(--line-height-roomlist-name);
+    letter-spacing: var(--letter-spacing-roomlist-name);
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: var(--color-primary-white-80);
+    paint-order: stroke fill;
+  }
+  .font-roomlist-price {
+    font-family: var(--font-sans);
+    font-weight: var(--font-roomlist-price-weight);
+    font-size: var(--font-roomlist-price-size);
+    line-height: var(--line-height-roomlist-price);
+    letter-spacing: var(--letter-spacing-roomlist-price);
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: var(--color-primary-white-80);
+    paint-order: stroke fill;
   }
   .font-cluster {
     font-family: var(--font-sans);
