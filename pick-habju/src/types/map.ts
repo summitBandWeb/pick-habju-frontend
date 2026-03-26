@@ -41,6 +41,7 @@ export type MarkerUiState = {
 /** 지도 마커 하나에 대한 뷰모델. 좌표 + 가격 텍스트 + UI 상태 + 해당 지점의 룸 목록(rooms). */
 export type MarkerViewModel = MapMarker &
   MarkerUiState & {
+    name: string;
     priceText: string;
     extraRoomCount: number;
     rooms: MarkerRoomItem[];
