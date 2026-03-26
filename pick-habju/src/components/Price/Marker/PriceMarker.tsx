@@ -171,17 +171,16 @@ const PriceMarker = ({
       )}
 
       {/* ── 텍스트 라벨 (Level 1 전용) ──────────────────────────────────── */}
-      {/* 말풍선 하단(top: 44px) 기준 절대 위치, 버블 중심 x에 맞춰 가운데 정렬 */}
-      {/* TODO: hover/active 상태 스타일 — Figma 스펙 확인 후 업데이트 필요   */}
+      {/* 말풍선 하단 + 5px gap 기준 절대 위치, 버블 중심 x에 맞춰 가운데 정렬  */}
       {level === 1 && (
         <div
           data-marker-label=""
-          className="absolute top-11 left-[17px] -translate-x-1/2 flex flex-col items-center whitespace-nowrap pointer-events-none"
+          className="absolute top-[45px] left-[17px] -translate-x-1/2 flex flex-col items-center pointer-events-none"
         >
-          <span className="font-semibold text-sm leading-tight tracking-[0.03em] text-gray-600 text-shadow-sm">
+          <span className={`font-roomlist-name text-center max-w-[90px] text-shadow-[0_0_1px_white] ${isActive ? 'text-primary-black' : 'text-gray-600 group-hover/marker:text-primary-black'}`}>
             {name}
           </span>
-          <span className="font-semibold text-sm leading-tight tracking-[0.03em] text-gray-600 text-shadow-sm">
+          <span className={`font-roomlist-price text-center w-[70px] text-shadow-[0_0_1px_white] ${isActive ? 'text-primary-black' : 'text-gray-600 group-hover/marker:text-primary-black'}`}>
             ₩ {price}
           </span>
         </div>
