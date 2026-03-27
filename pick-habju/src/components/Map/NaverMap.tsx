@@ -1,11 +1,24 @@
-﻿import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import PriceLabel from '../Price/PriceLabel/PriceLabel';
+import PriceMarker, {
+  PRICE_MARKER_ANCHOR_X,
+  PRICE_MARKER_ANCHOR_Y,
+  PRICE_MARKER_DOT_ANCHOR_X,
+  PRICE_MARKER_DOT_ANCHOR_Y,
+  PRICE_MARKER_LABEL_W,
+  PRICE_MARKER_LABEL_H,
+} from '../Price/Marker/PriceMarker';
 import PriceList from '../Price/PriceList/PriceList';
 import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 import { getClusterIcons } from '../../hook/getClusterIcons';
+import {
+  buildMarkerBox,
+  computeMarkerLevels,
+  getMarkerPriority,
+} from '../../utils/markerCollisionDetector';
+import type { PriceMarkerLevel } from '../../utils/markerCollisionDetector';
 
 /** NaverMap 컴포넌트 Props. */
 type NaverMapProps = {
@@ -39,14 +52,11 @@ type ReactMarkerPopover = {
   rooms: Array<{ id: string; name: string; priceText: string }>;
 };
 
-/** PriceLabel 마커 아이콘 너비(px). 팝오버 수평 중앙 정렬 계산에 사용. */
-const MARKER_WIDTH_PX = 129;
-/** PriceLabel 마커 앵커 좌표(px). 아이콘 좌상단 기준 클릭 포인트 위치. */
-const MARKER_ANCHOR_PX = 48;
 
 /**
  * 네이버 지도 SDK 기반 지도 컴포넌트.
- * - markerViewModels로 PriceLabel 마커를 렌더링하고, 클릭·드래그·줌 이벤트를 상위에 전달.
+ * - markerViewModels로 PriceMarker 마커를 렌더링하고, 클릭·드래그·줌 이벤트를 상위에 전달.
+ * - zoom ≥ 16에서 idle 이벤트마다 AABB 충돌 검사로 마커 레벨(1/2/3)을 자동 조정.
  * - 복수 룸 마커 클릭 시 InfoWindow 대신 React 오버레이(PriceList) 팝오버를 표시.
  * - ref로 NaverMapHandle(panTo, setCenter, getViewport 등)을 외부에 노출.
  */
@@ -94,6 +104,20 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // 마커 클릭 핸들러에서 현재 openedMarkerPopoverId를 읽기 위한 ref.
     // 클로저 생성 시점의 값을 캡처하므로 직접 prop을 참조할 수 없음.
     const openedMarkerPopoverIdRef = useRef<string | null>(null);
+    /** 마커 ID → 라벨 DOM 실측 크기 캐시. 한 번 측정 후 재사용. */
+    const labelSizeCacheRef = useRef<Map<string, { width: number; height: number }>>(new Map());
+    /** 마커 ID → 현재 표시 레벨. idle마다 비교해 변경된 마커만 setIcon 호출. */
+    const markerLevelsRef = useRef<Map<string, PriceMarkerLevel>>(new Map());
+    /** idle 핸들러에서 최신 markerViewModels를 읽기 위한 ref (클로저 stale 방지). */
+    const markerViewModelsRef = useRef<MarkerViewModel[]>([]);
+    /** idle 핸들러에서 최신 selectedMarkerId를 읽기 위한 ref. */
+    const selectedMarkerIdRef = useRef<string | null>(null);
+    /**
+     * 충돌 감지 + 마커 레벨 업데이트 함수 ref.
+     * 지도 초기화 완료 후 설정되며, markerViewModels 변경 시에도 직접 호출해
+     * idle 이벤트 없이도 레벨을 즉시 반영한다.
+     */
+    const runCollisionDetectionRef = useRef<(() => void) | null>(null);
 
     const [scriptError, setScriptError] = useState<string | null>(null);
     const [isMapReady, setIsMapReady] = useState(false);
@@ -139,6 +163,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       onMarkerClickRef.current = onMarkerClick;
     }, [onMarkerClick]);
 
+    // markerViewModels / selectedMarkerId ref 동기화 — idle 핸들러에서 최신값 참조용
+    useEffect(() => {
+      markerViewModelsRef.current = markerViewModels ?? [];
+    }, [markerViewModels]);
+
+    useEffect(() => {
+      selectedMarkerIdRef.current = selectedMarkerId ?? null;
+    }, [selectedMarkerId]);
+
     // 네이버 지도 SDK 스크립트 로드 → 지도 인스턴스 생성 → 이벤트 리스너 등록.
     // initialCenter·initialZoom은 마운트 시 1회만 사용. props 변경 시 지도를 재생성하지 않는다.
     const initialCenterRef = useRef(initialCenter);
@@ -170,9 +203,106 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           const loadCb = onLoadRef.current;
           if (loadCb) loadCb(map);
 
+          // 충돌 감지 + 마커 레벨 업데이트 함수.
+          // idle 핸들러와 markerViewModels 변경 시 모두 호출된다.
+          const runCollisionDetection = () => {
+            const models = markerViewModelsRef.current;
+            const currentSelectedId = selectedMarkerIdRef.current;
+            const projection = map.getProjection();
+            const bounds = map.getBounds() as naver.maps.LatLngBounds;
+
+            // 1. 실제로 지도에 표시 중인 마커만 추출.
+            // MarkerClustering이 클러스터로 묶은 마커는 setMap(null) 상태이므로 제외된다.
+            // zoom 숫자가 아닌 실제 가시성을 기준으로 하여, 클러스터링 구간(zoom ≤ 15)에서도
+            // 클러스터에 포함되지 않은 단독 마커에는 충돌 감지가 적용된다.
+            const visibleModels = models.filter((m) => {
+              const marker = markerInstancesRef.current.get(m.id);
+              return marker?.getMap() !== null && bounds.hasLatLng(new naver.maps.LatLng(m.lat, m.lng));
+            });
+
+            // 2. 라벨 DOM 크기 측정 (캐시 미스만)
+            for (const m of visibleModels) {
+              if (!labelSizeCacheRef.current.has(m.id)) {
+                const markerEl = markerInstancesRef.current.get(m.id)?.getElement();
+                const labelEl = markerEl?.querySelector('[data-marker-label]');
+                if (labelEl) {
+                  const rect = labelEl.getBoundingClientRect();
+                  if (rect.width > 0) {
+                    labelSizeCacheRef.current.set(m.id, {
+                      width: rect.width,
+                      height: rect.height,
+                    });
+                  }
+                }
+              }
+            }
+
+            // 3. MarkerBox 배열 생성
+            // labelSize: DOM 측정값 우선, 없으면 CSS 제약 기반 상수로 폴백.
+            // idle 시점에 마커 DOM이 아직 렌더링되지 않은 경우를 대비한 안전장치.
+            const boxes = visibleModels.map((m) => {
+              const pos = projection.fromCoordToOffset(new naver.maps.LatLng(m.lat, m.lng));
+              const labelSize = labelSizeCacheRef.current.get(m.id) ?? {
+                width: PRICE_MARKER_LABEL_W,
+                height: PRICE_MARKER_LABEL_H,
+              };
+              const priority = getMarkerPriority(m.id === currentSelectedId, m.favorite === 'on');
+              return buildMarkerBox(m.id, { x: pos.x, y: pos.y }, labelSize, priority);
+            });
+
+            // 4. 충돌 검사 → 레벨 결정
+            const newLevels = computeMarkerLevels(boxes);
+
+            // 5. 변경된 마커만 setIcon 업데이트
+            for (const m of visibleModels) {
+              const newLevel = newLevels.get(m.id) ?? 1;
+              const isSelected = m.id === currentSelectedId;
+
+              // 선택된 마커는 겹쳐도 항상 level 1 유지
+              const effectiveLevel: PriceMarkerLevel = isSelected ? 1 : newLevel;
+              const prevLevel = markerLevelsRef.current.get(m.id);
+
+              if (prevLevel !== effectiveLevel) {
+                const marker = markerInstancesRef.current.get(m.id);
+                if (marker) {
+                  marker.setZIndex(isSelected ? 1000 : m.favorite === 'on' ? 1 : 0);
+                  const anchorX = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
+                  const anchorY = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
+                  marker.setIcon({
+                    content: renderToStaticMarkup(
+                      <PriceMarker
+                        level={effectiveLevel}
+                        name={m.name}
+                        price={m.priceText}
+                        isFave={m.favorite === 'on'}
+                        isPartial={m.isPartial}
+                        isActive={isSelected}
+                        extraRoomCount={m.extraRoomCount}
+                      />
+                    ),
+                    anchor: new naver.maps.Point(anchorX, anchorY),
+                  });
+                  markerLevelsRef.current.set(m.id, effectiveLevel);
+                }
+              }
+            }
+          };
+
+          runCollisionDetectionRef.current = runCollisionDetection;
+
           idleListenerRef.current = naver.maps.Event.addListener(map, 'idle', () => {
+            // 뷰포트 변경 알림
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
+
+            // 충돌 감지를 다음 프레임으로 지연.
+            // idle 이벤트는 우리 리스너와 MarkerClustering 내부 리스너가 모두 구독하는데,
+            // 등록 순서상 우리 리스너가 먼저 실행된다.
+            // 클러스터 해제 시(zoom 15→16) MarkerClustering이 개별 마커를 setMap(map)으로
+            // 복원하기 전에 우리 코드가 실행되면 visibleModels가 비어 충돌 감지가 무시된다.
+            // requestAnimationFrame으로 한 프레임 뒤에 실행하면 MarkerClustering 처리가
+            // 완료된 이후에 충돌 감지가 실행된다.
+            requestAnimationFrame(runCollisionDetection);
           });
 
           mapClickListenerRef.current = naver.maps.Event.addListener(map, 'click', () => {
@@ -212,6 +342,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           mapClickListenerRef.current = null;
         }
 
+        runCollisionDetectionRef.current = null;
+
         if (mapRef.current) {
           mapRef.current.destroy();
           mapRef.current = null;
@@ -250,23 +382,30 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       const models = markerViewModels ?? [];
       const markerArray: naver.maps.Marker[] = [];
 
+      // 마커 재생성 시 레벨/라벨 캐시 초기화
+      labelSizeCacheRef.current.clear();
+      markerLevelsRef.current.clear();
+
       for (const model of models) {
         // MarkerClustering이 마커 가시성(setMap)을 관리하므로 map 속성 없이 생성.
         // 클러스터링 미사용 폴백 시에는 아래에서 직접 setMap을 호출한다.
+        // 초기 렌더링은 level 1로 시작. idle 이벤트에서 충돌 검사 후 레벨 조정됨.
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(model.lat, model.lng),
           zIndex: model.favorite === 'on' ? 1 : 0,
           icon: {
             content: renderToStaticMarkup(
-              <PriceLabel
-                priceText={model.priceText}
+              <PriceMarker
+                level={1}
+                name={model.name}
+                price={model.priceText}
+                isFave={model.favorite === 'on'}
                 isPartial={model.isPartial}
-                favorite={model.favorite}
-                isActive={model.isActive}
+                isActive={false}
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           },
         });
 
@@ -288,8 +427,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                   const markerRect = markerEl.getBoundingClientRect();
                   const containerRect = mapContainerRef.current.getBoundingClientRect();
                   setReactPopover({
-                    // 마커 이미지 좌상단 기준 → 시각적 중앙(x), 상단에서 gap(y)으로 보정
-                    left: markerRect.left - containerRect.left + MARKER_WIDTH_PX / 2,
+                    // 마커 이미지 좌상단 기준 → 앵커 x(버블 중심)로 수평 정렬
+                    left: markerRect.left - containerRect.left + PRICE_MARKER_ANCHOR_X,
                     top: markerRect.top - containerRect.top,
                     rooms: model.rooms.map((r) => ({ id: r.id, name: r.name, priceText: r.priceText })),
                   });
@@ -328,10 +467,22 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           marker.setMap(map);
         }
       }
+
+      // 마커 재생성 후 idle 이벤트 없이도 충돌 감지를 즉시 실행한다.
+      // idle은 지도가 이동·줌이 완료된 뒤에만 발생하므로,
+      // 같은 위치에서 재검색하면 idle이 발생하지 않아 마커가 level 1로 굳는 문제를 방지.
+      // requestAnimationFrame으로 마커 DOM이 브라우저에 그려진 뒤 실행.
+      const rafId = requestAnimationFrame(() => {
+        runCollisionDetectionRef.current?.();
+      });
+
+      return () => {
+        cancelAnimationFrame(rafId);
+      };
     }, [isMapReady, markerViewModels]);
 
     // selectedMarkerId 변경 시 이전·현재 마커 아이콘만 교체 (isActive 플래그).
-    // 전체 마커를 재생성하지 않고 두 개만 갱신하여 성능 최적화.
+    // 선택된 마커는 level 1 강제 + zIndex 1000. 이전 마커는 레벨 캐시 기준 복원.
     useEffect(() => {
       if (!isMapReady) return;
 
@@ -343,18 +494,21 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const prevMarker = markerInstancesRef.current.get(prev);
         const prevModel = models.find((m) => m.id === prev);
         if (prevMarker && prevModel) {
+          const prevLevel = markerLevelsRef.current.get(prev) ?? 1;
           prevMarker.setZIndex(prevModel.favorite === 'on' ? 1 : 0);
           prevMarker.setIcon({
             content: renderToStaticMarkup(
-              <PriceLabel
-                priceText={prevModel.priceText}
+              <PriceMarker
+                level={prevLevel}
+                name={prevModel.name}
+                price={prevModel.priceText}
+                isFave={prevModel.favorite === 'on'}
                 isPartial={prevModel.isPartial}
-                favorite={prevModel.favorite}
                 isActive={false}
                 extraRoomCount={prevModel.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           });
         }
       }
@@ -363,18 +517,21 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const marker = markerInstancesRef.current.get(selectedMarkerId);
         const model = models.find((m) => m.id === selectedMarkerId);
         if (marker && model) {
-          marker.setZIndex(10);
+          // 선택된 마커는 겹쳐도 항상 level 1, zIndex 최상위
+          marker.setZIndex(1000);
           marker.setIcon({
             content: renderToStaticMarkup(
-              <PriceLabel
-                priceText={model.priceText}
+              <PriceMarker
+                level={1}
+                name={model.name}
+                price={model.priceText}
+                isFave={model.favorite === 'on'}
                 isPartial={model.isPartial}
-                favorite={model.favorite}
                 isActive={true}
                 extraRoomCount={model.extraRoomCount}
               />
             ),
-            anchor: new naver.maps.Point(MARKER_ANCHOR_PX, MARKER_ANCHOR_PX), // PriceLabel 컴포넌트 기준 앵커 위치 (좌상단으로부터 px)
+            anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           });
         }
       }
@@ -394,7 +551,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           const markerRect = markerEl.getBoundingClientRect();
           const containerRect = mapContainerRef.current.getBoundingClientRect();
           // React state/리렌더 없이 DOM에 직접 write → 같은 프레임 안에 반영되어 지연 없음
-          popoverDomRef.current.style.left = `${markerRect.left - containerRect.left + MARKER_WIDTH_PX / 2}px`;
+          popoverDomRef.current.style.left = `${markerRect.left - containerRect.left + PRICE_MARKER_ANCHOR_X}px`;
           popoverDomRef.current.style.top = `${markerRect.top - containerRect.top}px`;
         }
         animFrameId = requestAnimationFrame(track);

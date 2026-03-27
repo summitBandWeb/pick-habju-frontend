@@ -22,12 +22,21 @@ export const PRICE_MARKER_ANCHOR_X = 17; // ≈ 35 / 2
 export const PRICE_MARKER_ANCHOR_Y = 40; // Union 높이
 
 // ── AABB 충돌 계산용 아이콘 크기 상수 ───────────────────────────────────────
-// idle 핸들러에서 iconBox 계산 시 사용. (마커 콘텐츠 좌상단 기준 offset)
 export const PRICE_MARKER_ICON_W = 35;
 export const PRICE_MARKER_ICON_H = 40;
-/** 아이콘 좌측 edge → 콘텐츠 좌상단으로부터의 offset (chip 없을 때 0) */
-export const PRICE_MARKER_ICON_OFFSET_X = 0;
-export const PRICE_MARKER_ICON_OFFSET_Y = 0;
+
+// ── 라벨 추정 크기 (DOM 측정 폴백용) ────────────────────────────────────────
+// name: 12px × line-height 1.2 × 최대 2줄 ≈ 29px
+// price: 13px × line-height ~1.2 ≈ 16px
+// max-w-[90px] 제약 기준 너비
+export const PRICE_MARKER_LABEL_W = 90;
+export const PRICE_MARKER_LABEL_H = 45;
+
+// ── Level 3 점 마커 앵커 좌표 ────────────────────────────────────────────────
+// 점 크기: size-3 = 12px. 앵커는 점 중심(6, 6).
+// 버블 앵커(17, 40)와 다르므로 별도 상수로 관리.
+export const PRICE_MARKER_DOT_ANCHOR_X = 6;
+export const PRICE_MARKER_DOT_ANCHOR_Y = 6;
 
 function getBubbleFillClasses(isFave: boolean, isPartial: boolean, isActive: boolean): string {
   if (isActive) {
@@ -134,8 +143,7 @@ const PriceMarker = ({
       className={`group/price group/marker inline-flex items-start pr-[9px] relative transition-transform duration-150 ${isActive ? 'scale-[1.3]' : ''}`}
     >
       {/* ── 말풍선 아이콘 영역 ──────────────────────────────────────────── */}
-      {/* mr-[-9px]: chip을 왼쪽으로 9px 당겨 마커와 겹치게 함 (Figma: negative gap -9px)  */}
-      {/* hover 시 -11px로 확대 (Figma: negative gap -11px)                               */}
+      {/* mr-[-9px]: chip을 왼쪽으로 9px 당겨 마커와 겹치게 함 (Figma: negative gap -9px) */}
       <div className="relative flex items-center justify-center shrink-0 mr-[-9px]">
         {/* Union 컨테이너: 35×40px. SVG는 inset으로 컨테이너 밖으로 overflow */}
         <div className="w-[35px] h-[40px] relative shrink-0">
