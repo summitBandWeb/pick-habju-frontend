@@ -8,7 +8,6 @@ import PriceMarker, {
   PRICE_MARKER_LABEL_W,
   PRICE_MARKER_LABEL_H,
 } from '../Price/Marker/PriceMarker';
-import PriceList from '../Price/PriceList/PriceList';
 import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/map';
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
@@ -28,14 +27,10 @@ type NaverMapProps = {
   initialZoom: number;
   /** 렌더링할 마커 뷰모델 목록. 변경 시 마커 전체 재생성. */
   markerViewModels?: MarkerViewModel[];
-  /** 팝오버(룸 목록)를 열 마커 ID. null이면 팝오버 없음. */
-  openedMarkerPopoverId?: string | null;
   /** 선택된 룸이 속한 마커 ID. 해당 마커 아이콘을 active 상태로 표시. */
   selectedMarkerId?: string | null;
   /** 마커 클릭 시 호출. 마커 ID를 전달. */
   onMarkerClick?: (id: string) => void;
-  /** 팝오버 내 룸 클릭 시 호출. 룸 ID를 전달. */
-  onMarkerRoomClick?: (roomId: string) => void;
   /** 지도 SDK 로드 완료 후 호출. naver.maps.Map 인스턴스를 전달. */
   onLoad?: (map: naver.maps.Map) => void;
   /** idle 이벤트마다 호출. 현재 뷰포트(center + bounds)를 전달. */
@@ -45,19 +40,12 @@ type NaverMapProps = {
   className?: string;
 };
 
-/** 팝오버 오버레이의 위치(px)와 표시할 룸 목록. 마커 클릭 시 생성됨. */
-type ReactMarkerPopover = {
-  left: number;
-  top: number;
-  rooms: Array<{ id: string; name: string; priceText: string }>;
-};
-
 
 /**
  * 네이버 지도 SDK 기반 지도 컴포넌트.
  * - markerViewModels로 PriceMarker 마커를 렌더링하고, 클릭·드래그·줌 이벤트를 상위에 전달.
  * - zoom ≥ 16에서 idle 이벤트마다 AABB 충돌 검사로 마커 레벨(1/2/3)을 자동 조정.
- * - 복수 룸 마커 클릭 시 InfoWindow 대신 React 오버레이(PriceList) 팝오버를 표시.
+ * - 마커 클릭 시 onMarkerClick 콜백을 호출해 상위에서 캐러셀을 표시.
  * - ref로 NaverMapHandle(panTo, setCenter, getViewport 등)을 외부에 노출.
  */
 const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
@@ -66,10 +54,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       initialCenter,
       initialZoom,
       markerViewModels,
-      openedMarkerPopoverId,
       selectedMarkerId,
       onMarkerClick,
-      onMarkerRoomClick,
       onLoad,
       onViewportChange,
       onMapEmptyClick,
@@ -80,8 +66,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     // ── DOM 및 Naver Maps 인스턴스 refs ──
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<naver.maps.Map | null>(null);
-    /** 팝오버 div ref. rAF 루프에서 React state 없이 위치를 직접 업데이트하는 데 사용. */
-    const popoverDomRef = useRef<HTMLDivElement>(null);
 
     // ── 지도 이벤트 리스너 refs (cleanup 시 removeListener에 사용) ──
     const idleListenerRef = useRef<naver.maps.MapEventListener | null>(null);
@@ -95,15 +79,12 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     const onMapEmptyClickRef = useRef(onMapEmptyClick);
     const onMarkerClickRef = useRef(onMarkerClick);
 
-    // ── 마커 인스턴스 및 팝오버 상태 refs ──
+    // ── 마커 인스턴스 refs ──
     const markerInstancesRef = useRef<Map<string, naver.maps.Marker>>(new Map());
     const markerListenersRef = useRef<naver.maps.MapEventListener[]>([]);
     const prevSelectedMarkerIdRef = useRef<string | null>(null);
     /** MarkerClustering 인스턴스. markerViewModels 변경 시 재생성. */
     const clusteringRef = useRef<MarkerClustering | null>(null);
-    // 마커 클릭 핸들러에서 현재 openedMarkerPopoverId를 읽기 위한 ref.
-    // 클로저 생성 시점의 값을 캡처하므로 직접 prop을 참조할 수 없음.
-    const openedMarkerPopoverIdRef = useRef<string | null>(null);
     /** 마커 ID → 라벨 DOM 실측 크기 캐시. 한 번 측정 후 재사용. */
     const labelSizeCacheRef = useRef<Map<string, { width: number; height: number }>>(new Map());
     /** 마커 ID → 현재 표시 레벨. idle마다 비교해 변경된 마커만 setIcon 호출. */
@@ -121,8 +102,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
 
     const [scriptError, setScriptError] = useState<string | null>(null);
     const [isMapReady, setIsMapReady] = useState(false);
-    /** 현재 표시 중인 팝오버 데이터. null이면 팝오버 미표시. */
-    const [reactPopover, setReactPopover] = useState<ReactMarkerPopover | null>(null);
 
     useImperativeHandle(
       ref,
@@ -349,13 +328,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           mapRef.current = null;
           setIsMapReady(false);
         }
-        setReactPopover(null);
       };
     }, []);
 
     // markerViewModels 변경 시 마커 전체 재생성.
-    // 단일 룸 마커: 클릭 시 바로 룸 선택.
-    // 복수 룸 마커: 클릭 시 팝오버 토글.
+    // 마커 클릭 시 onMarkerClick 호출 → 상위에서 캐러셀 표시.
     // MarkerClustering이 로드된 경우 클러스터링 인스턴스도 재생성.
     useEffect(() => {
       if (!isMapReady) return;
@@ -413,28 +390,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         markerInstancesRef.current.set(model.id, marker);
         markerListenersRef.current.push(
           naver.maps.Event.addListener(marker, 'click', () => {
-            if (model.rooms.length > 1) {
-              if (openedMarkerPopoverIdRef.current === model.id) {
-                // 이미 열린 마커 재클릭 → 팝오버 닫기
-                setReactPopover(null);
-              } else {
-                // SDK의 map.getProjection().fromCoordToOffset()은 패닝 후 내부 캐시를
-                // 즉시 갱신하지 않아 stale한 좌표를 반환한다 (줌은 projection 스케일이
-                // 바뀌어 강제 재계산되므로 정상 동작).
-                // → 마커 DOM 요소의 getBoundingClientRect()로 실제 화면 위치를 직접 읽는다.
-                const markerEl = markerInstancesRef.current.get(model.id)?.getElement();
-                if (markerEl && mapContainerRef.current) {
-                  const markerRect = markerEl.getBoundingClientRect();
-                  const containerRect = mapContainerRef.current.getBoundingClientRect();
-                  setReactPopover({
-                    // 마커 이미지 좌상단 기준 → 앵커 x(버블 중심)로 수평 정렬
-                    left: markerRect.left - containerRect.left + PRICE_MARKER_ANCHOR_X,
-                    top: markerRect.top - containerRect.top,
-                    rooms: model.rooms.map((r) => ({ id: r.id, name: r.name, priceText: r.priceText })),
-                  });
-                }
-              }
-            }
             onMarkerClickRef.current?.(model.id);
           })
         );
@@ -537,40 +492,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       }
     }, [isMapReady, selectedMarkerId, markerViewModels]);
 
-    // 팝오버가 열린 동안 rAF 루프로 마커 DOM 위치를 매 프레임 추적해 팝오버 좌표를 갱신.
-    // Naver Maps SDK는 패닝·줌 시 마커 DOM을 직접 이동시키므로
-    // getBoundingClientRect()는 항상 현재 화면 위치를 정확히 반환한다.
-    // → 팝오버가 마커를 따라 움직여 지도 이동 중에도 닫히지 않는다.
-    useEffect(() => {
-      if (!openedMarkerPopoverId) return;
-      let animFrameId: number;
-
-      const track = () => {
-        const markerEl = markerInstancesRef.current.get(openedMarkerPopoverId)?.getElement();
-        if (markerEl && mapContainerRef.current && popoverDomRef.current) {
-          const markerRect = markerEl.getBoundingClientRect();
-          const containerRect = mapContainerRef.current.getBoundingClientRect();
-          // React state/리렌더 없이 DOM에 직접 write → 같은 프레임 안에 반영되어 지연 없음
-          popoverDomRef.current.style.left = `${markerRect.left - containerRect.left + PRICE_MARKER_ANCHOR_X}px`;
-          popoverDomRef.current.style.top = `${markerRect.top - containerRect.top}px`;
-        }
-        animFrameId = requestAnimationFrame(track);
-      };
-
-      animFrameId = requestAnimationFrame(track);
-      return () => cancelAnimationFrame(animFrameId);
-    }, [openedMarkerPopoverId]);
-
-    // openedMarkerPopoverId 동기화 및 팝오버 닫기.
-    // - ref 동기화: 마커 클릭 핸들러에서 현재값을 읽기 위함 (클로저 stale 방지).
-    // - null로 변경 시 팝오버 닫기: 필터 변경·룸 선택 등 외부에서 팝오버를 닫을 때 호출됨.
-    useEffect(() => {
-      openedMarkerPopoverIdRef.current = openedMarkerPopoverId ?? null;
-      if (!openedMarkerPopoverId) {
-        setReactPopover(null);
-      }
-    }, [openedMarkerPopoverId]);
-
     if (scriptError) {
       return (
         <div className={className} style={{ width: '100%', height: '100%' }} role="alert" aria-live="polite">
@@ -583,33 +504,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
     }
 
     return (
-      // position: relative — 팝오버 absolute 기준점
-      <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div className={className} style={{ width: '100%', height: '100%' }}>
         <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
-
-        {/* 룸 목록 팝오버.
-            Naver Maps InfoWindow는 React 트리 밖 DOM이라 클릭 이벤트가 동작하지 않으므로,
-            absolute div + React 컴포넌트로 대체.
-            transform: translate(-50%, -100%) → 수평 중앙 정렬, 마커 상단에 하단 배치.
-            stopPropagation → 팝오버 위 터치·클릭이 지도 이벤트로 전파되지 않도록 차단. */}
-        {reactPopover && (
-          <div
-            ref={popoverDomRef}
-            className="absolute z-30"
-            style={{
-              left: reactPopover.left,
-              top: reactPopover.top,
-              transform: 'translate(-50%, -100%)',
-            }}
-            onMouseDown={(event) => event.stopPropagation()}
-            onMouseUp={(event) => event.stopPropagation()}
-            onTouchStart={(event) => event.stopPropagation()}
-            onTouchEnd={(event) => event.stopPropagation()}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <PriceList rooms={reactPopover.rooms} isOpen onRoomClick={(room) => onMarkerRoomClick?.(room.id)} />
-          </div>
-        )}
       </div>
     );
   }

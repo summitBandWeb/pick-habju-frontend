@@ -41,10 +41,9 @@ const MapPage = () => {
   const reservationActions = useReservationStore((s) => s.actions);
   const navigate = useNavigate();
   const mapRef = useRef<NaverMapHandle | null>(null);
-  // ── 선택·팝오버 상태 ──
+  // ── 선택 상태 ──
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
-  const [openedMarkerPopoverId, setOpenedMarkerPopoverId] = useState<string | null>(null);
 
   // ── 필터 상태 ──
   const [isPartialFilterActive, setIsPartialFilterActive] = useState(false);
@@ -114,15 +113,11 @@ const MapPage = () => {
     setSearchText(text);
   }, []);
 
-  /**
-   * 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시.
-   * 팝오버가 열린 마커도 active 상태로 표시한다 (룸 미선택 상태에서 팝오버를 열었을 때).
-   */
+  /** 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시. */
   const selectedMarkerId = useMemo(() => {
-    if (openedMarkerPopoverId) return openedMarkerPopoverId;
     if (!selectedRoomId) return null;
     return markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null;
-  }, [markerViewModels, openedMarkerPopoverId, selectedRoomId]);
+  }, [markerViewModels, selectedRoomId]);
 
   /** 캐러셀에 표시할 룸 목록. 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회. */
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
@@ -148,7 +143,7 @@ const MapPage = () => {
   }, [isPartialFilterActive, markerViewModels, roomsById]);
 
   /**
-   * 룸 선택 핸들러. 캐러셀을 열고 팝오버를 닫으며, 다른 룸으로 이동할 때만 panTo 실행.
+   * 룸 선택 핸들러. 캐러셀을 열고, 다른 룸으로 이동할 때만 panTo 실행.
    * @param id 선택할 룸의 bizItemId
    */
   const handleSelectRoom = useCallback(
@@ -160,15 +155,12 @@ const MapPage = () => {
       if (!isCarouselOpen) {
         setIsCarouselOpen(true);
       }
-      if (openedMarkerPopoverId !== null) {
-        setOpenedMarkerPopoverId(null);
-      }
       if (isSameRoom) return;
       const roomDetail = roomsById[id];
       if (!roomDetail) return;
       mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
     },
-    [isCarouselOpen, openedMarkerPopoverId, roomsById, selectedRoomId]
+    [isCarouselOpen, roomsById, selectedRoomId]
   );
 
   /**
@@ -183,9 +175,7 @@ const MapPage = () => {
   );
 
   /**
-   * 마커 클릭 핸들러.
-   * - 단일 룸 마커: 해당 룸을 바로 선택.
-   * - 복수 룸 마커: 팝오버 토글 (같은 마커 재클릭 시 닫힘).
+   * 마커 클릭 핸들러. 찜한 룸을 우선으로 선택하여 캐러셀을 바로 표시.
    * @param markerId 클릭된 마커의 businessId
    */
   const handleMarkerClick = useCallback(
@@ -193,35 +183,18 @@ const MapPage = () => {
       const marker = markerViewModels.find((item) => item.id === markerId);
       if (!marker) return;
 
-      if (marker.rooms.length <= 1) {
-        const onlyRoom = marker.rooms[0];
-        if (!onlyRoom) return;
-        handleSelectRoom(onlyRoom.id);
-        return;
-      }
-
-      setOpenedMarkerPopoverId((prev) => (prev === markerId ? null : markerId));
+      // 찜한 룸 우선, 없으면 첫 번째 룸
+      const roomToSelect = marker.rooms.find((room) => room.favorite === 'on') ?? marker.rooms[0];
+      if (!roomToSelect) return;
+      handleSelectRoom(roomToSelect.id);
     },
     [handleSelectRoom, markerViewModels]
   );
 
-  /**
-   * 팝오버(PriceList) 내 룸 클릭 핸들러. 팝오버를 닫은 뒤 해당 룸을 선택.
-   * @param roomId 클릭된 룸의 bizItemId
-   */
-  const handleMarkerRoomClick = useCallback(
-    (roomId: string) => {
-      setOpenedMarkerPopoverId(null);
-      handleSelectRoom(roomId);
-    },
-    [handleSelectRoom]
-  );
-
-  /** 선택 UI 초기화. 선택된 룸·캐러셀·팝오버·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
+  /** 선택 UI 초기화. 선택된 룸·캐러셀·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
     setSelectedRoomId(null);
     setIsCarouselOpen(false);
-    setOpenedMarkerPopoverId(null);
     setCurrentModal(null);
     setBookModal(null);
   }, []);
@@ -322,10 +295,8 @@ const MapPage = () => {
         initialCenter={lastQuery.center}
         initialZoom={DEFAULT_MAP_ZOOM}
         markerViewModels={markerViewModels}
-        openedMarkerPopoverId={openedMarkerPopoverId}
         selectedMarkerId={selectedMarkerId}
         onMarkerClick={handleMarkerClick}
-        onMarkerRoomClick={handleMarkerRoomClick}
         onViewportChange={handleViewportChange}
         onMapEmptyClick={resetSelectionUiState}
         className="h-full w-full"
