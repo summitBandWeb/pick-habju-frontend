@@ -151,6 +151,7 @@ const PriceMarker = ({
     // pr-[9px]: chip이 오른쪽으로 overflow될 공간 확보
     <div
       className={`group/price group/marker inline-flex items-start pr-[9px] relative transition-transform duration-150 ${isActive ? 'scale-[1.3]' : ''}`}
+      style={{ transformOrigin: `${PRICE_MARKER_ANCHOR_X}px ${PRICE_MARKER_ANCHOR_Y}px` }}
     >
       {/* ── 말풍선 아이콘 영역 ──────────────────────────────────────────── */}
       {/* mr-[-9px]: chip을 왼쪽으로 9px 당겨 마커와 겹치게 함 (Figma: negative gap -9px) */}
