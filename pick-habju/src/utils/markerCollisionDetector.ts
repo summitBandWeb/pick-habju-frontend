@@ -71,10 +71,12 @@ export function buildMarkerBox(
  *
  * 알고리즘:
  * 1. priority 오름차순 정렬 (selected → fave → normal)
- * 2. 각 마커 B에 대해 B보다 우선순위가 높은 마커 A와 비교:
- *    - B.iconBox ∩ A.iconBox → Level 3 (점) 확정
- *    - B.labelBox ∩ A.iconBox → Level 2 (아이콘만)
- *    - A가 Level 1이면: B.labelBox ∩ A.labelBox → Level 2
+ * 2. 각 마커 B에 대해 이미 확정된 마커 A와 비교 (j 루프 전체를 항상 순회):
+ *    a. [소급] A가 Level 1이고 B.iconBox ∩ A.labelBox → A를 Level 2로 강등
+ *       (break 이전에 반드시 실행되도록 루프 최상단에 위치)
+ *    b. B.iconBox ∩ A.iconBox → B: Level 3 확정, 이후 j는 (a)만 계속 검사
+ *    c. B.labelBox ∩ A.iconBox → B: Level 2
+ *    d. A가 Level 1이고 B.labelBox ∩ A.labelBox → B: Level 2
  * 3. 위 조건 없음 → Level 1 (full) 유지
  */
 export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarkerLevel> {
@@ -89,18 +91,27 @@ export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarker
       const other = sorted[j];
       const otherLevel = levels.get(other.id) ?? 1;
 
-      // Level 3 판정: 아이콘끼리 겹침
-      if (isRectOverlap(current.iconBox, other.iconBox)) {
-        level = 3;
-        break;
+      // (a) 소급 강등: 내 아이콘이 상대 라벨과 겹침 → 상대를 Level 2로 강등.
+      // break/continue 이전 루프 최상단에 위치하여 level 3 케이스에서도 반드시 실행.
+      if (otherLevel === 1 && isRectOverlap(current.iconBox, other.labelBox)) {
+        levels.set(other.id, 2);
       }
 
-      // Level 2 판정: 내 라벨이 상대 아이콘과 겹침
+      // level이 이미 3이면 (b)(c)(d) 판정 불필요 — (a)만 계속 확인
+      if (level === 3) continue;
+
+      // (b) Level 3 판정: 아이콘끼리 겹침
+      if (isRectOverlap(current.iconBox, other.iconBox)) {
+        level = 3;
+        continue; // break 대신 continue: 나머지 j에서 (a) 소급 강등은 계속 수행
+      }
+
+      // (c) Level 2 판정: 내 라벨이 상대 아이콘과 겹침
       if (isRectOverlap(current.labelBox, other.iconBox)) {
         level = 2;
       }
 
-      // Level 2 판정: 상대가 Level 1이면 상대 라벨과도 비교
+      // (d) Level 2 판정: 상대가 Level 1이면 상대 라벨과도 비교
       if (otherLevel === 1 && isRectOverlap(current.labelBox, other.labelBox)) {
         level = 2;
       }
