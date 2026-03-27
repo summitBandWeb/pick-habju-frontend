@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import PriceMarker, {
+import { renderPriceMarker } from '../../utils/renderPriceMarker';
+import {
   PRICE_MARKER_ANCHOR_X,
   PRICE_MARKER_ANCHOR_Y,
   PRICE_MARKER_DOT_ANCHOR_X,
@@ -248,17 +248,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                   const anchorX = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
                   const anchorY = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
                   marker.setIcon({
-                    content: renderToStaticMarkup(
-                      <PriceMarker
-                        level={effectiveLevel}
-                        name={m.name}
-                        price={m.priceText}
-                        isFave={m.favorite === 'on'}
-                        isPartial={m.isPartial}
-                        isActive={isSelected}
-                        extraRoomCount={m.extraRoomCount}
-                      />
-                    ),
+                    content: renderPriceMarker({
+                      level: effectiveLevel,
+                      name: m.name,
+                      price: m.priceText,
+                      isFave: m.favorite === 'on',
+                      isPartial: m.isPartial,
+                      isActive: isSelected,
+                      extraRoomCount: m.extraRoomCount,
+                    }),
                     anchor: new naver.maps.Point(anchorX, anchorY),
                   });
                   markerLevelsRef.current.set(m.id, effectiveLevel);
@@ -371,17 +369,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           position: new naver.maps.LatLng(model.lat, model.lng),
           zIndex: model.favorite === 'on' ? 1 : 0,
           icon: {
-            content: renderToStaticMarkup(
-              <PriceMarker
-                level={1}
-                name={model.name}
-                price={model.priceText}
-                isFave={model.favorite === 'on'}
-                isPartial={model.isPartial}
-                isActive={false}
-                extraRoomCount={model.extraRoomCount}
-              />
-            ),
+            content: renderPriceMarker({
+              level: 1,
+              name: model.name,
+              price: model.priceText,
+              isFave: model.favorite === 'on',
+              isPartial: model.isPartial,
+              isActive: false,
+              extraRoomCount: model.extraRoomCount,
+            }),
             anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           },
         });
@@ -452,17 +448,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           const prevLevel = markerLevelsRef.current.get(prev) ?? 1;
           prevMarker.setZIndex(prevModel.favorite === 'on' ? 1 : 0);
           prevMarker.setIcon({
-            content: renderToStaticMarkup(
-              <PriceMarker
-                level={prevLevel}
-                name={prevModel.name}
-                price={prevModel.priceText}
-                isFave={prevModel.favorite === 'on'}
-                isPartial={prevModel.isPartial}
-                isActive={false}
-                extraRoomCount={prevModel.extraRoomCount}
-              />
-            ),
+            content: renderPriceMarker({
+              level: prevLevel,
+              name: prevModel.name,
+              price: prevModel.priceText,
+              isFave: prevModel.favorite === 'on',
+              isPartial: prevModel.isPartial,
+              isActive: false,
+              extraRoomCount: prevModel.extraRoomCount,
+            }),
             anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           });
         }
@@ -475,17 +469,15 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           // 선택된 마커는 겹쳐도 항상 level 1, zIndex 최상위
           marker.setZIndex(1000);
           marker.setIcon({
-            content: renderToStaticMarkup(
-              <PriceMarker
-                level={1}
-                name={model.name}
-                price={model.priceText}
-                isFave={model.favorite === 'on'}
-                isPartial={model.isPartial}
-                isActive={true}
-                extraRoomCount={model.extraRoomCount}
-              />
-            ),
+            content: renderPriceMarker({
+              level: 1,
+              name: model.name,
+              price: model.priceText,
+              isFave: model.favorite === 'on',
+              isPartial: model.isPartial,
+              isActive: true,
+              extraRoomCount: model.extraRoomCount,
+            }),
             anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
           });
         }
