@@ -125,9 +125,19 @@ const PriceMarker = ({
   extraRoomCount,
 }: PriceMarkerProps) => {
   // ── Level 3: 점 마커 ──────────────────────────────────────────────────────
+  // Default: Gray/300 (#AFAFAF), Partial: Gray/400 (#7C7C7C), Fave: Yellow/900 (#F5BE00)
+  // 공통: 12×12px 원형, 흰색 2px 링, 드롭 섀도 (shadow-price)
   if (level === 3) {
+    const dotBg = isFave
+      ? 'bg-yellow-900 hover:bg-yellow-500'
+      : isPartial
+        ? 'bg-gray-400 hover:bg-gray-200'
+        : 'bg-gray-300 hover:bg-gray-200';
     return (
-      <div className="size-3 rounded-full bg-gray-300 shadow-price" />
+      <div
+        className={`size-3 rounded-full ${dotBg} transition-colors duration-150`}
+        style={{ boxShadow: '0 0 0 2px white, 0px 1px 3px 0px rgba(0, 0, 0, 0.35)' }}
+      />
     );
   }
 
