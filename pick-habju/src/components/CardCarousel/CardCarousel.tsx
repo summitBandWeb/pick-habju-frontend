@@ -40,22 +40,19 @@ const getSwiperProps = (isDesktop: boolean) =>
 
 /**
  * 슬라이드 한 장: CardCarouselRoom -> Card 렌더, 모바일 활성 슬라이드 시 scale.
- * memo로 감싸 isActive가 바뀐 2개 슬라이드만 re-render. 나머지 N-2개는 skip.
+ * memo로 감싸 selectedRoomId 변경·마커 클릭 등으로 CardCarousel이 리렌더될 때
+ * room/isMobile/onBookClick이 바뀌지 않은 슬라이드의 리렌더를 방지.
  */
 const CarouselSlideContent = memo(function CarouselSlideContent({
   room,
-  isActive,
   isMobile,
-  isDesktop,
   onBookClick,
 }: {
   room: CardCarouselRoom;
-  isActive: boolean;
   isMobile: boolean;
-  isDesktop: boolean;
   onBookClick: (bizItemId: string) => void;
 }) {
-  const shouldScale = isMobile && isActive;
+  const isDesktop = !isMobile;
 
   const cardProps: CardProps = {
     images: room.imageUrls,
@@ -72,7 +69,11 @@ const CarouselSlideContent = memo(function CarouselSlideContent({
 
   return (
     <div className={isDesktop ? 'w-full flex justify-center' : 'flex justify-center'}>
-      <div className={`transform transition-transform duration-300 ${shouldScale ? 'scale-105 z-10' : 'scale-100'}`}>
+      <div
+        className={`transform transition-transform duration-300${
+          isMobile ? ' [.swiper-slide-active_&]:scale-105 [.swiper-slide-active_&]:z-10' : ''
+        }`}
+      >
         <Card {...cardProps} />
       </div>
     </div>
@@ -194,15 +195,11 @@ const CardCarousel = ({
                 {rooms.map((room) => (
                   // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
                   <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
-                    {({ isActive }: { isActive: boolean }) => (
-                      <CarouselSlideContent
-                        room={room}
-                        isActive={isActive}
-                        isMobile={isMobile}
-                        isDesktop={isDesktop}
-                        onBookClick={onBookClick}
-                      />
-                    )}
+                    <CarouselSlideContent
+                      room={room}
+                      isMobile={isMobile}
+                      onBookClick={onBookClick}
+                    />
                   </SwiperSlide>
                 ))}
               </Swiper>
