@@ -180,6 +180,7 @@ const CardCarousel = ({
                 aria-label="룸 카드 캐러셀"
                 modules={[Navigation]}
                 loop={true}
+                loopAdditionalSlides={2}
                 navigation={false}
                 initialSlide={initialSlide}
                 onSwiper={handleSwiper}
@@ -199,11 +200,7 @@ const CardCarousel = ({
                 {rooms.map((room) => (
                   // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
                   <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
-                    <CarouselSlideContent
-                      room={room}
-                      isMobile={isMobile}
-                      onBookClick={onBookClick}
-                    />
+                    <CarouselSlideContent room={room} isMobile={isMobile} onBookClick={onBookClick} />
                   </SwiperSlide>
                 ))}
               </Swiper>
