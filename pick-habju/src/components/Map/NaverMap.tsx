@@ -15,6 +15,8 @@ import { getClusterIcons } from '../../hook/getClusterIcons';
 import { buildMarkerBox, computeMarkerLevels, getMarkerPriority } from '../../utils/markerCollisionDetector';
 import type { PriceMarkerLevel } from '../../utils/markerCollisionDetector';
 
+const NAVER_MAP_CUSTOM_STYLE_ID = '1ef1aa21-4f03-4b99-957f-7d08f5f698bb';
+
 /** NaverMap 컴포넌트 Props. */
 type NaverMapProps = {
   /** 지도 초기 중심 좌표 */
@@ -182,6 +184,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             zoom: initialZoomRef.current,
             zoomControl: false,
             mapDataControl: false,
+            gl: true,
+            customStyleId: NAVER_MAP_CUSTOM_STYLE_ID,
           });
 
           mapRef.current = map;
