@@ -94,6 +94,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
      * idle 이벤트 없이도 레벨을 즉시 반영한다.
      */
     const runCollisionDetectionRef = useRef<(() => void) | null>(null);
+    const idleCollisionRafRef = useRef<number | null>(null);
     /**
      * panTo 직후 idle 이벤트에서 충돌 감지를 건너뛰기 위한 플래그.
      * panTo는 줌 레벨을 유지하므로 마커 간 상대 픽셀 거리가 변하지 않아
@@ -195,7 +196,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             const models = markerViewModelsRef.current;
             const currentSelectedId = selectedMarkerIdRef.current;
             const projection = map.getProjection();
-            const bounds = map.getBounds();
+            const bounds = map.getBounds() as naver.maps.LatLngBounds | null;
             if (!bounds) return;
 
             // 1. 실제로 지도에 표시 중인 마커만 추출.
@@ -301,7 +302,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 복원하기 전에 우리 코드가 실행되면 visibleModels가 비어 충돌 감지가 무시된다.
             // requestAnimationFrame으로 한 프레임 뒤에 실행하면 MarkerClustering 처리가
             // 완료된 이후에 충돌 감지가 실행된다.
-            requestAnimationFrame(runCollisionDetection);
+            idleCollisionRafRef.current = requestAnimationFrame(runCollisionDetection);
           });
 
           mapClickListenerRef.current = naver.maps.Event.addListener(map, 'click', () => {
@@ -342,6 +343,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         }
 
         runCollisionDetectionRef.current = null;
+
+        if (idleCollisionRafRef.current !== null) {
+          cancelAnimationFrame(idleCollisionRafRef.current);
+          idleCollisionRafRef.current = null;
+        }
 
         if (mapRef.current) {
           mapRef.current.destroy();
