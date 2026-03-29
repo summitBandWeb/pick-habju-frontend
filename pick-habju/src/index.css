@@ -582,7 +582,7 @@
   fill: #ffd760;
 } /* yellow-500 */
 
-/* ── 말풍선 fill: 활성 상태 (비-즐겨찾기만 색상 변경) ── */
+/* ── 말풍선 fill: 활성 상태 ── */
 /* cascade 순서상 호버 규칙보다 뒤에 위치해 active가 최종 우선권을 가짐.
    모바일에서 탭 후 :hover가 고착되어도 active 색상이 유지된다. */
 [data-pm-active='true'][data-pm-type='default'] [data-pm-bubble] {
@@ -591,6 +591,12 @@
 [data-pm-active='true'][data-pm-type='partial'] [data-pm-bubble] {
   fill: #444444;
 } /* gray-600 */
+[data-pm-active='true'][data-pm-type='fave'] [data-pm-bubble] {
+  fill: #f5be00;
+} /* yellow-900 */
+[data-pm-active='true'][data-pm-type='fave-partial'] [data-pm-bubble] {
+  fill: #fccd28;
+} /* yellow-700 */
 
 /* ── 스케일: 활성 마커 1.3× 확대 ── */
 [data-pm-active='true'] {

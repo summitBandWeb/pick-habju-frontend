@@ -195,7 +195,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             const models = markerViewModelsRef.current;
             const currentSelectedId = selectedMarkerIdRef.current;
             const projection = map.getProjection();
-            const bounds = map.getBounds() as naver.maps.LatLngBounds;
+            const bounds = map.getBounds();
+            if (!bounds) return;
 
             // 1. 실제로 지도에 표시 중인 마커만 추출.
             // MarkerClustering이 클러스터로 묶은 마커는 setMap(null) 상태이므로 제외된다.
@@ -203,7 +204,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 클러스터에 포함되지 않은 단독 마커에는 충돌 감지가 적용된다.
             const visibleModels = models.filter((m) => {
               const marker = markerInstancesRef.current.get(m.id);
-              return marker?.getMap() !== null && bounds.hasLatLng(new naver.maps.LatLng(m.lat, m.lng));
+              return marker != null && marker.getMap() !== null && bounds.hasLatLng(new naver.maps.LatLng(m.lat, m.lng));
             });
 
             // 2. 라벨 DOM 크기 측정 (캐시 미스만)
