@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
@@ -38,8 +38,11 @@ const getSwiperProps = (isDesktop: boolean) =>
         allowTouchMove: true,
       };
 
-/** 슬라이드 한 장: CardCarouselRoom -> Card 렌더, 모바일 활성 슬라이드 시 scale */
-function CarouselSlideContent({
+/**
+ * 슬라이드 한 장: CardCarouselRoom -> Card 렌더, 모바일 활성 슬라이드 시 scale.
+ * memo로 감싸 isActive가 바뀐 2개 슬라이드만 re-render. 나머지 N-2개는 skip.
+ */
+const CarouselSlideContent = memo(function CarouselSlideContent({
   room,
   isActive,
   isMobile,
@@ -74,7 +77,7 @@ function CarouselSlideContent({
       </div>
     </div>
   );
-}
+});
 
 /**
  * 검색 결과 룸 목록을 하단 슬라이딩 오버레이로 표시하는 캐러셀.
@@ -82,7 +85,15 @@ function CarouselSlideContent({
  * - 사용자 스와이프 시 onCardChange로 선택 룸 ID를 상위에 전달.
  * - isOpen / rooms.length에 따라 AnimatePresence로 슬라이드 인·아웃 처리.
  */
-const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, onBookClick, forceDevice }: CardCarouselProps) => {
+const CardCarousel = ({
+  rooms,
+  selectedRoomId,
+  isOpen,
+  onCardChange,
+  onSwipeTransitionEnd,
+  onBookClick,
+  forceDevice,
+}: CardCarouselProps) => {
   const detectedMobile = useMobileDetect();
   const isMobile = forceDevice ? forceDevice === 'mobile' : detectedMobile;
   const isDesktop = !isMobile;
@@ -175,13 +186,26 @@ const CardCarousel = ({ rooms, selectedRoomId, isOpen, onCardChange, onBookClick
                     onCardChange(currentRoom.bizItemId);
                   }
                 }}
+                onSlideChangeTransitionEnd={(swiper) => {
+                  if (!isSwipeReadyRef.current) return;
+                  const currentRoom = rooms[swiper.realIndex];
+                  if (currentRoom) {
+                    onSwipeTransitionEnd?.(currentRoom.bizItemId);
+                  }
+                }}
                 className="w-full h-full !py-8"
               >
                 {rooms.map((room) => (
                   // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
                   <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
                     {({ isActive }: { isActive: boolean }) => (
-                      <CarouselSlideContent room={room} isActive={isActive} isMobile={isMobile} isDesktop={isDesktop} onBookClick={onBookClick} />
+                      <CarouselSlideContent
+                        room={room}
+                        isActive={isActive}
+                        isMobile={isMobile}
+                        isDesktop={isDesktop}
+                        onBookClick={onBookClick}
+                      />
                     )}
                   </SwiperSlide>
                 ))}

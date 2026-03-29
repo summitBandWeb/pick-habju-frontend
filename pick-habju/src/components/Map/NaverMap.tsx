@@ -12,11 +12,7 @@ import type { MarkerViewModel, MapViewport, NaverMapHandle } from '../../types/m
 import { getViewportFromMap } from '../../utils/naverMapAdapter';
 import { loadNaverMapScript } from '../../utils/loadNaverMapScript';
 import { getClusterIcons } from '../../hook/getClusterIcons';
-import {
-  buildMarkerBox,
-  computeMarkerLevels,
-  getMarkerPriority,
-} from '../../utils/markerCollisionDetector';
+import { buildMarkerBox, computeMarkerLevels, getMarkerPriority } from '../../utils/markerCollisionDetector';
 import type { PriceMarkerLevel } from '../../utils/markerCollisionDetector';
 
 /** NaverMap 컴포넌트 Props. */
@@ -39,7 +35,6 @@ type NaverMapProps = {
   onMapEmptyClick?: () => void;
   className?: string;
 };
-
 
 /**
  * 네이버 지도 SDK 기반 지도 컴포넌트.
@@ -99,6 +94,12 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
      * idle 이벤트 없이도 레벨을 즉시 반영한다.
      */
     const runCollisionDetectionRef = useRef<(() => void) | null>(null);
+    /**
+     * panTo 직후 idle 이벤트에서 충돌 감지를 건너뛰기 위한 플래그.
+     * panTo는 줌 레벨을 유지하므로 마커 간 상대 픽셀 거리가 변하지 않아
+     * 충돌 감지 결과가 동일하다. 불필요한 O(n²) 연산을 억제한다.
+     */
+    const suppressCollisionRef = useRef(false);
 
     const [scriptError, setScriptError] = useState<string | null>(null);
     const [isMapReady, setIsMapReady] = useState(false);
@@ -113,6 +114,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         },
         panTo: (lat: number, lng: number) => {
           if (mapRef.current) {
+            suppressCollisionRef.current = true;
             mapRef.current.panTo(new naver.maps.LatLng(lat, lng));
           }
         },
@@ -278,6 +280,14 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
 
+            // panTo 직후 idle은 충돌 감지를 건너뜀.
+            // panTo는 줌 레벨을 유지하므로 마커 간 상대 픽셀 거리가 변하지 않아
+            // 결과가 동일하다. 플래그를 소비한 뒤 즉시 리셋.
+            if (suppressCollisionRef.current) {
+              suppressCollisionRef.current = false;
+              return;
+            }
+
             // 충돌 감지를 다음 프레임으로 지연.
             // idle 이벤트는 우리 리스너와 MarkerClustering 내부 리스너가 모두 구독하는데,
             // 등록 순서상 우리 리스너가 먼저 실행된다.
@@ -438,58 +448,99 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
       };
     }, [isMapReady, markerViewModels]);
 
-    // selectedMarkerId 변경 시 이전·현재 마커 아이콘만 교체 (isActive 플래그).
-    // 선택된 마커는 level 1 강제 + zIndex 1000. 이전 마커는 레벨 캐시 기준 복원.
+    // selectedMarkerId 변경 시 이전·현재 마커의 활성 상태를 전환한다.
+    //
+    // [공통 경로 — level 1] setIcon 없이 data-pm-active 속성 토글만 수행.
+    //   DOM 재생성이 없어 캐러셀 슬라이딩 중 "툭" 끊기는 현상을 방지한다.
+    //   이전 마커의 fave 여부는 DOM data-pm-type 속성에서 읽어 models.find를 생략한다.
+    //
+    // [폴백 — level 2/3] 충돌 감지로 축소된 마커를 선택할 때만 setIcon으로 level 1 전환.
+    //   해제 시에도 마커 레벨 캐시 기준 원래 크기로 복원한다.
     useEffect(() => {
       if (!isMapReady) return;
 
-      const models = markerViewModels ?? [];
-      const prev = prevSelectedMarkerIdRef.current;
-      prevSelectedMarkerIdRef.current = selectedMarkerId ?? null;
+      const currId = selectedMarkerId ?? null;
+      const prevId = prevSelectedMarkerIdRef.current;
+      prevSelectedMarkerIdRef.current = currId;
 
-      if (prev) {
-        const prevMarker = markerInstancesRef.current.get(prev);
-        const prevModel = models.find((m) => m.id === prev);
-        if (prevMarker && prevModel) {
-          const prevLevel = markerLevelsRef.current.get(prev) ?? 1;
-          const prevAnchorX = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
-          const prevAnchorY = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
-          prevMarker.setZIndex(prevModel.favorite === 'on' ? 1 : 0);
-          prevMarker.setIcon({
-            content: renderPriceMarker({
-              level: prevLevel,
-              name: prevModel.name,
-              price: prevModel.priceText,
-              isFave: prevModel.favorite === 'on',
-              isPartial: prevModel.isPartial,
-              isActive: false,
-              extraRoomCount: prevModel.extraRoomCount,
-            }),
-            anchor: new naver.maps.Point(prevAnchorX, prevAnchorY),
-          });
-        }
-      }
+      const rafId = requestAnimationFrame(() => {
+        // ── 이전 마커 비활성화 ──────────────────────────────────────────────
+        if (prevId) {
+          const prevMarker = markerInstancesRef.current.get(prevId);
+          if (prevMarker) {
+            const prevLevel = markerLevelsRef.current.get(prevId) ?? 1;
+            const prevEl = prevMarker.getElement()?.querySelector<HTMLElement>('[data-pm-active]');
+            // data-pm-type에서 fave 여부 판별 → models.find 불필요
+            const isFave = prevEl?.dataset.pmType?.startsWith('fave') ?? false;
+            prevMarker.setZIndex(isFave ? 1 : 0);
 
-      if (selectedMarkerId) {
-        const marker = markerInstancesRef.current.get(selectedMarkerId);
-        const model = models.find((m) => m.id === selectedMarkerId);
-        if (marker && model) {
-          // 선택된 마커는 겹쳐도 항상 level 1, zIndex 최상위
-          marker.setZIndex(1000);
-          marker.setIcon({
-            content: renderPriceMarker({
-              level: 1,
-              name: model.name,
-              price: model.priceText,
-              isFave: model.favorite === 'on',
-              isPartial: model.isPartial,
-              isActive: true,
-              extraRoomCount: model.extraRoomCount,
-            }),
-            anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
-          });
+            if (prevLevel === 1) {
+              // [공통] CSS 토글만 — DOM 재생성 없음
+              prevEl?.setAttribute('data-pm-active', 'false');
+            } else {
+              // [폴백] level 2/3 복원 — setIcon 필요
+              const prevModel = (markerViewModels ?? []).find((m) => m.id === prevId);
+              if (prevModel) {
+                const anchorX = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
+                const anchorY = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
+                prevMarker.setIcon({
+                  content: renderPriceMarker({
+                    level: prevLevel,
+                    name: prevModel.name,
+                    price: prevModel.priceText,
+                    isFave: prevModel.favorite === 'on',
+                    isPartial: prevModel.isPartial,
+                    isActive: false,
+                    extraRoomCount: prevModel.extraRoomCount,
+                  }),
+                  anchor: new naver.maps.Point(anchorX, anchorY),
+                });
+              }
+            }
+          }
         }
-      }
+
+        // ── 현재 마커 활성화 ────────────────────────────────────────────────
+        if (currId) {
+          const currMarker = markerInstancesRef.current.get(currId);
+          if (currMarker) {
+            const currLevel = markerLevelsRef.current.get(currId) ?? 1;
+            currMarker.setZIndex(1000);
+
+            if (currLevel === 1) {
+              // [공통] CSS 토글만 — DOM 재생성 없음
+              currMarker
+                .getElement()
+                ?.querySelector<HTMLElement>('[data-pm-active]')
+                ?.setAttribute('data-pm-active', 'true');
+            } else {
+              // [폴백] level 2/3 → level 1 전환 후 CSS 활성화
+              const currModel = (markerViewModels ?? []).find((m) => m.id === currId);
+              if (currModel) {
+                currMarker.setIcon({
+                  content: renderPriceMarker({
+                    level: 1,
+                    name: currModel.name,
+                    price: currModel.priceText,
+                    isFave: currModel.favorite === 'on',
+                    isPartial: currModel.isPartial,
+                    isActive: false,
+                    extraRoomCount: currModel.extraRoomCount,
+                  }),
+                  anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
+                });
+                // setIcon이 DOM을 교체한 직후 새 요소에 활성 속성 적용
+                currMarker
+                  .getElement()
+                  ?.querySelector<HTMLElement>('[data-pm-active]')
+                  ?.setAttribute('data-pm-active', 'true');
+              }
+            }
+          }
+        }
+      });
+
+      return () => cancelAnimationFrame(rafId);
     }, [isMapReady, selectedMarkerId, markerViewModels]);
 
     if (scriptError) {

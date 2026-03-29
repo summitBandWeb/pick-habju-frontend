@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import CardCarousel from '../components/CardCarousel/CardCarousel';
@@ -40,7 +40,10 @@ const MapPage = () => {
   const lastQuery = useSearchStore((s) => s.lastQuery);
   const reservationActions = useReservationStore((s) => s.actions);
   const navigate = useNavigate();
+  const [, startTransition] = useTransition();
   const mapRef = useRef<NaverMapHandle | null>(null);
+  /** 마커 클릭 시 panTo를 캐러셀 애니메이션 이후로 미루기 위한 타이머. */
+  const panToTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // ── 선택 상태 ──
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
@@ -113,11 +116,12 @@ const MapPage = () => {
     setSearchText(text);
   }, []);
 
-  /** 선택된 룸이 속한 마커 ID → NaverMap에서 해당 마커 아이콘을 active 상태로 표시. */
-  const selectedMarkerId = useMemo(() => {
-    if (!selectedRoomId) return null;
-    return markerViewModels.find((marker) => marker.rooms.some((room) => room.id === selectedRoomId))?.id ?? null;
-  }, [markerViewModels, selectedRoomId]);
+  /**
+   * 선택된 마커 ID. useMemo 파생값 대신 독립 state로 관리.
+   * 마커 클릭 시 즉시 업데이트(NaverMap 아이콘 교체)하고,
+   * 캐러셀 slideToLoop는 startTransition으로 뒤에 실행해 두 작업이 프레임을 나눠 쓰도록 한다.
+   */
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
 
   /** 캐러셀에 표시할 룸 목록. 현재 마커 뷰모델에 포함된 룸만 roomsById에서 조회. */
   const carouselRooms = useMemo<CardCarouselRoom[]>(() => {
@@ -143,56 +147,111 @@ const MapPage = () => {
   }, [isPartialFilterActive, markerViewModels, roomsById]);
 
   /**
-   * 룸 선택 핸들러. 캐러셀을 열고, 다른 룸으로 이동할 때만 panTo 실행.
+   * 룸 선택 핸들러. 상태 업데이트만 담당하며 panTo는 호출하지 않는다.
+   * panTo는 각 호출처(handleMarkerClick, handleCardChange)에서 타이머로 지연 실행.
    * @param id 선택할 룸의 bizItemId
    */
   const handleSelectRoom = useCallback(
     (id: string) => {
-      const isSameRoom = id === selectedRoomId;
-      if (!isSameRoom) {
-        setSelectedRoomId(id);
-      }
-      if (!isCarouselOpen) {
-        setIsCarouselOpen(true);
-      }
-      if (isSameRoom) return;
-      const roomDetail = roomsById[id];
-      if (!roomDetail) return;
-      mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
+      if (id !== selectedRoomId) setSelectedRoomId(id);
+      if (!isCarouselOpen) setIsCarouselOpen(true);
     },
-    [isCarouselOpen, roomsById, selectedRoomId]
+    [isCarouselOpen, selectedRoomId]
   );
 
   /**
-   * 캐러셀 스와이프로 활성 카드가 바뀔 때 호출. 해당 룸을 선택 상태로 전환.
+   * 캐러셀 스와이프로 활성 카드가 바뀔 때 호출.
+   * startTransition으로 낮은 우선순위를 부여해 Swiper CSS 애니메이션 프레임을 보호한다.
+   * panTo는 Swiper 전환 애니메이션 완료 후 onSwipeTransitionEnd에서 처리한다.
    * @param id 새로 활성화된 슬라이드의 bizItemId
    */
   const handleCardChange = useCallback(
     (id: string) => {
-      handleSelectRoom(id);
+      startTransition(() => {
+        const markerId =
+          markerViewModels.find((marker) => marker.rooms.some((room) => room.id === id))?.id ?? null;
+        setSelectedMarkerId(markerId);
+        handleSelectRoom(id);
+      });
     },
-    [handleSelectRoom]
+    [handleSelectRoom, markerViewModels]
+  );
+
+  /**
+   * Swiper 슬라이드 전환 애니메이션이 완전히 끝난 뒤 호출.
+   * swipe 애니메이션과 panTo 애니메이션이 겹치지 않아 프레임 드롭 없이 지도가 이동한다.
+   * @param id 전환 완료된 슬라이드의 bizItemId
+   */
+  const handleSwipeTransitionEnd = useCallback(
+    (id: string) => {
+      const roomDetail = roomsById[id];
+      if (!roomDetail) return;
+      mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
+    },
+    [roomsById]
   );
 
   /**
    * 마커 클릭 핸들러. 찜한 룸을 우선으로 선택하여 캐러셀을 바로 표시.
+   *
+   * 렌더링 분리 전략 (마커 클릭 시 캐러셀 slideToLoop 버벅임 방지):
+   * 1. setSelectedMarkerId(markerId) → 즉시 실행: NaverMap 마커 아이콘 교체
+   * 2. startTransition → handleSelectRoom(roomId): 캐러셀 slideToLoop는 다음 여유 프레임에서 실행
+   *    → 두 작업이 같은 프레임을 두고 경쟁하지 않아 슬라이딩 버벅임 감소
+   *
+   * panTo 전략:
+   * - 캐러셀이 이미 열려있는 경우: slideToLoop 완료 후 onSlideChangeTransitionEnd →
+   *   handleSwipeTransitionEnd 에서 panTo. (캐러셀 스와이프와 동일한 경로)
+   * - 캐러셀이 닫혀있는 경우: Framer Motion spring 입장 애니메이션(~300ms) 동안
+   *   slideToLoop이 발생하지 않으므로 350ms 후 직접 panTo.
    * @param markerId 클릭된 마커의 businessId
    */
   const handleMarkerClick = useCallback(
     (markerId: string) => {
+      if (panToTimerRef.current) {
+        clearTimeout(panToTimerRef.current);
+        panToTimerRef.current = null;
+      }
       const marker = markerViewModels.find((item) => item.id === markerId);
       if (!marker) return;
 
       // 찜한 룸 우선, 없으면 첫 번째 룸
       const roomToSelect = marker.rooms.find((room) => room.favorite === 'on') ?? marker.rooms[0];
       if (!roomToSelect) return;
-      handleSelectRoom(roomToSelect.id);
+
+      const carouselWasOpen = isCarouselOpen;
+
+      // ① 즉시: 마커 하이라이트만 교체 (NaverMap DOM 업데이트)
+      setSelectedMarkerId(markerId);
+
+      // 같은 룸을 다시 클릭한 경우 캐러셀·panTo 로직은 불필요
+      if (roomToSelect.id === selectedRoomId) return;
+
+      // ② 지연: 캐러셀 slideToLoop (①의 DOM 업데이트와 프레임을 분리)
+      startTransition(() => {
+        handleSelectRoom(roomToSelect.id);
+      });
+
+      if (!carouselWasOpen) {
+        const roomDetail = roomsById[roomToSelect.id];
+        if (!roomDetail) return;
+        panToTimerRef.current = setTimeout(() => {
+          panToTimerRef.current = null;
+          mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
+        }, 350);
+      }
+      // carouselWasOpen 인 경우: slideToLoop → onSlideChangeTransitionEnd → handleSwipeTransitionEnd 에서 panTo
     },
-    [handleSelectRoom, markerViewModels]
+    [handleSelectRoom, isCarouselOpen, markerViewModels, roomsById, selectedRoomId]
   );
 
-  /** 선택 UI 초기화. 선택된 룸·캐러셀·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
+  /** 선택 UI 초기화. 선택된 룸·마커·캐러셀·모달을 모두 닫는다. 지도 빈 영역 클릭·필터 변경 시 사용. */
   const resetSelectionUiState = useCallback(() => {
+    if (panToTimerRef.current) {
+      clearTimeout(panToTimerRef.current);
+      panToTimerRef.current = null;
+    }
+    setSelectedMarkerId(null);
     setSelectedRoomId(null);
     setIsCarouselOpen(false);
     setCurrentModal(null);
@@ -245,6 +304,13 @@ const MapPage = () => {
     });
   }, [handleSearchHere, resetSelectionUiState]);
 
+  // 언마운트 시 panTo 타이머 정리.
+  useEffect(() => {
+    return () => {
+      if (panToTimerRef.current) clearTimeout(panToTimerRef.current);
+    };
+  }, []);
+
   // 필터·검색 텍스트 변경 시 선택 UI 초기화.
   useEffect(() => {
     resetSelectionUiState();
@@ -262,6 +328,7 @@ const MapPage = () => {
     if (!selectedRoomId) return;
     if (roomsById[selectedRoomId]) return;
 
+    setSelectedMarkerId(null);
     setSelectedRoomId(null);
     if (isCarouselOpen) {
       setIsCarouselOpen(false);
@@ -331,6 +398,7 @@ const MapPage = () => {
           selectedRoomId={selectedRoomId}
           isOpen={isCarouselOpen}
           onCardChange={handleCardChange}
+          onSwipeTransitionEnd={handleSwipeTransitionEnd}
           onBookClick={handleBookClick}
         />
       )}
