@@ -237,29 +237,35 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
               const newLevel = newLevels.get(m.id) ?? 1;
               const isSelected = m.id === currentSelectedId;
 
-              // 선택된 마커는 겹쳐도 항상 level 1 유지
-              const effectiveLevel: PriceMarkerLevel = isSelected ? 1 : newLevel;
               const prevLevel = markerLevelsRef.current.get(m.id);
 
-              if (prevLevel !== effectiveLevel) {
+              // 충돌 감지 레벨은 항상 캐시에 저장.
+              // effectiveLevel(선택 시 강제 1)이 아닌 newLevel을 저장해야
+              // 선택 해제 시 selectedMarkerId effect가 올바른 레벨로 복원할 수 있다.
+              markerLevelsRef.current.set(m.id, newLevel);
+
+              // 선택된 마커의 아이콘은 selectedMarkerId effect에서 전담 관리.
+              // 여기서 처리하면 effectiveLevel=1이 캐시에 덮어써지는 버그가 발생하므로 건너뜀.
+              if (isSelected) continue;
+
+              if (prevLevel !== newLevel) {
                 const marker = markerInstancesRef.current.get(m.id);
                 if (marker) {
-                  marker.setZIndex(isSelected ? 1000 : m.favorite === 'on' ? 1 : 0);
-                  const anchorX = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
-                  const anchorY = effectiveLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
+                  marker.setZIndex(m.favorite === 'on' ? 1 : 0);
+                  const anchorX = newLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
+                  const anchorY = newLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
                   marker.setIcon({
                     content: renderPriceMarker({
-                      level: effectiveLevel,
+                      level: newLevel,
                       name: m.name,
                       price: m.priceText,
                       isFave: m.favorite === 'on',
                       isPartial: m.isPartial,
-                      isActive: isSelected,
+                      isActive: false,
                       extraRoomCount: m.extraRoomCount,
                     }),
                     anchor: new naver.maps.Point(anchorX, anchorY),
                   });
-                  markerLevelsRef.current.set(m.id, effectiveLevel);
                 }
               }
             }
@@ -446,6 +452,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         const prevModel = models.find((m) => m.id === prev);
         if (prevMarker && prevModel) {
           const prevLevel = markerLevelsRef.current.get(prev) ?? 1;
+          const prevAnchorX = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_X : PRICE_MARKER_ANCHOR_X;
+          const prevAnchorY = prevLevel === 3 ? PRICE_MARKER_DOT_ANCHOR_Y : PRICE_MARKER_ANCHOR_Y;
           prevMarker.setZIndex(prevModel.favorite === 'on' ? 1 : 0);
           prevMarker.setIcon({
             content: renderPriceMarker({
@@ -457,7 +465,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
               isActive: false,
               extraRoomCount: prevModel.extraRoomCount,
             }),
-            anchor: new naver.maps.Point(PRICE_MARKER_ANCHOR_X, PRICE_MARKER_ANCHOR_Y),
+            anchor: new naver.maps.Point(prevAnchorX, prevAnchorY),
           });
         }
       }
