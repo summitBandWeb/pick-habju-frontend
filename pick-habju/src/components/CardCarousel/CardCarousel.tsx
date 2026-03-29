@@ -116,15 +116,23 @@ const CardCarousel = ({
 
   /** 지도 핀 클릭(selectedRoomId 변경) 시 해당 슬라이드로 동기화. Loop 모드이므로 slideToLoop 사용 */
   useEffect(() => {
-    if (swiperInstance && selectedRoomId && isOpen && rooms.length > 0) {
-      const index = rooms.findIndex((room) => room.bizItemId === selectedRoomId);
-      if (index !== -1) {
-        if (swiperInstance.realIndex !== index) {
-          swiperInstance.slideToLoop(index);
-        }
+    if (!swiperInstance || !isOpen || rooms.length === 0) return;
+
+    if (selectedRoomId === null) {
+      if (swiperInstance.realIndex !== 0) {
+        swiperInstance.slideToLoop(0);
       }
       isSwipeReadyRef.current = true;
+      return;
     }
+
+    const index = rooms.findIndex((room) => room.bizItemId === selectedRoomId);
+    if (index !== -1) {
+      if (swiperInstance.realIndex !== index) {
+        swiperInstance.slideToLoop(index);
+      }
+    }
+    isSwipeReadyRef.current = true;
   }, [selectedRoomId, isOpen, swiperInstance, rooms]);
 
   /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
