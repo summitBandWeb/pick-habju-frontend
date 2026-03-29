@@ -42,6 +42,8 @@ const getSwiperProps = (isDesktop: boolean) =>
  * 슬라이드 한 장: CardCarouselRoom -> Card 렌더, 모바일 활성 슬라이드 시 scale.
  * memo로 감싸 selectedRoomId 변경·마커 클릭 등으로 CardCarousel이 리렌더될 때
  * room/isMobile/onBookClick이 바뀌지 않은 슬라이드의 리렌더를 방지.
+ * scale은 .swiper-slide-active CSS 클래스로 처리 — React 리렌더 없이 Swiper가 직접 토글.
+ * delay-300으로 Swiper 애니메이션(300ms) 완료 후 scale이 시작되어 스와이프 중 겹침 방지.
  */
 const CarouselSlideContent = memo(function CarouselSlideContent({
   room,
@@ -71,7 +73,9 @@ const CarouselSlideContent = memo(function CarouselSlideContent({
     <div className={isDesktop ? 'w-full flex justify-center' : 'flex justify-center'}>
       <div
         className={`transform transition-transform duration-300${
-          isMobile ? ' [.swiper-slide-active_&]:scale-105 [.swiper-slide-active_&]:z-10' : ''
+          isMobile
+            ? ' [.swiper-slide-active_&]:scale-105 [.swiper-slide-active_&]:z-10 [.swiper-slide-active_&]:delay-300'
+            : ''
         }`}
       >
         <Card {...cardProps} />
