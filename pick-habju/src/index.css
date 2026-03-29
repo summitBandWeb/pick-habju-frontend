@@ -553,9 +553,9 @@
  *
  * 우선순위 구조 (specificity):
  *   기본 fill  [data-pm-type][data-pm-bubble]            → (0,2,0)
- *   활성 fill  [data-pm-active="true"][data-pm-type][data-pm-bubble] → (0,3,0) ← 활성이 기본을 이김
  *   호버 fill  [data-pm-type]:hover [data-pm-bubble]     → (0,2+1,0) = (0,3,0)
- *   → 호버 규칙을 활성 규칙 뒤에 배치해 cascade 순서로 호버가 최종 우선권을 가짐
+ *   활성 fill  [data-pm-active="true"][data-pm-type][data-pm-bubble] → (0,3,0) ← 활성이 호버를 이김
+ *   → specificity가 동일하므로 활성 규칙을 호버 규칙 뒤에 배치해 cascade 순서로 활성이 최종 우선권을 가짐
  * ─────────────────────────────────────────────────────────────────────────── */
 
 /* ── 말풍선 fill: 비활성 기본값 ── */

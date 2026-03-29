@@ -17,7 +17,7 @@ export function renderPriceMarker(props: PriceMarkerProps): string {
   const cached = cache.get(key);
   if (cached !== undefined) return cached;
 
-  const html = renderToStaticMarkup(PriceMarker(props));
+  const html = renderToStaticMarkup(<PriceMarker {...props} />);
   cache.set(key, html);
   return html;
 }
