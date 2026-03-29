@@ -179,17 +179,13 @@ const CardCarousel = ({
                 initialSlide={initialSlide}
                 onSwiper={handleSwiper}
                 {...getSwiperProps(isDesktop)}
-                onSlideChange={(swiper) => {
-                  if (!isSwipeReadyRef.current) return;
-                  const currentRoom = rooms[swiper.realIndex];
-                  if (currentRoom && currentRoom.bizItemId !== selectedRoomId) {
-                    onCardChange(currentRoom.bizItemId);
-                  }
-                }}
                 onSlideChangeTransitionEnd={(swiper) => {
                   if (!isSwipeReadyRef.current) return;
                   const currentRoom = rooms[swiper.realIndex];
                   if (currentRoom) {
+                    if (currentRoom.bizItemId !== selectedRoomId) {
+                      onCardChange(currentRoom.bizItemId);
+                    }
                     onSwipeTransitionEnd?.(currentRoom.bizItemId);
                   }
                 }}
