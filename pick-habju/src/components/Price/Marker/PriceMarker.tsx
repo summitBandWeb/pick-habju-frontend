@@ -37,6 +37,7 @@ export const PRICE_MARKER_LABEL_H = 45;
 // 버블 앵커(17, 40)와 다르므로 별도 상수로 관리.
 export const PRICE_MARKER_DOT_ANCHOR_X = 6;
 export const PRICE_MARKER_DOT_ANCHOR_Y = 6;
+export const PRICE_MARKER_DOT_SIZE = 12; // size-3 = 12px
 
 function getBubbleFillClasses(isFave: boolean, isPartial: boolean, isActive: boolean): string {
   if (isActive) {
