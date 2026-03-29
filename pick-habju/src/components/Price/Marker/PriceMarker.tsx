@@ -39,44 +39,35 @@ export const PRICE_MARKER_DOT_ANCHOR_X = 6;
 export const PRICE_MARKER_DOT_ANCHOR_Y = 6;
 export const PRICE_MARKER_DOT_SIZE = 12; // size-3 = 12px
 
-function getBubbleFillClasses(isFave: boolean, isPartial: boolean, isActive: boolean): string {
-  if (isActive) {
-    if (isFave && isPartial) return 'fill-yellow-700 group-hover/marker:fill-yellow-500';
-    if (isFave) return 'fill-yellow-900 group-hover/marker:fill-yellow-500';
-    if (isPartial) return 'fill-gray-600 group-hover/marker:fill-gray-200';
-    return 'fill-gray-400 group-hover/marker:fill-gray-200';
-  }
-  if (isFave && isPartial) return 'fill-yellow-700 group-hover/marker:fill-yellow-500';
-  if (isFave) return 'fill-yellow-900 group-hover/marker:fill-yellow-500';
-  if (isPartial) return 'fill-gray-400 group-hover/marker:fill-gray-200';
-  return 'fill-gray-300 group-hover/marker:fill-gray-200';
-}
-
 // ── 말풍선 SVG ──────────────────────────────────────────────────────────────
-// 4가지 상태 모두 동일한 경로(viewBox 0 0 41 46), fill 색상만 다름.
+// 4가지 상태 모두 동일한 경로(viewBox 0 0 41 46).
+// fill 색상은 Tailwind 클래스 대신 [data-pm-type] / [data-pm-active] CSS 규칙으로 관리.
 // SVG filter/mask ID(pm-shadow, pm-mask)는 여러 마커 인스턴스에서 공유하지만
 // 모든 정의가 동일하므로 첫 번째 정의가 사용되어도 시각 결과가 동일하다.
 // inset: -5% -8.57% -10% -8.57% → SVG(41×46)가 컨테이너(35×40) 밖으로 overflow
-function BubbleSVG({ fillClasses }: { fillClasses: string }) {
+// SVG feGaussianBlur filter 대신 CSS drop-shadow 사용.
+// CSS drop-shadow는 GPU 컴포지터에서 직접 처리되어 SVG filter 파싱·래스터라이제이션 비용이 없다.
+// dy=1, blur≈3px(stdDeviation 1.5×2), opacity=0.35 — 기존 SVG filter와 동일한 시각 결과.
+function BubbleSVG() {
   return (
     <svg
       preserveAspectRatio="none"
       width="100%"
       height="100%"
       overflow="visible"
-      style={{ display: 'block' }}
+      style={{ display: 'block', filter: 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.35))' }}
       viewBox="0 0 41 46"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g filter="url(#pm-shadow)">
+      <g>
         <mask id="pm-mask" fill="white">
           <path d="M20.5 2C30.1647 2.00005 37.9998 10.0191 38 19.9111C38 28.6015 31.9528 35.8453 23.9307 37.4775L20.499 42L17.0664 37.4766C9.0457 35.8432 3 28.6005 3 19.9111C3.00024 10.019 10.8352 2 20.5 2Z" />
         </mask>
-        {/* 말풍선 채우기 */}
+        {/* 말풍선 채우기 — fill은 index.css의 [data-pm-type] / [data-pm-active] 규칙에서 관리 */}
         <path
           d="M20.5 2C30.1647 2.00005 37.9998 10.0191 38 19.9111C38 28.6015 31.9528 35.8453 23.9307 37.4775L20.499 42L17.0664 37.4766C9.0457 35.8432 3 28.6005 3 19.9111C3.00024 10.019 10.8352 2 20.5 2Z"
-          className={`${fillClasses}`}
+          data-pm-bubble
         />
         {/* 흰색 테두리 (mask로 내부 클리핑) */}
         <path
@@ -85,46 +76,12 @@ function BubbleSVG({ fillClasses }: { fillClasses: string }) {
           mask="url(#pm-mask)"
         />
       </g>
-      <defs>
-        {/* drop shadow: dy=1, blur=1.5, opacity=0.35 */}
-        <filter
-          id="pm-shadow"
-          x="0"
-          y="0"
-          width="41"
-          height="46"
-          filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
-        >
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feColorMatrix
-            in="SourceAlpha"
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="1.5" />
-          <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
-        </filter>
-      </defs>
     </svg>
   );
 }
 
 // ── PriceMarker ─────────────────────────────────────────────────────────────
-const PriceMarker = ({
-  level,
-  name,
-  price,
-  isFave,
-  isPartial,
-  isActive,
-  extraRoomCount,
-}: PriceMarkerProps) => {
+const PriceMarker = ({ level, name, price, isFave, isPartial, isActive, extraRoomCount }: PriceMarkerProps) => {
   // ── Level 3: 점 마커 ──────────────────────────────────────────────────────
   // Default: Gray/300 (#AFAFAF), Partial: Gray/400 (#7C7C7C), Fave: Yellow/900 (#F5BE00)
   // 공통: 12×12px 원형, 흰색 2px 링, 드롭 섀도 (shadow-price)
@@ -143,15 +100,21 @@ const PriceMarker = ({
   }
 
   // ── Level 1 / 2: 말풍선 아이콘 마커 ──────────────────────────────────────
-  const fillClasses = getBubbleFillClasses(isFave, isPartial, isActive);
+  // fill·text·scale 등 isActive 기반 스타일은 Tailwind 클래스 대신
+  // data-pm-active / data-pm-type 속성 → index.css CSS 규칙으로 구동한다.
+  // NaverMap에서 선택 변경 시 setIcon 없이 setAttribute만으로 활성 상태를 전환한다.
+  const markerType = isFave && isPartial ? 'fave-partial' : isFave ? 'fave' : isPartial ? 'partial' : 'default';
   const hasChip = extraRoomCount > 0;
 
   return (
     // group/price: PriceChip의 group-hover/price: 클래스 트리거
-    // group/marker: 마커 자체의 hover 효과 (chip margin 변경 등)
+    // group/marker: 마커 자체의 hover 효과
     // pr-[9px]: chip이 오른쪽으로 overflow될 공간 확보
+    // scale·fill·text 활성 상태는 index.css의 [data-pm-active="true"] 규칙으로 관리
     <div
-      className={`group/price group/marker inline-flex items-start pr-[9px] relative transition-transform duration-150 ${isActive ? 'scale-[1.3]' : ''}`}
+      className="group/price group/marker inline-flex items-start pr-[9px] relative transition-transform duration-150"
+      data-pm-active={String(isActive)}
+      data-pm-type={markerType}
       style={{ transformOrigin: `${PRICE_MARKER_ANCHOR_X}px ${PRICE_MARKER_ANCHOR_Y}px` }}
     >
       {/* ── 말풍선 아이콘 영역 ──────────────────────────────────────────── */}
@@ -160,7 +123,7 @@ const PriceMarker = ({
         {/* Union 컨테이너: 35×40px. SVG는 inset으로 컨테이너 밖으로 overflow */}
         <div className="w-[35px] h-[40px] relative shrink-0">
           <div className="absolute inset-[-5%_-8.57%_-10%_-8.57%]">
-            <BubbleSVG fillClasses={fillClasses} />
+            <BubbleSVG />
           </div>
         </div>
 
@@ -182,13 +145,8 @@ const PriceMarker = ({
 
       {/* ── 룸 수 Chip (복수 룸일 때만 표시) ───────────────────────────── */}
       {/* mr-[-9px]: 칩 우측 공간을 당겨 outer div의 pr-[9px]와 상쇄        */}
-      {hasChip && (
-        <PriceChip
-          count={extraRoomCount + 1}
-          isActive={isActive}
-          className="mr-[-9px] relative z-10"
-        />
-      )}
+      {/* isActive는 항상 false — 크기 변화는 [data-pm-active="true"] CSS로 관리 */}
+      {hasChip && <PriceChip count={extraRoomCount + 1} isActive={false} className="mr-[-9px] relative z-10" />}
 
       {/* ── 텍스트 라벨 (Level 1 전용) ──────────────────────────────────── */}
       {/* 말풍선 하단 + 5px gap 기준 절대 위치, 버블 중심 x에 맞춰 가운데 정렬  */}
@@ -197,10 +155,17 @@ const PriceMarker = ({
           data-marker-label=""
           className="absolute top-[45px] left-[17px] -translate-x-1/2 flex flex-col items-center pointer-events-none"
         >
-          <span className={`font-roomlist-name text-center max-w-[90px] text-shadow-[0_0_1px_white] ${isActive ? 'text-primary-black' : 'text-gray-600 group-hover/marker:text-primary-black'}`}>
+          {/* text 색상은 [data-pm-active] CSS 규칙으로 관리 */}
+          <span
+            data-pm-label
+            className="font-roomlist-name text-center max-w-[90px] text-shadow-[0_0_1px_white] text-gray-600"
+          >
             {name}
           </span>
-          <span className={`font-roomlist-price text-center w-[70px] text-shadow-[0_0_1px_white] ${isActive ? 'text-primary-black' : 'text-gray-600 group-hover/marker:text-primary-black'}`}>
+          <span
+            data-pm-label
+            className="font-roomlist-price text-center w-[70px] text-shadow-[0_0_1px_white] text-gray-600"
+          >
             ₩ {price}
           </span>
         </div>

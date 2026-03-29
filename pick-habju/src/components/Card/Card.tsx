@@ -120,17 +120,17 @@ const Card = ({
     return (
       <div key={index} className={classNames('relative overflow-hidden', className)}>
         {!isLoaded && (
-          <div className="absolute inset-0 bg-gray-200">
+          <div className="absolute inset-0 overflow-hidden bg-gray-200">
             <div
-              className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
-              style={{ backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              style={{ animation: 'shimmer 1.5s linear infinite' }}
             />
           </div>
         )}
         <img
           src={image}
           alt={`slide ${index + 1}`}
-          className={`w-full h-full object-cover transition-all duration-500 ${
+          className={`w-full h-full object-cover transition-[opacity,transform] duration-500 ${
             isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
           }`}
           onLoad={() => handleImageLoad(index)}
