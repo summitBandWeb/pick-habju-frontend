@@ -114,6 +114,11 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
         },
         panTo: (lat: number, lng: number) => {
           if (mapRef.current) {
+            for (const marker of markerInstancesRef.current.values()) {
+              if (marker.getMap() === null) {
+                marker.setMap(mapRef.current);
+              }
+            }
             suppressCollisionRef.current = true;
             mapRef.current.panTo(new naver.maps.LatLng(lat, lng));
           }
