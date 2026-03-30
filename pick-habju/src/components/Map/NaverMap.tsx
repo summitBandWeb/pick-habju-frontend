@@ -115,7 +115,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           if (!mapRef.current) return null;
           return getViewportFromMap(mapRef.current);
         },
-        panTo: (lat: number, lng: number) => {
+        panTo: (lat: number, lng: number, offsetY?: number) => {
           if (mapRef.current) {
             for (const marker of markerInstancesRef.current.values()) {
               if (marker.getMap() === null) {
@@ -123,7 +123,21 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
               }
             }
             suppressCollisionRef.current = true;
-            mapRef.current.panTo(new naver.maps.LatLng(lat, lng));
+
+            const target = new naver.maps.LatLng(lat, lng);
+            if (offsetY && offsetY !== 0) {
+              // projection을 이용해 목표 좌표를 offsetY 픽셀만큼 북쪽(위)으로 이동.
+              // fromCoordToOffset: 현재 줌 기준 월드 픽셀 좌표 반환 (Y 아래 방향 양수).
+              // target.y + offsetY → 지도 중심을 target보다 남쪽으로 이동 → 화면에서 마커가 위로 올라감.
+              const projection = mapRef.current.getProjection();
+              const pt = projection.fromCoordToOffset(target);
+              const adjusted = projection.fromOffsetToCoord(
+                new naver.maps.Point(pt.x, pt.y + offsetY)
+              );
+              mapRef.current.panTo(adjusted);
+            } else {
+              mapRef.current.panTo(target);
+            }
           }
         },
         setCenter: (lat: number, lng: number) => {
