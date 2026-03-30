@@ -164,9 +164,9 @@ const PriceMarker = ({ level, name, price, isFave, isPartial, isActive, extraRoo
           </span>
           <span
             data-pm-label
-            className="font-roomlist-price text-center w-[70px] text-shadow-[0_0_1px_white] text-gray-600"
+            className="font-roomlist-price text-center whitespace-nowrap text-shadow-[0_0_1px_white] text-gray-600"
           >
-            ₩ {price}
+            ₩ {price}{extraRoomCount > 0 ? '~' : ''}
           </span>
         </div>
       )}
