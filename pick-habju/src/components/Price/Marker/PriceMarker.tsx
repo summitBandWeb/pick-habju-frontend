@@ -158,7 +158,7 @@ const PriceMarker = ({ level, name, price, isFave, isPartial, isActive, extraRoo
           {/* text 색상은 [data-pm-active] CSS 규칙으로 관리 */}
           <span
             data-pm-label
-            className="font-roomlist-name text-center max-w-[90px] text-shadow-[0_0_1px_white] text-gray-600"
+            className="font-roomlist-name text-center max-w-[90px] break-keep break-words text-shadow-[0_0_1px_white] text-gray-600"
           >
             {name}
           </span>
