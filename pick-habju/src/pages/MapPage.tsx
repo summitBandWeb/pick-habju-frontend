@@ -30,6 +30,14 @@ import ToastMessage from '../components/ToastMessage/ToastMessage';
 
 const DEFAULT_MAP_ZOOM = 16;
 
+// ── panTo 오프셋 상수 ─────────────────────────────────────────────────────────
+// 검색바+필터 오버레이(상단)와 캐러셀(하단)을 제외한 가시 영역 중앙에 마커를 위치시킴.
+// 캐러셀 높이: SearchHereButton 위치 기준과 동일한 18.5rem = 296px
+// 상단 오버레이 높이: p-3(12) + SearchBar(44) + gap-3(12) + FilterSection(36) + p-3(12) ≈ 116px
+const MAP_CAROUSEL_H = 18.5 * 16; // 296px
+const MAP_TOP_INSET = 116; // px
+const PANTO_OFFSET_Y = (MAP_CAROUSEL_H - MAP_TOP_INSET) / 2; // ≈ 90px
+
 /**
  * 지도 기반 합주실 검색 페이지.
  * - 마커 클릭 → 룸 선택 → 캐러셀 표시의 선택 흐름을 관리.
@@ -186,7 +194,7 @@ const MapPage = () => {
     (id: string) => {
       const roomDetail = roomsById[id];
       if (!roomDetail) return;
-      mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
+      mapRef.current?.panTo(roomDetail.lat, roomDetail.lng, PANTO_OFFSET_Y);
     },
     [roomsById]
   );
@@ -237,7 +245,7 @@ const MapPage = () => {
         if (!roomDetail) return;
         panToTimerRef.current = setTimeout(() => {
           panToTimerRef.current = null;
-          mapRef.current?.panTo(roomDetail.lat, roomDetail.lng);
+          mapRef.current?.panTo(roomDetail.lat, roomDetail.lng, PANTO_OFFSET_Y);
         }, 350);
       }
       // carouselWasOpen 인 경우: slideToLoop → onSlideChangeTransitionEnd → handleSwipeTransitionEnd 에서 panTo

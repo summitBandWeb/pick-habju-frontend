@@ -16,7 +16,7 @@ const FilterSection = ({
   favoriteDisabled = false,
 }: FilterSectionProps) => {
   return (
-    <div className="flex items-center gap-2.5 w-91.5 h-12">
+    <div className="flex items-center gap-2.5 w-fit h-12">
       <button
         type="button"
         disabled={partialDisabled}
