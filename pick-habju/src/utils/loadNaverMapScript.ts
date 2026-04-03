@@ -76,7 +76,7 @@ export function loadNaverMapScript(): Promise<typeof naver> {
     );
   }
 
-  const url = `${SCRIPT_BASE}?ncpKeyId=${encodeURIComponent(clientId)}&submodules=geocoder`;
+  const url = `${SCRIPT_BASE}?ncpKeyId=${encodeURIComponent(clientId)}&submodules=geocoder,gl`;
 
   loadPromise = new Promise((resolve, reject) => {
     const afterNaverLoaded = () => {
