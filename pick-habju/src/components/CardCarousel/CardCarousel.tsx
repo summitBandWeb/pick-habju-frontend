@@ -116,7 +116,11 @@ const CardCarousel = ({
 
   /** 지도 핀 클릭(selectedRoomId 변경) 시 해당 슬라이드로 동기화. Loop 모드이므로 slideToLoop 사용 */
   useEffect(() => {
-    if (!swiperInstance || !isOpen || rooms.length === 0) return;
+    if (!isOpen) {
+      isSwipeReadyRef.current = false;
+      return;
+    }
+    if (!swiperInstance || rooms.length === 0) return;
 
     if (selectedRoomId === null) {
       if (swiperInstance.realIndex !== 0) {
