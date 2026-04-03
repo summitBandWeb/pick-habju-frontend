@@ -137,8 +137,10 @@ export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarker
         level = 2;
       }
 
-      // (d) Level 2 판정: 상대가 Level 1이면 상대 라벨과도 비교
-      if (otherLevel === 1 && isRectOverlap(current.labelBox, other.labelBox)) {
+      // (d) Level 2 판정: 상대가 Level 1이면 상대 라벨과도 비교.
+      // (a)에서 other가 이미 level 2로 소급 강등됐을 수 있으므로 otherLevel(stale)이 아닌
+      // levels 맵을 재조회해 실제 최신 레벨을 확인한다.
+      if ((levels.get(other.id) ?? 1) === 1 && isRectOverlap(current.labelBox, other.labelBox)) {
         level = 2;
       }
     }
