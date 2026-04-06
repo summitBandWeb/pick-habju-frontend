@@ -46,18 +46,22 @@ function isRectOverlap(a: Rect, b: Rect): boolean {
  *
  * @param pos - projection.fromCoordToOffset() 결과. 앵커(말풍선 꼭짓점)의 픽셀 좌표.
  * @param labelSize - DOM 측정으로 얻은 라벨 실제 크기. null이면 labelBox를 빈 영역으로 처리.
+ * @param scale - CSS transform scale 배율. active 마커(1.3)처럼 시각적으로 확대된 경우 전달.
+ *   transformOrigin이 앵커(ANCHOR_X, ANCHOR_Y)이므로 앵커를 기준으로 iconBox를 확장한다.
  */
 export function buildMarkerBox(
   id: string,
   pos: { x: number; y: number },
   labelSize: { width: number; height: number } | null,
-  priority: number
+  priority: number,
+  scale = 1
 ): MarkerBox {
-  // Icon Box: 앵커(pos)가 아이콘 하단 중앙 → 좌상단으로 역산
+  // Icon Box: 앵커(pos)가 아이콘 하단 중앙 → 좌상단으로 역산.
+  // scale > 1이면 transformOrigin(앵커) 기준으로 확장되므로 각 방향을 scale 배 늘린다.
   const iconBox: Rect = {
-    left: pos.x - PRICE_MARKER_ANCHOR_X,
-    right: pos.x - PRICE_MARKER_ANCHOR_X + PRICE_MARKER_ICON_W,
-    top: pos.y - PRICE_MARKER_ANCHOR_Y,
+    left: pos.x - PRICE_MARKER_ANCHOR_X * scale,
+    right: pos.x - PRICE_MARKER_ANCHOR_X * scale + PRICE_MARKER_ICON_W * scale,
+    top: pos.y - PRICE_MARKER_ANCHOR_Y * scale,
     bottom: pos.y,
   };
 
