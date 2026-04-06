@@ -257,7 +257,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             });
 
             // 4. 충돌 검사 → 레벨 결정
-            const newLevels = computeMarkerLevels(boxes);
+            const newLevels = computeMarkerLevels(boxes, currentSelectedId ?? undefined);
 
             // 5. 변경된 마커만 setIcon 업데이트
             for (const m of visibleModels) {
