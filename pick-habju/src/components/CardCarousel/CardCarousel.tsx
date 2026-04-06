@@ -95,7 +95,7 @@ const CardCarousel = ({
   selectedRoomId,
   isOpen,
   onCardChange,
-  onSwipeTransitionEnd,
+  onSlideTransitionEnd,
   onBookClick,
   forceDevice,
 }: CardCarouselProps) => {
@@ -204,7 +204,7 @@ const CardCarousel = ({
                     if (currentRoom.bizItemId !== selectedRoomId) {
                       onCardChange(currentRoom.bizItemId);
                     }
-                    onSwipeTransitionEnd?.(currentRoom.bizItemId);
+                    onSlideTransitionEnd?.(currentRoom.bizItemId);
                   }
                 }}
                 className="w-full h-full !py-8"
