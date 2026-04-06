@@ -36,10 +36,11 @@ export interface CardCarouselProps {
   /** 스와이프 또는 마커 선택으로 활성 슬라이드가 변경될 때 호출. bizItemId를 전달. */
   onCardChange: (id: string) => void;
   /**
-   * 스와이프 전환 애니메이션이 완전히 끝난 뒤 호출. bizItemId를 전달.
-   * panTo 등 지도 조작은 이 콜백에서 실행해야 swipe 애니메이션과 겹치지 않는다.
+   * 슬라이드 전환 애니메이션이 완전히 끝난 뒤 호출. bizItemId를 전달.
+   * 사용자 스와이프 및 프로그래매틱 이동(slideToLoop) 모두 해당.
+   * panTo 등 지도 조작은 이 콜백에서 실행해야 슬라이드 애니메이션과 겹치지 않는다.
    */
-  onSwipeTransitionEnd?: (id: string) => void;
+  onSlideTransitionEnd?: (id: string) => void;
   /** 예약하기 버튼 클릭 시 호출. bizItemId를 전달. */
   onBookClick: (bizItemId: string) => void;
   /** 강제 디바이스 모드 (Storybook 등 테스트용). 미설정 시 자동 감지. */

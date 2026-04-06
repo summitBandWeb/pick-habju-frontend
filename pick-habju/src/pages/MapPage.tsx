@@ -186,11 +186,11 @@ const MapPage = () => {
   );
 
   /**
-   * Swiper 슬라이드 전환 애니메이션이 완전히 끝난 뒤 호출.
-   * swipe 애니메이션과 panTo 애니메이션이 겹치지 않아 프레임 드롭 없이 지도가 이동한다.
+   * Swiper 슬라이드 전환 애니메이션이 완전히 끝난 뒤 호출 (스와이프 및 프로그래매틱 이동 포함).
+   * 슬라이드 애니메이션과 panTo 애니메이션이 겹치지 않아 프레임 드롭 없이 지도가 이동한다.
    * @param id 전환 완료된 슬라이드의 bizItemId
    */
-  const handleSwipeTransitionEnd = useCallback(
+  const handleSlideTransitionEnd = useCallback(
     (id: string) => {
       const roomDetail = roomsById[id];
       if (!roomDetail) return;
@@ -209,7 +209,7 @@ const MapPage = () => {
    *
    * panTo 전략:
    * - 캐러셀이 이미 열려있는 경우: slideToLoop 완료 후 onSlideChangeTransitionEnd →
-   *   handleSwipeTransitionEnd 에서 panTo. (캐러셀 스와이프와 동일한 경로)
+   *   handleSlideTransitionEnd 에서 panTo. (캐러셀 스와이프와 동일한 경로)
    * - 캐러셀이 닫혀있는 경우: Framer Motion spring 입장 애니메이션(~300ms) 동안
    *   slideToLoop이 발생하지 않으므로 350ms 후 직접 panTo.
    * @param markerId 클릭된 마커의 businessId
@@ -253,7 +253,7 @@ const MapPage = () => {
           mapRef.current?.panTo(roomDetail.lat, roomDetail.lng, PANTO_OFFSET_Y);
         }, 350);
       }
-      // carouselWasOpen 인 경우: slideToLoop → onSlideChangeTransitionEnd → handleSwipeTransitionEnd 에서 panTo
+      // carouselWasOpen 인 경우: slideToLoop → onSlideChangeTransitionEnd → handleSlideTransitionEnd 에서 panTo
     },
     [handleSelectRoom, isCarouselOpen, markerViewModels, roomsById, selectedRoomId]
   );
@@ -416,7 +416,7 @@ const MapPage = () => {
           selectedRoomId={selectedRoomId}
           isOpen={isCarouselOpen}
           onCardChange={handleCardChange}
-          onSwipeTransitionEnd={handleSwipeTransitionEnd}
+          onSlideTransitionEnd={handleSlideTransitionEnd}
           onBookClick={handleBookClick}
         />
       )}
