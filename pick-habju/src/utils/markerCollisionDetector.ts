@@ -87,14 +87,21 @@ export function buildMarkerBox(
 /**
  * 마커 배열의 충돌을 검사하여 각 마커의 표시 레벨을 반환한다.
  *
+ * selectedId가 주어지면 해당 마커는 항상 Level 1로 유지된다.
+ * 알고리즘이 selected를 강등하지 않도록 (a)(d) 조건을 보정한다.
+ *
  * 1차 패스 알고리즘 (버블 iconBox 기준):
  * 1. priority 오름차순 정렬 (selected → fave → normal)
  * 2. 각 마커 B에 대해 이미 확정된 마커 A와 비교 (j 루프 전체를 항상 순회):
- *    a. [소급] A가 Level 1이고 B.iconBox ∩ A.labelBox → A를 Level 2로 강등
+ *    a. A가 Level 1이고 B.iconBox ∩ A.labelBox → A를 Level 2로 강등
  *       (break 이전에 반드시 실행되도록 루프 최상단에 위치)
+ *       단, A가 selected이면 강등 스킵. 대신:
+ *    a'. B.iconBox ∩ selected.labelBox → B를 Level 3으로 강등
+ *       (selected 라벨을 숨길 수 없으므로 B의 아이콘이 비켜야 함)
  *    b. B.iconBox ∩ A.iconBox → B: Level 3 확정, 이후 j는 (a)만 계속 검사
  *    c. B.labelBox ∩ A.iconBox → B: Level 2
  *    d. A가 Level 1이고 B.labelBox ∩ A.labelBox → B: Level 2
+ *       A가 selected이면 levels.get() 대신 항상 1로 취급
  * 3. 위 조건 없음 → Level 1 (full) 유지
  *
  * 2차 패스 (dot 실제 위치 기준):
@@ -104,7 +111,7 @@ export function buildMarkerBox(
  *    e. Level 3의 dotBox ∩ 상대 labelBox → 상대를 Level 2로 강등
  *    f. Level 3의 dotBox ∩ 상대 iconBox  → 상대를 Level 3으로 강등
  */
-export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarkerLevel> {
+export function computeMarkerLevels(boxes: MarkerBox[], selectedId?: string): Map<string, PriceMarkerLevel> {
   const sorted = [...boxes].sort((a, b) => a.priority - b.priority);
   const levels = new Map<string, PriceMarkerLevel>();
 
@@ -117,10 +124,16 @@ export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarker
       const other = sorted[j];
       const otherLevel = levels.get(other.id) ?? 1;
 
-      // (a) 소급 강등: 내 아이콘이 상대 라벨과 겹침 → 상대를 Level 2로 강등.
+      // (a) 소급 강등: 내 아이콘이 상대 라벨과 겹침.
       // break/continue 이전 루프 최상단에 위치하여 level 3 케이스에서도 반드시 실행.
-      if (otherLevel === 1 && isRectOverlap(current.iconBox, other.labelBox)) {
-        levels.set(other.id, 2);
+      // - 상대가 selected이면 강등 불가 → (a') 내가 level 3으로 강등
+      // - 그 외 상대가 Level 1이면 상대를 Level 2로 강등
+      if (isRectOverlap(current.iconBox, other.labelBox)) {
+        if (other.id === selectedId) {
+          level = 3; // (a') selected 라벨을 숨길 수 없으므로 내 아이콘이 비킴
+        } else if (otherLevel === 1) {
+          levels.set(other.id, 2);
+        }
       }
 
       // level이 이미 3이면 (b)(c)(d) 판정 불필요 — (a)만 계속 확인
@@ -140,7 +153,9 @@ export function computeMarkerLevels(boxes: MarkerBox[]): Map<string, PriceMarker
       // (d) Level 2 판정: 상대가 Level 1이면 상대 라벨과도 비교.
       // (a)에서 other가 이미 level 2로 소급 강등됐을 수 있으므로 otherLevel(stale)이 아닌
       // levels 맵을 재조회해 실제 최신 레벨을 확인한다.
-      if ((levels.get(other.id) ?? 1) === 1 && isRectOverlap(current.labelBox, other.labelBox)) {
+      // 단, 상대가 selected이면 알고리즘이 강등했더라도 항상 1로 취급.
+      const otherEffectiveLevel = other.id === selectedId ? 1 : (levels.get(other.id) ?? 1);
+      if (otherEffectiveLevel === 1 && isRectOverlap(current.labelBox, other.labelBox)) {
         level = 2;
       }
     }
