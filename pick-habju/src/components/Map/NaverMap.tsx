@@ -252,8 +252,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
                 width: PRICE_MARKER_LABEL_W,
                 height: PRICE_MARKER_LABEL_H,
               };
-              const priority = getMarkerPriority(m.id === currentSelectedId, m.favorite === 'on');
-              return buildMarkerBox(m.id, { x: pos.x, y: pos.y }, labelSize, priority);
+              const isSelected = m.id === currentSelectedId;
+              const priority = getMarkerPriority(isSelected, m.favorite === 'on');
+              const scale = isSelected ? 1.3 : 1;
+              return buildMarkerBox(m.id, { x: pos.x, y: pos.y }, labelSize, priority, scale);
             });
 
             // 4. 충돌 검사 → 레벨 결정
@@ -266,14 +268,16 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
 
               const prevLevel = markerLevelsRef.current.get(m.id);
 
-              // 충돌 감지 레벨은 항상 캐시에 저장.
-              // effectiveLevel(선택 시 강제 1)이 아닌 newLevel을 저장해야
-              // 선택 해제 시 selectedMarkerId effect가 올바른 레벨로 복원할 수 있다.
-              markerLevelsRef.current.set(m.id, newLevel);
-
-              // 선택된 마커의 아이콘은 selectedMarkerId effect에서 전담 관리.
-              // 여기서 처리하면 effectiveLevel=1이 캐시에 덮어써지는 버그가 발생하므로 건너뜀.
+              // 선택된 마커의 아이콘·캐시는 selectedMarkerId effect에서 전담 관리.
+              // - 캐시를 여기서 쓰면 알고리즘이 반환한 level 1이 덮어써져,
+              //   effect가 currLevel=1로 fast path를 타면서 setIcon을 건너뛰게 됨.
+              // - 캐시를 skip하면 선택 이전의 진짜 충돌 레벨이 남아있어
+              //   effect가 필요 시 setIcon(level 1)을 올바르게 호출한다.
               if (isSelected) continue;
+
+              // 충돌 감지 레벨은 비선택 마커만 캐시에 저장.
+              // 선택 해제 시 selectedMarkerId effect가 이 값으로 복원한다.
+              markerLevelsRef.current.set(m.id, newLevel);
 
               if (prevLevel !== newLevel) {
                 const marker = markerInstancesRef.current.get(m.id);
@@ -568,6 +572,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             }
           }
         }
+
+        // 선택 마커 변경 시 주변 마커 충돌 레벨 재계산.
+        // idle 없이 선택만 바꾸면 idle이 발화하지 않아 강등이 누락되므로 여기서도 호출.
+        runCollisionDetectionRef.current?.();
       });
 
       return () => cancelAnimationFrame(rafId);
