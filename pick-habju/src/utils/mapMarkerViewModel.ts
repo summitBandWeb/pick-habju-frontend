@@ -35,10 +35,15 @@ const toMarkerRoomItem = (room: RoomDetail, favoriteBizItemIds: Set<string>): Ma
   };
 };
 
-/** 부분 가능 포함 필터에 따라 마커(지점) 노출 여부 판별. */
-const isRoomMatchedByFilters = (room: MarkerRoomItem, isPartialFilterActive: boolean): boolean => {
+/** 부분 가능·찜 필터에 따라 룸 노출 여부 판별. */
+const isRoomMatchedByFilters = (
+  room: MarkerRoomItem,
+  isPartialFilterActive: boolean,
+  isFavoriteFilterActive: boolean,
+): boolean => {
   const partialMatched = isPartialFilterActive ? room.isPartial : !room.isPartial;
-  return partialMatched;
+  const favoriteMatched = isFavoriteFilterActive ? room.favorite === 'on' : true;
+  return partialMatched && favoriteMatched;
 };
 
 /**
@@ -69,13 +74,12 @@ export const buildMarkerViewModels = ({
     }
 
     const rooms = branch.rooms.map((room) => toMarkerRoomItem(room, favoriteBizItemIds));
-    const visibleRooms = rooms.filter((room) => isRoomMatchedByFilters(room, isPartialFilterActive));
+    const visibleRooms = rooms.filter((room) => isRoomMatchedByFilters(room, isPartialFilterActive, isFavoriteFilterActive));
 
     if (visibleRooms.length === 0) continue;
 
     const isPartial = visibleRooms.some((room) => room.isPartial);
-    const favorite: 'on' | 'off' =
-      isFavoriteFilterActive && rooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
+    const favorite: 'on' | 'off' = visibleRooms.some((room) => room.favorite === 'on') ? 'on' : 'off';
 
     markerViewModels.push({
       id: branch.business_id,
