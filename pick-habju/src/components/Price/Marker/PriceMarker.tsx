@@ -9,7 +9,7 @@
  * hover는 CSS group-hover로, active는 setIcon() 재렌더로 처리.
  */
 import DefaultNoteIcon from '../../../assets/svg/DefaultNote.svg?react';
-import ParticalNoteIcon from '../../../assets/svg/ParticalNote.svg?react';
+import PartialNoteIcon from '../../../assets/svg/PartialNote.svg?react';
 import PriceChip from '../PriceChip/PriceChip';
 import type { PriceMarkerProps } from './PriceMarker.types';
 
@@ -138,7 +138,7 @@ const PriceMarker = ({ level, name, price, isFave, isPartial, isActive, extraRoo
         ) : (
           // Partial / Fave+Partial: 약간 다른 위치 + overflow-clip
           <div className="absolute size-4 left-2.5 top-[10.5px] flex items-center justify-center overflow-clip">
-            <ParticalNoteIcon className="h-full w-auto" />
+            <PartialNoteIcon className="h-full w-auto" />
           </div>
         )}
       </div>
