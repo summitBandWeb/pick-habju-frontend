@@ -19,7 +19,7 @@ const FavoriteButton = ({ isActive = false, onToggle, disabled = false }: Favori
       onClick={handleClick}
     >
       <FaveOnIcon className="w-5 h-[1.0625rem] shrink-0" />
-      <span className="font-modal-call whitespace-nowrap">찜한 합주실</span>
+      <span className="font-modal-call whitespace-nowrap">찜한 곳만</span>
     </button>
   );
 };
