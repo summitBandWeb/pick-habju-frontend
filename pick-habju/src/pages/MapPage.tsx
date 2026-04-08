@@ -383,26 +383,31 @@ const MapPage = () => {
       />
 
       {/* 검색바 + 필터 — 지도 위 float 오버레이 */}
-      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3">
-        <SearchBar
-          value={searchText}
-          onSearchChange={handleSearchChange}
-          searchCondition={searchCondition}
-          onConditionClick={() => {
-            // DatePicker가 lastQuery 날짜를 초기값으로 표시하도록 store에 미리 세팅
-            if (lastQuery) {
-              reservationActions.setDate([parseISO(lastQuery.date)]);
-              reservationActions.setHourSlotsRaw(lastQuery.hour_slots);
-            }
-            navigate(RoutePaths.HOME);
-          }}
-        />
-        <FilterSection
-          isPartialFilterActive={isPartialFilterActive}
-          onPartialFilterToggle={handlePartialFilterToggle}
-          isFavoriteFilterActive={isFavoriteFilterActive}
-          onFavoriteFilterToggle={handleFavoriteFilterToggle}
-        />
+      {/* pointer-events-none: 컨테이너 패딩·gap 빈 영역이 지도 클릭을 막지 않도록. 자식 래퍼는 pointer-events-auto로 복원하되, flex stretch로 full-width가 되는 래퍼는 w-fit으로 빈 공간이 지도를 막지 않게 해야 함. */}
+      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3 pointer-events-none">
+        <div className="pointer-events-auto">
+          <SearchBar
+            value={searchText}
+            onSearchChange={handleSearchChange}
+            searchCondition={searchCondition}
+            onConditionClick={() => {
+              // DatePicker가 lastQuery 날짜를 초기값으로 표시하도록 store에 미리 세팅
+              if (lastQuery) {
+                reservationActions.setDate([parseISO(lastQuery.date)]);
+                reservationActions.setHourSlotsRaw(lastQuery.hour_slots);
+              }
+              navigate(RoutePaths.HOME);
+            }}
+          />
+        </div>
+        <div className="pointer-events-auto w-fit">
+          <FilterSection
+            isPartialFilterActive={isPartialFilterActive}
+            onPartialFilterToggle={handlePartialFilterToggle}
+            isFavoriteFilterActive={isFavoriteFilterActive}
+            onFavoriteFilterToggle={handleFavoriteFilterToggle}
+          />
+        </div>
       </div>
 
       {carouselRooms.length > 0 && (
