@@ -62,7 +62,7 @@ export function buildMarkerBox(
     left: pos.x - PRICE_MARKER_ANCHOR_X * scale,
     right: pos.x - PRICE_MARKER_ANCHOR_X * scale + PRICE_MARKER_ICON_W * scale,
     top: pos.y - PRICE_MARKER_ANCHOR_Y * scale,
-    bottom: pos.y,
+    bottom: pos.y, // 앵커가 아이콘 맨 하단이므로 bottom은 scale에 무관하게 항상 pos.y
   };
 
   // Label Box: 아이콘 하단(pos.y)에서 5px gap 이후 시작, 가로 중앙 정렬.
