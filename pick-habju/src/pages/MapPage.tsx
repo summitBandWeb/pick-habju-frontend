@@ -383,8 +383,7 @@ const MapPage = () => {
       />
 
       {/* 검색바 + 필터 — 지도 위 float 오버레이 */}
-      {/* pointer-events-none: 컨테이너 빈 영역이 지도 클릭을 막지 않도록. 자식은 pointer-events-auto로 복원. */}
-      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3 pointer-events-none">
+      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3">
         <SearchBar
           value={searchText}
           onSearchChange={handleSearchChange}
