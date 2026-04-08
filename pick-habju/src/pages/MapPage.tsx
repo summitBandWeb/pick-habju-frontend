@@ -223,8 +223,13 @@ const MapPage = () => {
       const marker = markerViewModels.find((item) => item.id === markerId);
       if (!marker) return;
 
-      // 찜한 룸 우선, 없으면 첫 번째 룸
-      const roomToSelect = marker.rooms.find((room) => room.favorite === 'on') ?? marker.rooms[0];
+      // 가격 일치 + 찜 → 찜(가격 무관) → 가격 일치 → 첫 번째 룸
+      const priceMatchedRooms = marker.rooms.filter((room) => room.priceText === marker.priceText);
+      const roomToSelect =
+        priceMatchedRooms.find((room) => room.favorite === 'on') ??
+        marker.rooms.find((room) => room.favorite === 'on') ??
+        priceMatchedRooms[0] ??
+        marker.rooms[0];
       if (!roomToSelect) return;
 
       const carouselWasOpen = isCarouselOpen;
@@ -378,7 +383,8 @@ const MapPage = () => {
       />
 
       {/* 검색바 + 필터 — 지도 위 float 오버레이 */}
-      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3">
+      {/* pointer-events-none: 컨테이너 빈 영역이 지도 클릭을 막지 않도록. 자식은 pointer-events-auto로 복원. */}
+      <div className="absolute left-0 right-0 top-0 z-[60] flex flex-col gap-3 p-3 pointer-events-none">
         <SearchBar
           value={searchText}
           onSearchChange={handleSearchChange}
