@@ -65,13 +65,14 @@ export function buildMarkerBox(
     bottom: pos.y,
   };
 
-  // Label Box: 아이콘 하단(pos.y)에서 5px gap 이후 시작, 가로 중앙 정렬
+  // Label Box: 아이콘 하단(pos.y)에서 5px gap 이후 시작, 가로 중앙 정렬.
+  // transformOrigin이 앵커(pos.x, pos.y)이므로 라벨도 pos 기준으로 scale 배 확장된다.
   const labelBox: Rect = labelSize
     ? {
-        left: pos.x - labelSize.width / 2,
-        right: pos.x + labelSize.width / 2,
-        top: pos.y + 5,
-        bottom: pos.y + 5 + labelSize.height,
+        left: pos.x - (labelSize.width / 2) * scale,
+        right: pos.x + (labelSize.width / 2) * scale,
+        top: pos.y + 5 * scale,
+        bottom: pos.y + (5 + labelSize.height) * scale,
       }
     : { left: 0, right: 0, top: 0, bottom: 0 };
 
