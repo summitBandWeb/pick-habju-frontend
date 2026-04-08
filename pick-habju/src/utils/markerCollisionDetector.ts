@@ -92,7 +92,7 @@ export function buildMarkerBox(
  * 마커 배열의 충돌을 검사하여 각 마커의 표시 레벨을 반환한다.
  *
  * selectedId가 주어지면 해당 마커는 항상 Level 1로 유지된다.
- * 알고리즘이 selected를 강등하지 않도록 (a)(d) 조건을 보정한다.
+ * 알고리즘이 selected를 강등하지 않도록 (a)(d)(e)(f) 조건을 보정한다.
  *
  * 1차 패스 알고리즘 (버블 iconBox 기준):
  * 1. priority 오름차순 정렬 (selected → fave → normal)
@@ -175,6 +175,7 @@ export function computeMarkerLevels(boxes: MarkerBox[], selectedId?: string): Ma
 
     for (const other of sorted) {
       if (other.id === dot.id) continue;
+      if (other.id === selectedId) continue; // selected는 항상 Level 1 유지
       const otherLevel = levels.get(other.id) ?? 1;
       if (otherLevel === 3) continue;
 
