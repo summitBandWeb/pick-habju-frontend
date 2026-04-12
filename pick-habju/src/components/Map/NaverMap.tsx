@@ -280,6 +280,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
               markerLevelsRef.current.set(m.id, newLevel);
 
               if (prevLevel !== newLevel) {
+                console.log(`[Collision] setIcon: ${m.id} level ${prevLevel}→${newLevel}`);
                 const marker = markerInstancesRef.current.get(m.id);
                 if (marker) {
                   marker.setZIndex(m.favorite === 'on' ? 1 : 0);
@@ -305,6 +306,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           runCollisionDetectionRef.current = runCollisionDetection;
 
           idleListenerRef.current = naver.maps.Event.addListener(map, 'idle', () => {
+            console.log('[NaverMap] idle fired');
             // 뷰포트 변경 알림
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
@@ -314,6 +316,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 결과가 동일하다. 플래그를 소비한 뒤 즉시 리셋.
             if (suppressCollisionRef.current) {
               suppressCollisionRef.current = false;
+              console.log('[NaverMap] collision suppressed (panTo)');
               return;
             }
 
@@ -324,6 +327,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 복원하기 전에 우리 코드가 실행되면 visibleModels가 비어 충돌 감지가 무시된다.
             // requestAnimationFrame으로 한 프레임 뒤에 실행하면 MarkerClustering 처리가
             // 완료된 이후에 충돌 감지가 실행된다.
+            console.log('[NaverMap] scheduling collision detection');
             idleCollisionRafRef.current = requestAnimationFrame(runCollisionDetection);
           });
 
