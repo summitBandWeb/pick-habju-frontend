@@ -523,6 +523,7 @@ Cluster.prototype = {
    * _redraw 전용: 멤버 마커의 setMap 상태를 건드리지 않고 데이터 구조만 정리합니다.
    * 클러스터 마커(합산 아이콘)만 제거하고, 개별 마커의 DOM은 그대로 유지합니다.
    * 이후 _showMember/_hideMember가 실제 필요한 변경만 수행합니다.
+   * @private
    */
   _softDestroy: function () {
     naver.maps.Event.removeListener(this._relation);
