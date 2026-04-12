@@ -142,10 +142,12 @@ const CardCarousel = ({
     }
     if (!swiperInstance || rooms.length === 0) return;
 
+    const slideTo = loopActive
+      ? (i: number) => swiperInstance.slideToLoop(i)
+      : (i: number) => swiperInstance.slideTo(i);
+
     if (selectedRoomId === null) {
-      if (swiperInstance.realIndex !== 0) {
-        swiperInstance.slideToLoop(0);
-      }
+      if (swiperInstance.realIndex !== 0) slideTo(0);
       isSwipeReadyRef.current = true;
       return;
     }
@@ -165,10 +167,10 @@ const CardCarousel = ({
           nearest = i;
         }
       }
-      if (nearest !== -1) swiperInstance.slideToLoop(nearest);
+      if (nearest !== -1) slideTo(nearest);
     }
     isSwipeReadyRef.current = true;
-  }, [selectedRoomId, isOpen, swiperInstance, rooms, loopSlides]);
+  }, [selectedRoomId, isOpen, swiperInstance, rooms, loopSlides, loopActive]);
 
   /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
    *  Swiper는 initialSlide를 마운트 시에만 사용하므로 매 render마다 계산해도 안전하다. */
