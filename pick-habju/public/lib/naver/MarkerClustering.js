@@ -392,11 +392,21 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
 
   /**
    * 생성된 클러스터를 모두 제거하고, 다시 생성합니다.
-   * _softClearClusters를 사용해 개별 마커의 DOM 재삽입 없이 클러스터를 재구성합니다.
-   * 이후 _showMember/_hideMember가 실제 상태 변경이 필요한 마커만 setMap을 호출합니다.
+   * 마커 목록 변경 등 완전한 재구성이 필요한 경우 사용합니다.
    * @private
    */
   _redraw: function () {
+    this._clearClusters();
+    this._createClusters();
+    this._updateClusters();
+  },
+
+  /**
+   * idle/zoom 등 마커 목록은 동일한 상태에서의 재클러스터링 전용.
+   * 개별 마커의 DOM 재삽입 없이 클러스터를 재구성합니다.
+   * @private
+   */
+  _softRedraw: function () {
     this._softClearClusters();
     this._createClusters();
     this._updateClusters();
@@ -439,14 +449,14 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
    * 지도의 Idle 상태 이벤트 핸들러입니다.
    */
   _onIdle: function () {
-    this._redraw();
+    this._softRedraw();
   },
 
   /**
    * 각 마커의 드래그 종료 이벤트 핸들러입니다.
    */
   _onDragEnd: function () {
-    this._redraw();
+    this._softRedraw();
   },
 });
 
