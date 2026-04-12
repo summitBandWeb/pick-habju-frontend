@@ -620,7 +620,9 @@ Cluster.prototype = {
 
     // maxZoom 이상에서는 개별 마커만 표시하므로 클러스터 마커 생성을 건너뛴다.
     // 불필요한 DOM 삽입/제거(new Marker → 즉시 setMap(null))를 방지한다.
-    if (!this._clusterMarker && maxZoom <= currentZoom) {
+    // updateCluster() 진입 시점에 _clusterMarker는 항상 null(_createClusters에서 새로 생성)이므로
+    // !this._clusterMarker 조건은 불필요하다.
+    if (maxZoom <= currentZoom) {
       this.checkByZoomAndMinClusterSize();
       return;
     }
