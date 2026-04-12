@@ -507,7 +507,9 @@ Cluster.prototype = {
       members[i].setMap(null);
     }
 
-    this._clusterMarker.setMap(null);
+    if (this._clusterMarker) {
+      this._clusterMarker.setMap(null);
+    }
 
     this._clusterMarker = null;
     this._clusterCenter = null;
@@ -612,10 +614,21 @@ Cluster.prototype = {
    * - 클러스터 마커 노출 여부
    */
   updateCluster: function () {
+    var clusterer = this._markerClusterer,
+      maxZoom = clusterer.getMaxZoom(),
+      currentZoom = clusterer.getMap().getZoom();
+
+    // maxZoom 이상에서는 개별 마커만 표시하므로 클러스터 마커 생성을 건너뛴다.
+    // 불필요한 DOM 삽입/제거(new Marker → 즉시 setMap(null))를 방지한다.
+    if (!this._clusterMarker && maxZoom <= currentZoom) {
+      this.checkByZoomAndMinClusterSize();
+      return;
+    }
+
     if (!this._clusterMarker) {
       var position;
 
-      if (this._markerClusterer.getAverageCenter()) {
+      if (clusterer.getAverageCenter()) {
         position = this._calcAverageCenter(this._clusterMember);
       } else {
         position = this._clusterCenter;
@@ -623,10 +636,10 @@ Cluster.prototype = {
 
       this._clusterMarker = new naver.maps.Marker({
         position: position,
-        map: this._markerClusterer.getMap(),
+        map: clusterer.getMap(),
       });
 
-      if (!this._markerClusterer.getDisableClickZoom()) {
+      if (!clusterer.getDisableClickZoom()) {
         this.enableClickZoom();
       }
     }
