@@ -280,7 +280,6 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
               markerLevelsRef.current.set(m.id, newLevel);
 
               if (prevLevel !== newLevel) {
-                console.log(`[Collision] setIcon: ${m.id} level ${prevLevel}→${newLevel}`);
                 const marker = markerInstancesRef.current.get(m.id);
                 if (marker) {
                   marker.setZIndex(m.favorite === 'on' ? 1 : 0);
@@ -305,9 +304,32 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
 
           runCollisionDetectionRef.current = runCollisionDetection;
 
+          /**
+           * 마커 DOM 위치를 정수 픽셀로 스냅한다.
+           * 네이버 지도 GL SDK는 idle 시점에 마커 DOM 요소의 좌표를 부동소수점으로
+           * 재계산하는데, 이때 서브픽셀 차이로 마커가 미세하게 이동하는 현상이 발생한다.
+           * left/top 또는 translate 값을 반올림해 서브픽셀 이동을 제거한다.
+           */
+          const snapMarkerPositions = () => {
+            for (const marker of markerInstancesRef.current.values()) {
+              if (marker.getMap() === null) continue;
+              const el = marker.getElement() as HTMLElement | null;
+              if (!el) continue;
+
+              const { left, top, transform } = el.style;
+
+              if (transform && transform.includes('translate')) {
+                el.style.transform = transform.replace(
+                  /translate\(([^,]+),\s*([^)]+)\)/,
+                  (_, x, y) => `translate(${Math.round(parseFloat(x))}px, ${Math.round(parseFloat(y))}px)`
+                );
+              }
+              if (left) el.style.left = Math.round(parseFloat(left)) + 'px';
+              if (top) el.style.top = Math.round(parseFloat(top)) + 'px';
+            }
+          };
+
           idleListenerRef.current = naver.maps.Event.addListener(map, 'idle', () => {
-            console.log('[NaverMap] idle fired — ALL PROCESSING DISABLED FOR TEST');
-            return; // ★ 테스트: idle 시 아무것도 하지 않음
             // 뷰포트 변경 알림
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
@@ -317,7 +339,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 결과가 동일하다. 플래그를 소비한 뒤 즉시 리셋.
             if (suppressCollisionRef.current) {
               suppressCollisionRef.current = false;
-              console.log('[NaverMap] collision suppressed (panTo)');
+              // 충돌 감지는 건너뛰되, 마커 위치 스냅은 항상 수행
+              idleCollisionRafRef.current = requestAnimationFrame(snapMarkerPositions);
               return;
             }
 
@@ -328,8 +351,10 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
             // 복원하기 전에 우리 코드가 실행되면 visibleModels가 비어 충돌 감지가 무시된다.
             // requestAnimationFrame으로 한 프레임 뒤에 실행하면 MarkerClustering 처리가
             // 완료된 이후에 충돌 감지가 실행된다.
-            console.log('[NaverMap] scheduling collision detection');
-            idleCollisionRafRef.current = requestAnimationFrame(runCollisionDetection);
+            idleCollisionRafRef.current = requestAnimationFrame(() => {
+              runCollisionDetection();
+              snapMarkerPositions();
+            });
           });
 
           mapClickListenerRef.current = naver.maps.Event.addListener(map, 'click', () => {
