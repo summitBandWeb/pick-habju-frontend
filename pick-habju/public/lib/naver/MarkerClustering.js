@@ -619,15 +619,6 @@ Cluster.prototype = {
       maxZoom = clusterer.getMaxZoom(),
       currentZoom = clusterer.getMap().getZoom();
 
-    // maxZoom 이상에서는 개별 마커만 표시하므로 클러스터 마커 생성을 건너뛴다.
-    // 불필요한 DOM 삽입/제거(new Marker → 즉시 setMap(null))를 방지한다.
-    // updateCluster() 진입 시점에 _clusterMarker는 항상 null(_createClusters에서 새로 생성)이므로
-    // !this._clusterMarker 조건은 불필요하다.
-    if (maxZoom <= currentZoom) {
-      this.checkByZoomAndMinClusterSize();
-      return;
-    }
-
     if (!this._clusterMarker) {
       var position;
 
@@ -637,9 +628,12 @@ Cluster.prototype = {
         position = this._clusterCenter;
       }
 
+      // maxZoom 이상에서는 개별 마커만 표시하므로 map 없이 생성한다.
+      // DOM에 삽입되지 않아 불필요한 DOM 조작을 방지하면서,
+      // _clusterMarker가 항상 존재하므로 다른 메서드에서 null 참조가 발생하지 않는다.
       this._clusterMarker = new naver.maps.Marker({
         position: position,
-        map: clusterer.getMap(),
+        map: maxZoom <= currentZoom ? null : clusterer.getMap(),
       });
 
       if (!clusterer.getDisableClickZoom()) {
