@@ -170,7 +170,9 @@ const CardCarousel = ({
       if (nearest !== -1) slideTo(nearest);
     }
     isSwipeReadyRef.current = true;
-  }, [selectedRoomId, isOpen, swiperInstance, rooms, loopSlides, loopActive]);
+    // loopSlides·loopActive는 rooms에서 파생되므로 rooms 변경 시 항상 최신 값 참조
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoomId, isOpen, swiperInstance, rooms]);
 
   /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
    *  Swiper는 initialSlide를 마운트 시에만 사용하므로 매 render마다 계산해도 안전하다. */
