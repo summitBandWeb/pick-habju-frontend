@@ -306,7 +306,8 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           runCollisionDetectionRef.current = runCollisionDetection;
 
           idleListenerRef.current = naver.maps.Event.addListener(map, 'idle', () => {
-            console.log('[NaverMap] idle fired');
+            console.log('[NaverMap] idle fired — ALL PROCESSING DISABLED FOR TEST');
+            return; // ★ 테스트: idle 시 아무것도 하지 않음
             // 뷰포트 변경 알림
             const viewportCb = onViewportChangeRef.current;
             if (viewportCb) viewportCb(getViewportFromMap(map));
