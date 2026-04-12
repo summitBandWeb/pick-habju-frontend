@@ -439,9 +439,9 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
    * 지도의 Idle 상태 이벤트 핸들러입니다.
    */
   _onIdle: function () {
-    console.log('[MC] _onIdle start');
+    console.log('[MC] _onIdle — DISABLED FOR TEST');
+    return; // ★ 테스트: MarkerClustering idle도 비활성화
     this._redraw();
-    console.log('[MC] _onIdle end');
   },
 
   /**
