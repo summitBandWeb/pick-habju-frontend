@@ -419,7 +419,14 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
    * 지도의 Idle 상태 이벤트 핸들러입니다.
    */
   _onIdle: function () {
+    console.log('[MarkerClustering] _onIdle → _redraw 호출', {
+      clusterCount: this._clusters.length,
+      markerCount: this.getMarkers().length,
+      zoom: this.getMap().getZoom(),
+    });
+    console.time('[MarkerClustering] _redraw 소요시간');
     this._redraw();
+    console.timeEnd('[MarkerClustering] _redraw 소요시간');
   },
 
   /**
