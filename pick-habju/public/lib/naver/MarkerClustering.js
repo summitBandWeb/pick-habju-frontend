@@ -373,11 +373,31 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
   },
 
   /**
+   * _redraw 전용: 개별 마커의 setMap 상태를 건드리지 않고 클러스터 데이터만 정리합니다.
+   * _softDestroy로 클러스터 마커(합산 아이콘)만 제거하고, 개별 마커 DOM은 유지합니다.
+   * @private
+   */
+  _softClearClusters: function () {
+    var clusters = this._clusters;
+
+    for (var i = 0, ii = clusters.length; i < ii; i++) {
+      clusters[i]._softDestroy();
+    }
+
+    naver.maps.Event.removeListener(this._markerRelations);
+
+    this._markerRelations = [];
+    this._clusters = [];
+  },
+
+  /**
    * 생성된 클러스터를 모두 제거하고, 다시 생성합니다.
+   * _softClearClusters를 사용해 개별 마커의 DOM 재삽입 없이 클러스터를 재구성합니다.
+   * 이후 _showMember/_hideMember가 실제 상태 변경이 필요한 마커만 setMap을 호출합니다.
    * @private
    */
   _redraw: function () {
-    this._clearClusters();
+    this._softClearClusters();
     this._createClusters();
     this._updateClusters();
   },
@@ -419,14 +439,7 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
    * 지도의 Idle 상태 이벤트 핸들러입니다.
    */
   _onIdle: function () {
-    console.log('[MarkerClustering] _onIdle → _redraw 호출', {
-      clusterCount: this._clusters.length,
-      markerCount: this.getMarkers().length,
-      zoom: this.getMap().getZoom(),
-    });
-    console.time('[MarkerClustering] _redraw 소요시간');
     this._redraw();
-    console.timeEnd('[MarkerClustering] _redraw 소요시간');
   },
 
   /**
@@ -485,6 +498,26 @@ Cluster.prototype = {
     }
 
     this._clusterMarker.setMap(null);
+
+    this._clusterMarker = null;
+    this._clusterCenter = null;
+    this._clusterBounds = null;
+    this._relation = null;
+
+    this._clusterMember = [];
+  },
+
+  /**
+   * _redraw 전용: 멤버 마커의 setMap 상태를 건드리지 않고 데이터 구조만 정리합니다.
+   * 클러스터 마커(합산 아이콘)만 제거하고, 개별 마커의 DOM은 그대로 유지합니다.
+   * 이후 _showMember/_hideMember가 실제 필요한 변경만 수행합니다.
+   */
+  _softDestroy: function () {
+    naver.maps.Event.removeListener(this._relation);
+
+    if (this._clusterMarker) {
+      this._clusterMarker.setMap(null);
+    }
 
     this._clusterMarker = null;
     this._clusterCenter = null;
@@ -639,6 +672,7 @@ Cluster.prototype = {
 
   /**
    * 클러스터를 구성하는 마커를 노출합니다. 이때에는 클러스터 마커를 노출하지 않습니다.
+   * 이미 지도에 표시 중인 마커는 setMap을 건너뛰어 불필요한 DOM 재삽입을 방지합니다.
    * @private
    */
   _showMember: function () {
@@ -647,16 +681,19 @@ Cluster.prototype = {
       members = this._clusterMember;
 
     for (var i = 0, ii = members.length; i < ii; i++) {
-      members[i].setMap(map);
+      if (members[i].getMap() !== map) {
+        members[i].setMap(map);
+      }
     }
 
-    if (marker) {
+    if (marker && marker.getMap()) {
       marker.setMap(null);
     }
   },
 
   /**
    * 클러스터를 구성하는 마커를 노출하지 않습니다. 이때에는 클러스터 마커를 노출합니다.
+   * 이미 숨겨진 마커는 setMap을 건너뛰어 불필요한 DOM 조작을 방지합니다.
    * @private
    */
   _hideMember: function () {
@@ -665,7 +702,9 @@ Cluster.prototype = {
       members = this._clusterMember;
 
     for (var i = 0, ii = members.length; i < ii; i++) {
-      members[i].setMap(null);
+      if (members[i].getMap() !== null) {
+        members[i].setMap(null);
+      }
     }
 
     if (marker && !marker.getMap()) {
