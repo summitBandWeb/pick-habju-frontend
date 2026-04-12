@@ -439,8 +439,6 @@ naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, {
    * 지도의 Idle 상태 이벤트 핸들러입니다.
    */
   _onIdle: function () {
-    console.log('[MC] _onIdle — DISABLED FOR TEST');
-    return; // ★ 테스트: MarkerClustering idle도 비활성화
     this._redraw();
   },
 
@@ -678,14 +676,11 @@ Cluster.prototype = {
       marker = this._clusterMarker,
       members = this._clusterMember;
 
-    var setMapCount = 0;
     for (var i = 0, ii = members.length; i < ii; i++) {
       if (members[i].getMap() !== map) {
         members[i].setMap(map);
-        setMapCount++;
       }
     }
-    if (setMapCount > 0) console.log('[MC] _showMember: setMap(map) called on', setMapCount, 'markers');
 
     if (marker && marker.getMap()) {
       marker.setMap(null);
