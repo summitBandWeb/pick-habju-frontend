@@ -118,7 +118,7 @@ const CardCarousel = ({
    *  rooms 참조가 바뀌지 않는 한 동일 배열을 반환하여 불필요한 재생성을 방지한다. */
   const loopSlides = useMemo(
     () =>
-      rooms.length === 0 || rooms.length >= MIN_LOOP_SLIDES
+      rooms.length <= 1 || rooms.length >= MIN_LOOP_SLIDES
         ? rooms
         : Array.from({ length: Math.ceil(MIN_LOOP_SLIDES / rooms.length) }, () => rooms).flat(),
     [rooms]
