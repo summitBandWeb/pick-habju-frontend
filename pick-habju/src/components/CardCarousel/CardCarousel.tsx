@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
@@ -90,6 +90,14 @@ const CarouselSlideContent = memo(function CarouselSlideContent({
  * - 사용자 스와이프 시 onCardChange로 선택 룸 ID를 상위에 전달.
  * - isOpen / rooms.length에 따라 AnimatePresence로 슬라이드 인·아웃 처리.
  */
+/**
+ * Swiper loop가 안정적으로 작동하기 위한 최소 슬라이드 수.
+ * 모바일(slidesPerView:'auto' + centeredSlides + loopAdditionalSlides:2) 기준
+ * 4개 이하에서 loop 경고·오작동이 확인되어 5로 설정.
+ * 원본이 이보다 적으면 배열을 반복하여 패딩한다.
+ */
+const MIN_LOOP_SLIDES = 5;
+
 const CardCarousel = ({
   rooms,
   selectedRoomId,
@@ -104,6 +112,18 @@ const CardCarousel = ({
   const isDesktop = !isMobile;
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
+  const loopActive = rooms.length > 1;
+
+  /** 슬라이드가 부족하면 원본을 반복하여 Swiper loop 최소 요구치를 충족.
+   *  rooms 참조가 바뀌지 않는 한 동일 배열을 반환하여 불필요한 재생성을 방지한다. */
+  const loopSlides = useMemo(
+    () =>
+      rooms.length === 0 || rooms.length >= MIN_LOOP_SLIDES
+        ? rooms
+        : Array.from({ length: Math.ceil(MIN_LOOP_SLIDES / rooms.length) }, () => rooms).flat(),
+    [rooms]
+  );
+
   /** Swiper loop 초기화 중 발생하는 spurious onSlideChange를 무시하기 위한 flag.
    *  onSwiper(마운트)에서 false로 리셋, 첫 슬라이드 동기화 완료 후 true로 전환한다. */
   const isSwipeReadyRef = useRef(false);
@@ -114,7 +134,7 @@ const CardCarousel = ({
     setSwiperInstance(swiper);
   };
 
-  /** 지도 핀 클릭(selectedRoomId 변경) 시 해당 슬라이드로 동기화. Loop 모드이므로 slideToLoop 사용 */
+  /** 지도 핀 클릭(selectedRoomId 변경) 시 해당 슬라이드로 동기화 */
   useEffect(() => {
     if (!isOpen) {
       isSwipeReadyRef.current = false;
@@ -130,14 +150,25 @@ const CardCarousel = ({
       return;
     }
 
-    const index = rooms.findIndex((room) => room.bizItemId === selectedRoomId);
-    if (index !== -1) {
-      if (swiperInstance.realIndex !== index) {
-        swiperInstance.slideToLoop(index);
+    const currentBizItemId = loopSlides[swiperInstance.realIndex]?.bizItemId;
+    if (currentBizItemId !== selectedRoomId) {
+      const current = swiperInstance.realIndex;
+      const total = loopSlides.length;
+      let nearest = -1;
+      let minDist = Infinity;
+      for (let i = 0; i < total; i++) {
+        if (loopSlides[i].bizItemId !== selectedRoomId) continue;
+        const forward = (i - current + total) % total;
+        const dist = Math.min(forward, total - forward);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = i;
+        }
       }
+      if (nearest !== -1) swiperInstance.slideToLoop(nearest);
     }
     isSwipeReadyRef.current = true;
-  }, [selectedRoomId, isOpen, swiperInstance, rooms]);
+  }, [selectedRoomId, isOpen, swiperInstance, rooms, loopSlides]);
 
   /** Swiper 마운트 시점의 selectedRoomId 기반 초기 슬라이드 인덱스.
    *  Swiper는 initialSlide를 마운트 시에만 사용하므로 매 render마다 계산해도 안전하다. */
@@ -191,7 +222,7 @@ const CardCarousel = ({
                 role="region"
                 aria-label="룸 카드 캐러셀"
                 modules={[Navigation]}
-                loop={true}
+                loop={loopActive}
                 loopAdditionalSlides={2}
                 navigation={false}
                 initialSlide={initialSlide}
@@ -199,7 +230,7 @@ const CardCarousel = ({
                 {...getSwiperProps(isDesktop)}
                 onSlideChangeTransitionEnd={(swiper) => {
                   if (!isSwipeReadyRef.current) return;
-                  const currentRoom = rooms[swiper.realIndex];
+                  const currentRoom = loopSlides[swiper.realIndex];
                   if (currentRoom) {
                     if (currentRoom.bizItemId !== selectedRoomId) {
                       onCardChange(currentRoom.bizItemId);
@@ -209,9 +240,8 @@ const CardCarousel = ({
                 }}
                 className="w-full h-full !py-8"
               >
-                {rooms.map((room) => (
-                  // [L6] 슬라이드 래퍼: 데스크탑 !w-full(1장 꽉 참), 모바일 !w-auto
-                  <SwiperSlide key={room.bizItemId} className={isDesktop ? '!w-full' : '!w-auto'}>
+                {loopSlides.map((room, index) => (
+                  <SwiperSlide key={`${room.bizItemId}-${index}`} className={isDesktop ? '!w-full' : '!w-auto'}>
                     <CarouselSlideContent room={room} isMobile={isMobile} onBookClick={onBookClick} />
                   </SwiperSlide>
                 ))}
