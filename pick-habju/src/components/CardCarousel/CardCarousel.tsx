@@ -13,6 +13,14 @@ import { ChevronVariant } from '../Chevron/ChevronEnums';
 
 import 'swiper/css';
 
+/**
+ * Swiper loop가 안정적으로 작동하기 위한 최소 슬라이드 수.
+ * 모바일(slidesPerView:'auto' + centeredSlides + loopAdditionalSlides:2) 기준
+ * 4개 이하에서 loop 경고·오작동이 확인되어 5로 설정.
+ * 원본이 이보다 적으면 배열을 반복하여 패딩한다.
+ */
+const MIN_LOOP_SLIDES = 5;
+
 /** Chevron 컨테이너 스타일: nested 선택자 분리로 가독성 향상 */
 const CHEVRON_CONTAINER_STYLES = `
   w-full justify-between pointer-events-none
@@ -90,14 +98,6 @@ const CarouselSlideContent = memo(function CarouselSlideContent({
  * - 사용자 스와이프 시 onCardChange로 선택 룸 ID를 상위에 전달.
  * - isOpen / rooms.length에 따라 AnimatePresence로 슬라이드 인·아웃 처리.
  */
-/**
- * Swiper loop가 안정적으로 작동하기 위한 최소 슬라이드 수.
- * 모바일(slidesPerView:'auto' + centeredSlides + loopAdditionalSlides:2) 기준
- * 4개 이하에서 loop 경고·오작동이 확인되어 5로 설정.
- * 원본이 이보다 적으면 배열을 반복하여 패딩한다.
- */
-const MIN_LOOP_SLIDES = 5;
-
 const CardCarousel = ({
   rooms,
   selectedRoomId,
