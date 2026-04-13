@@ -31,4 +31,5 @@ export const toMapBounds = (b: naver.maps.LatLngBounds): MapBounds => {
 export const getViewportFromMap = (map: naver.maps.Map): MapViewport => ({
   center: toMapCenter(map.getCenter() as naver.maps.LatLng),
   bounds: toMapBounds(map.getBounds() as naver.maps.LatLngBounds),
+  zoom: map.getZoom(),
 });

@@ -377,7 +377,11 @@ const MapPage = () => {
         markerViewModels={markerViewModels}
         selectedMarkerId={selectedMarkerId}
         onMarkerClick={handleMarkerClick}
-        onViewportChange={handleViewportChange}
+        onViewportChange={(viewport) => {
+          handleViewportChange(viewport);
+          // 클러스터링 구간(zoom ≤ 15)으로 진입하면 캐러셀 닫기
+          if (viewport.zoom <= 15) resetSelectionUiState();
+        }}
         onMapEmptyClick={resetSelectionUiState}
         className="h-full w-full"
       />

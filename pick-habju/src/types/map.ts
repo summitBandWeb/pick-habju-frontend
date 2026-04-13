@@ -13,6 +13,7 @@ export type MapBounds = {
 export type MapViewport = {
   center: MapCenter;
   bounds: MapBounds;
+  zoom: number;
 };
 
 /** 지도 마커 기본 정보. id는 room 또는 business 식별자. */
