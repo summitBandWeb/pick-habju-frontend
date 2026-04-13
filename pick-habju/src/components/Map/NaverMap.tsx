@@ -450,7 +450,7 @@ const NaverMap = forwardRef<NaverMapHandle, NaverMapProps>(
           map,
           markers: markerArray,
           minClusterSize: 1,
-          // 이 줌 레벨 이상에서는 클러스터를 해제하고 개별 마커를 표시
+          // zoom < 15(≤ 14)에서 클러스터 활성, zoom ≥ 15에서 개별 마커 표시
           maxZoom: 15,
           gridSize: 120,
           disableClickZoom: false,
